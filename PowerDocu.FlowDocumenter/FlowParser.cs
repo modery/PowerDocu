@@ -1,0 +1,191 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.IO.Compression;
+using PowerDocu.Common;
+using Newtonsoft.Json.Linq;
+
+namespace PowerDocu.FlowDocumenter
+{
+    class FlowParser
+    {
+        private dynamic flowDefinition;
+        private List<FlowEntity> flows = new List<FlowEntity>();
+
+        public FlowParser(string filename)
+        {
+            Console.Write("Processing " + filename);
+
+            if (filename.ToLower().EndsWith("zip"))
+            {
+                List<ZipArchiveEntry> definitions = ZipHelper.getFilesFromZip(filename, ZipHelper.FlowDefinitionFile);
+                foreach (ZipArchiveEntry definition in definitions)
+                {
+                    using (StreamReader reader = new StreamReader(definition.Open()))
+                    {
+                        Console.WriteLine("Processing workflow definition " + definition.FullName);
+                        string definitionContent = reader.ReadToEnd();
+                        parseFlow(definitionContent);
+                    }
+                }
+            }
+            else if (filename.ToLower().EndsWith("json"))
+            {
+                //TODO currently working with definition.json files, but need to consider logic app templates
+                parseFlow(File.ReadAllText(filename));
+            }
+            else
+            {
+                Console.WriteLine("Invalid file " + filename);
+            }
+
+        }
+
+        /**
+		  * This function takes a Flow's JSON definition and parses it for further processing
+		  */
+        private void parseFlow(string flowJSON)
+        {
+            flowDefinition = JObject.Parse(flowJSON);
+            FlowEntity flow = new FlowEntity();
+            parseMetadata(flow);
+            parseTrigger(flow);
+            parseActions(flow, flowDefinition.properties.definition.actions.Children(), null);
+            parseConnectionReferences(flow);
+            flows.Add(flow);
+        }
+
+        /**
+		  * 
+		  */
+        private void parseMetadata(FlowEntity flow)
+        {
+            flow.ID = flowDefinition.name;
+            flow.Name = flowDefinition.properties.displayName;
+        }
+
+        /**
+		  * 
+		  */
+        private void parseTrigger(FlowEntity flow)
+        {
+            var dtriggers = flowDefinition.properties.definition.triggers.Children();
+            //only one trigger, need to revisit at some point to make it cleaner
+            foreach (JProperty trigger in dtriggers)
+            {
+                flow.addTrigger(trigger.Name);
+                JObject triggerDetails = (JObject)trigger.Value;
+                flow.trigger.Description = triggerDetails["description"]?.ToString();
+                flow.trigger.Type = triggerDetails["type"].ToString();
+            }
+        }
+
+        /**
+		  * 
+		  */
+        private void parseConnectionReferences(FlowEntity flow)
+        {
+            var connectionReferences = flowDefinition.properties.connectionReferences.Children();
+            foreach (JProperty connRef in connectionReferences)
+            {
+                JObject cRefDetails = (JObject)connRef.Value;
+                flow.connectionReferences.Add(new ConnectionReference(connRef.Name.Replace("shared_", ""), cRefDetails["source"].ToString(), cRefDetails["id"].ToString(), cRefDetails["connectionName"].ToString()));
+            }
+        }
+
+        /**
+		  * actions - list of JSON actions
+		  * parentAction - the parent action of the current list of actions
+		  * isElseActions - bool that defines if the set of actions is in a Else area (Or a "No" side of a Yes/No decision)
+		  */
+        private void parseActions(FlowEntity flow, JEnumerable<JToken> actions, ActionNode parentAction, bool isElseActions = false)
+        {
+
+            foreach (JProperty action in actions)
+            {
+                JObject actionDetails = (JObject)action.Value;
+                JObject runAfter = (JObject)actionDetails["runAfter"];
+                ActionNode aNode = flow.actions.FindOrCreate(action.Name);
+                aNode.Type = actionDetails["type"].ToString();
+                //TODO better expression parsing
+                aNode.Expression = actionDetails["expression"]?.ToString(); //NOTE: sometimes JObject, sometimes JValue		
+                if (actionDetails["inputs"] != null)
+                {
+                    var inputNodes = actionDetails["inputs"].Children();
+                    foreach (JProperty inputNode in inputNodes)
+                    {
+                        //TODO better inputs parsing
+                        aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
+                    }
+                }
+
+                if (parentAction != null)
+                {
+                    if (isElseActions)
+                    {
+                        parentAction.AddElseaction(aNode);
+                    }
+                    else
+                    {
+                        parentAction.AddSubaction(aNode);
+                    }
+                }
+                //TODO: runfter can be based on different conditions, such as succeeded, failed?, others. Review if current effort is enough, or if more things need to be done
+                if (runAfter.HasValues == false && parentAction == null && !flow.actions.hasRoot())
+                {
+                    //root node does not run after another node and is not inside
+                    flow.actions.setRootNode(aNode);
+                }
+                else
+                {
+                    //not root, let's connect the runafter node and this one by adding an edge
+                    var runAfterNodes = runAfter.Children();
+                    foreach (JProperty raNode in runAfterNodes)
+                    {
+                        ActionNode runAfterNode = flow.actions.FindOrCreate(raNode.Name);
+                        flow.actions.AddEdge(runAfterNode, aNode);
+                    }
+                }
+
+                //subactions
+                JObject subSactions = (JObject)actionDetails["actions"];
+                if (subSactions != null)
+                {
+                    parseActions(flow, subSactions.Children(), aNode);
+                }
+
+                //elseactions
+                JObject elseActions = (JObject)((JObject)actionDetails["else"])?["actions"];
+                if (elseActions != null)
+                {
+                    parseActions(flow, elseActions.Children(), aNode, true);
+                }
+
+                //Switch: type==Switch
+                if (aNode.Type == "Switch")
+                {
+                    JObject switchCases = (JObject)actionDetails["cases"];
+                    if (switchCases != null)
+                    {
+                        //TODO special parsing required
+                        foreach (JProperty switchCase in switchCases.Children())
+                        {
+                            parseActions(flow, switchCase.Value["actions"].Children(), aNode);
+                        }
+                    }
+                    JObject defaultCase = (JObject)actionDetails["default"];
+                    if (defaultCase != null)
+                    {
+                        parseActions(flow, defaultCase["actions"].Children(), aNode);
+                    }
+                }
+
+            }
+        }
+
+        public List<FlowEntity> getFlows()
+        {
+            return flows;
+        }
+    }
+}
