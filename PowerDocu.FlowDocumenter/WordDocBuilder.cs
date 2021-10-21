@@ -214,7 +214,7 @@ namespace PowerDocu.FlowDocumenter
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("The following chart shows the top level layout of the Flow. For a detailed view, please visit the section called Detailed Flow Diagram"));
             //we generated a png and a svg file. We use both: SVG as the default, PNG as the fallback for older clients that can't display SVG
-			ImagePart imagePart = wordDoc.MainDocumentPart.AddImagePart(ImagePartType.Png);
+            ImagePart imagePart = wordDoc.MainDocumentPart.AddImagePart(ImagePartType.Png);
             int imageWidth, imageHeight;
             using (FileStream stream = new FileStream(folderPath + flow.ID + ".png", FileMode.Open))
             {
