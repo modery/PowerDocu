@@ -14,10 +14,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <!-- to convert the SVG into a PNG -->
     <PackageReference Include="Svg" Version="3.3.0" />
-    
-    <Content Include="Resources\*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
 
     <!-- The following DLLs are part of the Rubjerg.Graphviz package, which is not compatible with .NET 5.0.
         See: https://github.com/Rubjerg/Graphviz.NetWrapper/issues/39

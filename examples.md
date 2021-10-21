@@ -18,4 +18,5 @@ FlowDocumenter's generated diagram for the Flow looks as follows:
 Here is an extract of the generated Word documentation:
 
 ![Email me with a list of upcoming Calendar events](Images/Weather-Flow-Documentation-1.png)
+![Email me with a list of upcoming Calendar events](Images/Weather-Flow-Documentation-2.png)
 
