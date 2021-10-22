@@ -20,3 +20,4 @@ Here is an extract of the generated Word documentation:
 ![Email me with a list of upcoming Calendar events](../Images/Weather-Flow-Documentation-1.png)
 ![Email me with a list of upcoming Calendar events](../Images/Weather-Flow-Documentation-2.png)
 
+The generated Word documentation for *Email me with a list of upcoming Calendar events* can also be downloaded here: [Email me with a list of upcoming Calendar events](Email%20me%20with%20a%20list%20of%20upcoming%20Calendar%20events.docx)
