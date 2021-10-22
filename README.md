@@ -30,7 +30,7 @@ Please refer to [Installation & Usage](installation.md) for information on how t
 
 ## How does the generated documentation look like?
 
-Please have a look at the [examples](examples.md) provided.
+Please have a look at the [examples](examples/examples.md) provided.
 
 ## How can I help to improve FlowDocumenter?
 
