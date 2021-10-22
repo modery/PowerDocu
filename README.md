@@ -38,3 +38,9 @@ FlowDocumenter is in a very early development stage at the moment. If you think 
 1. If it is not working properly or if you find a bug, please log a detailed [Issue](https://github.com/modery/PowerDocu/issues)
 2. If you have a suggestion on what could be added or what could be done better, please add it under **[Discussions](https://github.com/modery/PowerDocu/discussions)**. Also, please have a look at the existing discussions and add any comments you may have
 3. Found some ugly code that should be improved? Got an idea for some additional functionality and want to implement it yourself? Please create a fork of this repo, make your changes, and submit a Pull Request!
+
+
+## What other documentation options are there for the Power Platform?
+
+- **PowerApps-docstring** is a console based, pipeline ready application that automatically generates user and technical documentation for PowerApps: https://github.com/sebastian-muthwill/powerapps-docstring
+- **FlowToVisio**, a tool to create Visio representations of your Cloud Flows: https://github.com/LinkeD365/FlowToVisio
