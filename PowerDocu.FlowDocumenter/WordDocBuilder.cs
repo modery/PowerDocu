@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -87,7 +88,7 @@ namespace PowerDocu.FlowDocumenter
                 run.AppendChild(new Text(connectorIcon.Name));
                 ApplyStyleToParagraph("Heading3", para);
 
-                Table table = CreateTable(body);
+                Table table = CreateTable();
                 var tr = new TableRow();
                 var tc = new TableCell();
                 tc.Append(new Paragraph(new Run(new Text("Connector"))));
@@ -154,6 +155,7 @@ namespace PowerDocu.FlowDocumenter
                 tc.Append(new Paragraph(new Run(new Text(cRef.Source))));
                 tr.Append(tc);
                 table.Append(tr);
+                body.Append(table);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Break());
@@ -175,11 +177,11 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
 
-            AddTable(body, new string[,]
+            body.Append(AddTable(new string[,]
                 { { "Flow Name", flow.Name },
                 { "Flow ID", flow.ID }},
                 false
-            );
+            ));
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
@@ -193,12 +195,65 @@ namespace PowerDocu.FlowDocumenter
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            AddTable(body, new string[,]
+            Table table = AddTable(new string[,]
                 { { "Name", flow.trigger.Name },
                   { "Type", flow.trigger.Type },
                   { "Description", flow.trigger.Description }
                 }
             );
+
+            //the following 2 IFs could be turned into their own function
+            if (flow.trigger.Recurrence.Count > 0)
+            {
+                Table recurrenceTable = CreateTable();
+                var tr = new TableRow();
+                var tc = new TableCell();
+                foreach (KeyValuePair<string, string> properties in flow.trigger.Recurrence)
+                {
+                    tr = new TableRow();
+                    tc = new TableCell();
+                    tc.Append(new Paragraph(new Run(new Text(properties.Key))));
+                    tr.Append(tc);
+                    tc = new TableCell();
+                    tc.Append(new Paragraph(new Run(new Text(properties.Value))));
+                    tr.Append(tc);
+                    recurrenceTable.Append(tr);
+                }
+                tr = new TableRow();
+                tc = new TableCell();
+                tc.Append(new Paragraph(new Run(new Text("Recurrence Details"))));
+                tr.Append(tc);
+                tc = new TableCell();
+                tc.Append(new Paragraph(new Run(recurrenceTable)));
+                tr.Append(tc);
+                table.Append(tr);
+            }
+            if (flow.trigger.Inputs.Count > 0)
+            {
+                Table inputTable = CreateTable();
+                var tr = new TableRow();
+                var tc = new TableCell();
+                foreach (KeyValuePair<string, string> properties in flow.trigger.Inputs)
+                {
+                    tr = new TableRow();
+                    tc = new TableCell();
+                    tc.Append(new Paragraph(new Run(new Text(properties.Key))));
+                    tr.Append(tc);
+                    tc = new TableCell();
+                    tc.Append(new Paragraph(new Run(new Text(properties.Value))));
+                    tr.Append(tc);
+                    inputTable.Append(tr);
+                }
+                tr = new TableRow();
+                tc = new TableCell();
+                tc.Append(new Paragraph(new Run(new Text("Input Details"))));
+                tr.Append(tc);
+                tc = new TableCell();
+                tc.Append(new Paragraph(new Run(inputTable)));
+                tr.Append(tc);
+                table.Append(tr);
+            }
+            body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
@@ -256,7 +311,7 @@ namespace PowerDocu.FlowDocumenter
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(action.Name));
                 ApplyStyleToParagraph("Heading3", para);
-                Table actionDetailsTable = AddTable(body, new string[,]
+                Table actionDetailsTable = AddTable(new string[,]
                                                 { {"Name", action.Name },
                                                     {"Type", action.Type }, 
 													//{"Details", action.ToString() },   //TODO provide more details, such as information about subaction, subsequent actions?
@@ -295,7 +350,7 @@ namespace PowerDocu.FlowDocumenter
                         actionDetailsTable.Append(tr);
                     }
                 }
-
+                body.Append(actionDetailsTable);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Break());
@@ -555,10 +610,10 @@ namespace PowerDocu.FlowDocumenter
 
         // Take the data from a two-dimensional array and build a table at the 
         // end of the supplied document.
-        private Table AddTable(Body body, string[,] data, bool autoSize = false)
+        private Table AddTable(string[,] data, bool autoSize = false)
         {
 
-            Table table = CreateTable(body);
+            Table table = CreateTable();
 
             for (var i = 0; i <= data.GetUpperBound(0); i++)
             {
@@ -581,7 +636,7 @@ namespace PowerDocu.FlowDocumenter
             return table;
         }
 
-        private Table CreateTable(Body body)
+        private Table CreateTable()
         {
             Table table = new Table();
 
@@ -620,7 +675,6 @@ namespace PowerDocu.FlowDocumenter
 
             table.AppendChild<TableProperties>(props);
 
-            body.Append(table);
             return table;
         }
 

@@ -77,6 +77,25 @@ namespace PowerDocu.FlowDocumenter
                 JObject triggerDetails = (JObject)trigger.Value;
                 flow.trigger.Description = triggerDetails["description"]?.ToString();
                 flow.trigger.Type = triggerDetails["type"].ToString();
+
+                //the following 2 IFs could be turned into their own function
+                if (triggerDetails["recurrence"] != null)
+                {
+                    JObject recurrence = (JObject)triggerDetails["recurrence"];
+                    foreach (JProperty property in recurrence.Children())
+                    {
+                        flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
+                    }
+                }
+                if (triggerDetails["inputs"] != null)
+                {
+                    JObject inputs = (JObject)triggerDetails["inputs"];
+                    foreach (JProperty property in inputs.Children())
+                    {
+                        flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
+                    }
+                }
+
             }
         }
 
