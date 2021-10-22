@@ -2,10 +2,14 @@
 
 Please review the steps below to start using **FlowDocumenter**. Also, please note that the current version has only been tested on Windows.
 
+## Requirements
+
+FlowDocumenter has been tested on Windows only. It is running on .NET 5.0
+
 ## Download the latest Release
 Download the latest release from (https://github.com/modery/PowerDocu/releases). Currently, two versions are provided as part of the releases:
 1. The default app that requires [.NET 5.0 to be installed](https://dotnet.microsoft.com/download)
-2. The standalone package that contains everything you need to run it (including any .NET Core libraries).
+2. The standalone package that contains everything you need to run it (including .NET Core runtime and libraries).
 
 Alternatively, you can also download the current source code and compile it (e.g. in Visual Studio Code).
 
@@ -15,6 +19,7 @@ By default, this solution contains some general information about the currently 
 To retrieve the latest list of connector details and icons, simply run the PowerShell script **GenerateConnectorMapping.ps1** inside the *Resources\ConnectorIcons* folder.
 ![Generate Connector Mappings](Images/GenerateConnectorMapping.png)
 
+You do not need to run this script everytime before you generate documentation. After a first, initial run you would only need to run it again if there are new connectors available that you use inside your Flow.
 
 ## Export the Flow you want to documnent
 To generate documentation for a Flow, you need to export it from the web as a ZIP package. 
