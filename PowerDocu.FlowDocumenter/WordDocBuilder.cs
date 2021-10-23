@@ -41,7 +41,7 @@ namespace PowerDocu.FlowDocumenter
             System.IO.Directory.CreateDirectory(folderPath);
             string filename = folderPath + flow.Name + " (" + flow.ID + ").docx";
             filename = filename.Replace(":", "-");
-            Console.WriteLine("Creating file "+filename);
+            Console.WriteLine("Creating file " + filename);
             using (WordprocessingDocument wordDocument =
             WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
             {
@@ -257,7 +257,7 @@ namespace PowerDocu.FlowDocumenter
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
                 //actionDetailsTable.Append(CreateRow(new Text("Details"), new Text(action.ToString())));  //TODO provide more details, such as information about subaction, subsequent actions?
-                actionDetailsTable.Append(CreateRow(new Text("Expression"), new Text(action.Expression)));
+                actionDetailsTable.Append(CreateRow(new Text("Expression"), AddExpressionTable(action.actionExpression)));
                 if (action.actionInputs.Count > 0)
                 {
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
@@ -585,6 +585,48 @@ namespace PowerDocu.FlowDocumenter
                 tr.Append(tc);
             }
             return tr;
+        }
+
+
+        private Table AddExpressionTable(ActionExpression expression)
+        {
+            Table table = CreateTable();
+            if (expression != null && expression.expressionOperator != null)
+            {
+                var tr = new TableRow();
+                var tc = new TableCell();
+                tc.Append(new Paragraph(new Run(new Text(expression.expressionOperator))));
+                tc.TableCellProperties = new TableCellProperties();
+                var shading = new Shading()
+                {
+                    Color = "auto",
+                    Fill = "#E5FFE5",
+                    Val = ShadingPatternValues.Clear
+                };
+
+                tc.TableCellProperties.Append(shading);
+                tr.Append(tc);
+                tc = new TableCell();
+                foreach (var expressionOperand in expression.experessionOperands)
+                {
+
+                    if (expressionOperand.GetType().Equals(typeof(string)))
+                    {
+                        tc.Append(new Paragraph(new Run(new Text((string)expressionOperand))));
+                    }
+                    else if (expressionOperand.GetType().Equals(typeof(ActionExpression)))
+                    {
+                        tc.Append(new Paragraph(new Run(AddExpressionTable((ActionExpression)expressionOperand))));
+                    }
+                    else
+                    {
+                        tc.Append(new Paragraph(new Run(new Text(""))));
+                    }
+                }
+                tr.Append(tc);
+                table.Append(tr);
+            }
+            return table;
         }
 
         private TableRow CreateMergedRow(OpenXmlElement cellValue, int colSpan, string colour)

@@ -8,7 +8,7 @@ namespace PowerDocu.FlowDocumenter
     {
         public string Name;
         public string Expression;
-        public List<string> ExpressionValues = new List<string>();
+        public ActionExpression actionExpression;
         public string Type;
         public List<ActionInput> actionInputs = new List<ActionInput>();
         public List<ActionNode> Neighbours = new List<ActionNode>();
@@ -215,5 +215,31 @@ namespace PowerDocu.FlowDocumenter
             this.Name = name;
             this.Value = value;
         }
+    }
+
+    public class ActionExpression
+    {
+        public string expressionOperator;
+        public List<object> experessionOperands = new List<object>();
+
+        public ActionExpression()
+        {
+
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(expressionOperator + ": ");
+            sb.Append("\n");
+            foreach (object eo in experessionOperands)
+            {
+                sb.Append(eo.ToString() + ", ");
+            }
+            sb.Append("\n");
+
+            return sb.ToString();
+        }
+
     }
 }

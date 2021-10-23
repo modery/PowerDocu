@@ -136,11 +136,13 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
+                        //TODO better expressions parsing
+                        aNode.Expression = actionDetails["expression"]?.ToString();
                         var expressionNodes = actionDetails["expression"].Children();
                         foreach (JProperty inputNode in expressionNodes)
                         {
-                            //TODO better expressions parsing
-                            aNode.Expression = actionDetails["expression"]?.ToString();
+                            //there should be only one node here, code can be improved
+                            aNode.actionExpression = parseExpressions(inputNode);
                         }
                     }
                 }
@@ -218,6 +220,32 @@ namespace PowerDocu.FlowDocumenter
                 }
 
             }
+        }
+
+        private ActionExpression parseExpressions(JProperty expression)
+        {
+            ActionExpression actionExpression = new ActionExpression();
+            actionExpression.expressionOperator = expression.Name.ToString();
+            if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
+            {
+                JArray operands = (JArray)expression.Value;
+                foreach (JToken operandExpression in operands)
+                {
+                    if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+                    {
+                        actionExpression.experessionOperands.Add(operandExpression.ToString());
+                    }
+                    else if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+                    {
+                        var expressionNodes = operandExpression.Children();
+                        foreach (JProperty inputNode in expressionNodes)
+                        {
+                            actionExpression.experessionOperands.Add(parseExpressions(inputNode));
+                        }
+                    }
+                }
+            }
+            return actionExpression;
         }
 
         public List<FlowEntity> getFlows()

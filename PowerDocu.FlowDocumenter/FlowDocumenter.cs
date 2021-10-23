@@ -11,7 +11,6 @@ namespace PowerDocu.FlowDocumenter
             {
                 Console.WriteLine("Please provide an exported Flow as parameter. For example:");
                 Console.WriteLine("  powerdocu.flowdocumenter.exe ExportedFlow.zip");
-
             }
             else
             {
