@@ -21,7 +21,7 @@ To retrieve the latest list of connector details and icons, simply run the Power
 
 You do not need to run this script everytime before you generate documentation. After a first, initial run you would only need to run it again if there are new connectors available that you use inside your Flow.
 
-## Export the Flow you want to documnent
+## Export the Flow you want to document
 To generate documentation for a Flow, you need to export it from the web as a ZIP package. 
 
 1. Open your Flow's detail page
