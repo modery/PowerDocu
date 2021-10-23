@@ -28,6 +28,7 @@ namespace PowerDocu.FlowDocumenter
         private const int PageMarginBottom = 1000;
         private const double DocumentSizePerPixel = 15;
         private const double EmuPerPixel = 9525;
+        private const string cellHeaderBackground = "#E5E5FF";
         private FlowEntity flow;
 
         private string folderPath;
@@ -88,12 +89,6 @@ namespace PowerDocu.FlowDocumenter
                 run.AppendChild(new Text(connectorIcon.Name));
                 ApplyStyleToParagraph("Heading3", para);
 
-                Table table = CreateTable();
-                var tr = new TableRow();
-                var tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text("Connector"))));
-                tr.Append(tc);
-                tc = new TableCell();
                 var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + connectorUniqueName), true);
                 //todo put into its own function?
                 ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
@@ -123,9 +118,6 @@ namespace PowerDocu.FlowDocumenter
                                                 new Text(connectorIcon.Name));
                 }
 
-                tc.Append(new Paragraph(new Hyperlink(run)
-                { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
-
 
                 // this can be used to link within doc
                 /*
@@ -136,25 +128,11 @@ namespace PowerDocu.FlowDocumenter
 										}));
 										*/
 
-
-                tr.Append(tc);
-                table.Append(tr);
-                tr = new TableRow();
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text("ID"))));
-                tr.Append(tc);
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text(cRef.ID))));
-                tr.Append(tc);
-                table.Append(tr);
-                tr = new TableRow();
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text("Source"))));
-                tr.Append(tc);
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text(cRef.Source))));
-                tr.Append(tc);
-                table.Append(tr);
+                Table table = CreateTable();
+                table.Append(CreateRow(new Text("Connector"),
+                            new Hyperlink(run) { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
+                table.Append(CreateRow(new Text("ID"), new Text(cRef.ID)));
+                table.Append(CreateRow(new Text("Source"), new Text(cRef.Source)));
                 body.Append(table);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
@@ -176,12 +154,10 @@ namespace PowerDocu.FlowDocumenter
 
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-
-            body.Append(AddTable(new string[,]
-                { { "Flow Name", flow.Name },
-                { "Flow ID", flow.ID }},
-                false
-            ));
+            Table table = CreateTable();
+            table.Append(CreateRow(new Text("Flow Name"), new Text(flow.Name)));
+            table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
+            body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
@@ -195,63 +171,29 @@ namespace PowerDocu.FlowDocumenter
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            Table table = AddTable(new string[,]
-                { { "Name", flow.trigger.Name },
-                  { "Type", flow.trigger.Type },
-                  { "Description", flow.trigger.Description }
-                }
-            );
+            Table table = CreateTable();
+            table.Append(CreateRow(new Text("Name"), new Text(flow.trigger.Name)));
+            table.Append(CreateRow(new Text("Type"), new Text(flow.trigger.Type)));
+            table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
 
             //the following 2 IFs could be turned into their own function
             if (flow.trigger.Recurrence.Count > 0)
             {
-                Table recurrenceTable = CreateTable();
-                var tr = new TableRow();
-                var tc = new TableCell();
+                table.Append(CreateMergedRow(new Text("Recurrence Details"), 2, cellHeaderBackground));
                 foreach (KeyValuePair<string, string> properties in flow.trigger.Recurrence)
                 {
-                    tr = new TableRow();
-                    tc = new TableCell();
-                    tc.Append(new Paragraph(new Run(new Text(properties.Key))));
-                    tr.Append(tc);
-                    tc = new TableCell();
-                    tc.Append(new Paragraph(new Run(new Text(properties.Value))));
-                    tr.Append(tc);
-                    recurrenceTable.Append(tr);
+                    table.Append(CreateRow(new Text(properties.Key),
+                                                    new Text(properties.Value)));
                 }
-                tr = new TableRow();
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text("Recurrence Details"))));
-                tr.Append(tc);
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(recurrenceTable)));
-                tr.Append(tc);
-                table.Append(tr);
             }
             if (flow.trigger.Inputs.Count > 0)
             {
-                Table inputTable = CreateTable();
-                var tr = new TableRow();
-                var tc = new TableCell();
+                table.Append(CreateMergedRow(new Text("Inputs Details"), 2, cellHeaderBackground));
                 foreach (KeyValuePair<string, string> properties in flow.trigger.Inputs)
                 {
-                    tr = new TableRow();
-                    tc = new TableCell();
-                    tc.Append(new Paragraph(new Run(new Text(properties.Key))));
-                    tr.Append(tc);
-                    tc = new TableCell();
-                    tc.Append(new Paragraph(new Run(new Text(properties.Value))));
-                    tr.Append(tc);
-                    inputTable.Append(tr);
+                    table.Append(CreateRow(new Text(properties.Key),
+                                                    new Text(properties.Value)));
                 }
-                tr = new TableRow();
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(new Text("Input Details"))));
-                tr.Append(tc);
-                tc = new TableCell();
-                tc.Append(new Paragraph(new Run(inputTable)));
-                tr.Append(tc);
-                table.Append(tr);
             }
             body.Append(table);
             para = body.AppendChild(new Paragraph());
@@ -311,43 +253,18 @@ namespace PowerDocu.FlowDocumenter
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(action.Name));
                 ApplyStyleToParagraph("Heading3", para);
-                Table actionDetailsTable = AddTable(new string[,]
-                                                { {"Name", action.Name },
-                                                    {"Type", action.Type }, 
-													//{"Details", action.ToString() },   //TODO provide more details, such as information about subaction, subsequent actions?
-													{"Expression", action.Expression }
-                                                },
-                                                false
-                                            );
+                Table actionDetailsTable = CreateTable();
+                actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
+                actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
+                //actionDetailsTable.Append(CreateRow(new Text("Details"), new Text(action.ToString())));  //TODO provide more details, such as information about subaction, subsequent actions?
+                actionDetailsTable.Append(CreateRow(new Text("Expression"), new Text(action.Expression)));
                 if (action.actionInputs.Count > 0)
                 {
-                    var tr = new TableRow();
-                    var tc = new TableCell();
-                    RunProperties run1Properties = new RunProperties();
-                    run1Properties.Append(new Bold());
-                    run = new Run(new Text("Inputs"));
-                    run.RunProperties = run1Properties;
-                    tc.Append(new Paragraph(run));
-                    tc.TableCellProperties = new TableCellProperties();
-                    tc.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Restart };
-                    tr.Append(tc);
-                    var tc2 = new TableCell();
-                    tc2.TableCellProperties = new TableCellProperties();
-                    tc2.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Continue };
-                    tc2.Append(new Paragraph());
-                    tr.Append(tc2);
-                    actionDetailsTable.Append(tr);
+                    actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
 
                     foreach (ActionInput actionInput in action.actionInputs)
                     {
-                        tr = new TableRow();
-                        tc = new TableCell();
-                        tc.Append(new Paragraph(new Run(new Text(actionInput.Name))));
-                        tr.Append(tc);
-                        tc = new TableCell();
-                        tc.Append(new Paragraph(new Run(new Text(actionInput.Value))));
-                        tr.Append(tc);
-                        actionDetailsTable.Append(tr);
+                        actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
                     }
                 }
                 body.Append(actionDetailsTable);
@@ -607,35 +524,6 @@ namespace PowerDocu.FlowDocumenter
             pPr.ParagraphStyleId = new ParagraphStyleId() { Val = styleid };
         }
 
-
-        // Take the data from a two-dimensional array and build a table at the 
-        // end of the supplied document.
-        private Table AddTable(string[,] data, bool autoSize = false)
-        {
-
-            Table table = CreateTable();
-
-            for (var i = 0; i <= data.GetUpperBound(0); i++)
-            {
-                var tr = new TableRow();
-                for (var j = 0; j <= data.GetUpperBound(1); j++)
-                {
-                    var tc = new TableCell();
-                    tc.Append(new Paragraph(new Run(new Text(data[i, j]))));
-
-                    if (autoSize)
-                    {
-                        // Assume you want columns that are automatically sized.
-                        tc.Append(new TableCellProperties(
-                            new TableCellWidth { Type = TableWidthUnitValues.Auto }));
-                    }
-                    tr.Append(tc);
-                }
-                table.Append(tr);
-            }
-            return table;
-        }
-
         private Table CreateTable()
         {
             Table table = new Table();
@@ -677,6 +565,64 @@ namespace PowerDocu.FlowDocumenter
 
             return table;
         }
+
+        private TableRow CreateRow(params OpenXmlElement[] cellValues)
+        {
+            TableRow tr = new TableRow();
+            bool isFirstCell = true;
+            foreach (var cellValue in cellValues)
+            {
+                TableCell tc = new TableCell();
+                var run = new Run(cellValue);
+                if (isFirstCell)
+                {
+                    RunProperties runProperties = new RunProperties();
+                    runProperties.Append(new Bold());
+                    run.RunProperties = runProperties;
+                    isFirstCell = false;
+                    Console.WriteLine("Bold: " + cellValue);
+                }
+                tc.Append(new Paragraph(run));
+                tr.Append(tc);
+            }
+            return tr;
+        }
+
+        private TableRow CreateMergedRow(OpenXmlElement cellValue, int colSpan, string colour)
+        {
+            TableRow tr = new TableRow();
+            var tc = new TableCell();
+            RunProperties run1Properties = new RunProperties();
+            run1Properties.Append(new Bold());
+            var run = new Run(cellValue);
+            run.RunProperties = run1Properties;
+            tc.Append(new Paragraph(run));
+            tc.TableCellProperties = new TableCellProperties();
+            tc.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Restart };
+            var shading = new Shading()
+            {
+                Color = "auto",
+                Fill = colour,
+                Val = ShadingPatternValues.Clear
+            };
+
+            tc.TableCellProperties.Append(shading);
+            tr.Append(tc);
+            if (colSpan > 1)
+            {
+                for (int i = 2; i <= colSpan; i++)
+                {
+                    var tc2 = new TableCell();
+                    tc2.TableCellProperties = new TableCellProperties();
+                    tc2.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Continue };
+                    tc2.Append(new Paragraph());
+                    tr.Append(tc2);
+                }
+            }
+
+            return tr;
+        }
+
 
     }
 }

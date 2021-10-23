@@ -8,6 +8,7 @@ namespace PowerDocu.FlowDocumenter
     {
         public string Name;
         public string Expression;
+        public List<string> ExpressionValues = new List<string>();
         public string Type;
         public List<ActionInput> actionInputs = new List<ActionInput>();
         public List<ActionNode> Neighbours = new List<ActionNode>();

@@ -127,7 +127,25 @@ namespace PowerDocu.FlowDocumenter
                 ActionNode aNode = flow.actions.FindOrCreate(action.Name);
                 aNode.Type = actionDetails["type"].ToString();
                 //TODO better expression parsing
-                aNode.Expression = actionDetails["expression"]?.ToString(); //NOTE: sometimes JObject, sometimes JValue		
+                if (actionDetails["expression"] != null)
+                {
+                    //NOTE: sometimes JObject, sometimes JValue
+                    if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+                    {
+                        aNode.Expression = actionDetails["expression"]?.ToString();
+                    }
+                    else if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+                    {
+                        var expressionNodes = actionDetails["expression"].Children();
+                        foreach (JProperty inputNode in expressionNodes)
+                        {
+                            //TODO better expressions parsing
+                            aNode.Expression = actionDetails["expression"]?.ToString();
+                        }
+                    }
+                }
+
+
                 if (actionDetails["inputs"] != null)
                 {
                     var inputNodes = actionDetails["inputs"].Children();
