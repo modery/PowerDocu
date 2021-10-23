@@ -41,7 +41,7 @@ namespace PowerDocu.FlowDocumenter
             System.IO.Directory.CreateDirectory(folderPath);
             string filename = folderPath + flow.Name + " (" + flow.ID + ").docx";
             filename = filename.Replace(":", "-");
-            Console.WriteLine(filename);
+            Console.WriteLine("Creating file "+filename);
             using (WordprocessingDocument wordDocument =
             WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
             {
@@ -580,7 +580,6 @@ namespace PowerDocu.FlowDocumenter
                     runProperties.Append(new Bold());
                     run.RunProperties = runProperties;
                     isFirstCell = false;
-                    Console.WriteLine("Bold: " + cellValue);
                 }
                 tc.Append(new Paragraph(run));
                 tr.Append(tc);
