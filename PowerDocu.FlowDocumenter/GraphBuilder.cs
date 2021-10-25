@@ -94,7 +94,6 @@ namespace PowerDocu.FlowDocumenter
                 // if we are inside a cluster, then we create the new cluster as a child
                 if (currentCluster != null)
                 {
-                    // Console.WriteLine("1New cluster_" + node.Name +" under "+currentCluster.GetName());
                     cluster = currentCluster.GetOrAddSubgraph("cluster_" + node.Name);
                 }
                 else
@@ -103,13 +102,11 @@ namespace PowerDocu.FlowDocumenter
                     {
                         //create the new cluster inside the rootgraph itself
                         cluster = rootGraph.GetOrAddSubgraph("cluster_" + node.Name);
-                        //Console.WriteLine("2New cluster_" + node.Name +" under "+rootGraph.GetName());
                     }
                     else
                     {
                         //create the new cluster inside the parent cluster
                         cluster = parentCluster.GetOrAddSubgraph("cluster_" + node.Name);
-                        //Console.WriteLine("3New cluster_" + node.Name +" under "+parentCluster.GetName());
                     }
                 }
                 cluster.SafeSetAttribute("style", "filled", "");
@@ -120,12 +117,10 @@ namespace PowerDocu.FlowDocumenter
                 {
                     foreach (ActionNode subaction in node.Subactions)
                     {
-                        //Console.WriteLine("Let's look at subaction "+subaction.Name);
                         //connect the subactions to the current node inside the cluster
                         if (node.Elseactions.Count > 0)
                         {
                             yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + node.Name);
-                            //Console.WriteLine("4New cluster_yes" + node.Name +" under "+cluster.GetName());
                             yesCluster.SafeSetAttribute("style", "filled", "");
                             yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
                             addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, yesCluster, showSubactions, false);
@@ -133,7 +128,6 @@ namespace PowerDocu.FlowDocumenter
                         }
                         else
                         {
-                            // Console.WriteLine("preparing to add  subaction to current cluster" + cluster.GetName());
                             addNodesToGraph(rootGraph, subaction, currentNode, null, cluster, showSubactions, false);
                         }
                     }
@@ -141,7 +135,6 @@ namespace PowerDocu.FlowDocumenter
                     {
                         //connect the subactions to the current node inside the cluster                         
                         noCluster = cluster.GetOrAddSubgraph("cluster_no" + node.Name);
-                        // Console.WriteLine("5New cluster_no" + node.Name +" under "+cluster.GetName());
                         noCluster.SafeSetAttribute("style", "filled", "");
                         noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
                         addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, noCluster, showSubactions, false);
