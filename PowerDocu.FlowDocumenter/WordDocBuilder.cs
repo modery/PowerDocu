@@ -39,7 +39,6 @@ namespace PowerDocu.FlowDocumenter
             folderPath = @"\Flow Documentation - " + flow.Name + @"\";
             folderPath = folderPath.Replace(":", "-");
             folderPath = path + folderPath;
-            Console.WriteLine(folderPath);
             Directory.CreateDirectory(folderPath);
             string filename = flow.Name + " (" + flow.ID + ").docx";
             filename = filename.Replace(":", "-");
@@ -259,7 +258,10 @@ namespace PowerDocu.FlowDocumenter
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
                 //actionDetailsTable.Append(CreateRow(new Text("Details"), new Text(action.ToString())));  //TODO provide more details, such as information about subaction, subsequent actions?
-                actionDetailsTable.Append(CreateRow(new Text("Expression"), AddExpressionTable(action.actionExpression)));
+                if (action.actionExpression != null || !String.IsNullOrEmpty(action.Expression))
+                {
+                    actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
+                }
                 if (action.actionInputs.Count > 0)
                 {
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));

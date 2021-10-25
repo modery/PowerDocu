@@ -154,6 +154,7 @@ namespace PowerDocu.FlowDocumenter
                     foreach (JProperty inputNode in inputNodes)
                     {
                         //TODO better inputs parsing
+                        //TODO: compose is a simple input, similar to Expression
                         aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
                     }
                 }
