@@ -147,15 +147,24 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
 
-
                 if (actionDetails["inputs"] != null)
                 {
-                    var inputNodes = actionDetails["inputs"].Children();
-                    foreach (JProperty inputNode in inputNodes)
+                    if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
                     {
-                        //TODO better inputs parsing
-                        //TODO: compose is a simple input, similar to Expression
-                        aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
+                        aNode.Inputs = actionDetails["inputs"]?.ToString();
+                    }
+                    else if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+                    {
+                        //TODO better expressions parsing
+                        aNode.Inputs = actionDetails["inputs"]?.ToString();
+                        var inputNodes = actionDetails["inputs"].Children();
+                        foreach (JProperty inputNode in inputNodes)
+                        {
+                            //there should be only one node here, code can be improved
+                            //also: preparing for input parsing similar to expressions
+                            aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
+
+                        }
                     }
                 }
 
@@ -201,7 +210,7 @@ namespace PowerDocu.FlowDocumenter
                     parseActions(flow, elseActions.Children(), aNode, true);
                 }
 
-                //Switch: type==Switch
+                //todo: currently switch actions are subactions, but we do not have any way of determining this afterwards
                 if (aNode.Type == "Switch")
                 {
                     JObject switchCases = (JObject)actionDetails["cases"];
