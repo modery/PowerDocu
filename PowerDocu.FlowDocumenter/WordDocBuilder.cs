@@ -119,16 +119,6 @@ namespace PowerDocu.FlowDocumenter
                                                 new Text(connectorIcon.Name));
                 }
 
-
-                // this can be used to link within doc
-                /*
-					tc.Append(new Paragraph(new Hyperlink(new Run(new Text("text")))
-										{
-											Anchor = "anchor"",
-											DocLocation = "https://docs.microsoft.com/connectors/"+cRef.Connector.Replace("/providers/Microsoft.PowerApps/apis/shared_", "")
-										}));
-										*/
-
                 Table table = CreateTable();
                 table.Append(CreateRow(new Text("Connector"),
                             new Hyperlink(run) { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
@@ -253,11 +243,16 @@ namespace PowerDocu.FlowDocumenter
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(action.Name));
+                string bookmarkID = (new Random()).Next(100000, 999999).ToString();
+                BookmarkStart start = new BookmarkStart(){ Name = action.Name, Id = bookmarkID};
+                BookmarkEnd end = new BookmarkEnd(){Id = bookmarkID};
+                para.Append(start,end);
                 ApplyStyleToParagraph("Heading3", para);
                 Table actionDetailsTable = CreateTable();
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
-                //actionDetailsTable.Append(CreateRow(new Text("Details"), new Text(action.ToString())));  //TODO provide more details, such as information about subaction, subsequent actions?
+
+                //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
                 if (action.actionExpression != null || !String.IsNullOrEmpty(action.Expression))
                 {
                     actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
@@ -269,6 +264,49 @@ namespace PowerDocu.FlowDocumenter
                     foreach (ActionInput actionInput in action.actionInputs)
                     {
                         actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
+                    }
+                }
+                
+                                        
+                if (action.Subactions.Count > 0 || action.Elseactions.Count > 0)
+                {
+                    if (action.Subactions.Count > 0)
+                    {   
+                        var tr = new TableRow();
+                        var tc = new TableCell();
+                        tc.Append(new Paragraph(new Run(new Text("Subactions"))));
+                        tr.Append(tc);
+                        tc = new TableCell();
+                        foreach (ActionNode subaction in action.Subactions)
+                        {
+                            //adding a link to the subaction's section in the Word doc
+                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(subaction.Name))){
+											Anchor = subaction.Name,
+											DocLocation = ""
+										}));
+                        }
+                        //tc.Append(paragraph);
+                        tr.Append(tc);                        
+                        actionDetailsTable.Append(tr);
+                        
+                    }
+                    if (action.Elseactions.Count > 0)
+                    {
+                        var tr = new TableRow();
+                        var tc = new TableCell();
+                        tc.Append(new Paragraph(new Run(new Text("Elseactions"))));
+                        tr.Append(tc);
+                        tc = new TableCell();                        
+                        foreach (ActionNode elseaction in action.Elseactions)
+                        {
+                            //adding a link to the elseaction's section in the Word doc
+                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(elseaction.Name))){
+											Anchor = elseaction.Name,
+											DocLocation = ""
+										}));
+                        }
+                        tr.Append(tc);
+                        actionDetailsTable.Append(tr);
                     }
                 }
                 body.Append(actionDetailsTable);
