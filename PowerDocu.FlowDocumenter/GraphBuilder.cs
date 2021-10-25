@@ -14,12 +14,13 @@ namespace PowerDocu.FlowDocumenter
         //using this list to store the names of edges. Some edges were created twice when creating an edge to a cluster (as it creates a dummy node when pointing to a cluster, which happens multiple times instead of getting reused)
         private List<string> edges;
 
-        public GraphBuilder(FlowEntity flowToUse)
+        public GraphBuilder(FlowEntity flowToUse, string path)
         {
             flow = flowToUse;
-            folderPath = "Flow Documentation - " + flow.Name + @"\";
+            folderPath = @"\Flow Documentation - " + flow.Name + @"\";
             folderPath = folderPath.Replace(":", "-");
-            System.IO.Directory.CreateDirectory(folderPath);
+            folderPath = path + folderPath;
+            Directory.CreateDirectory(folderPath);
         }
 
         public string buildTopLevelGraph()
@@ -27,7 +28,6 @@ namespace PowerDocu.FlowDocumenter
             return buildGraph(false);
         }
 
-        //TODO
         public string buildDetailedGraph()
         {
             return buildGraph(true);

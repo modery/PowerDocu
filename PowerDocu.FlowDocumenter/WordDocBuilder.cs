@@ -33,15 +33,17 @@ namespace PowerDocu.FlowDocumenter
 
         private string folderPath;
 
-        public WordDocBuilder(FlowEntity flowToDocument)
+        public WordDocBuilder(FlowEntity flowToDocument, string path)
         {
             this.flow = flowToDocument;
-            folderPath = "Flow Documentation - " + flow.Name + @"\";
+            folderPath = @"\Flow Documentation - " + flow.Name + @"\";
             folderPath = folderPath.Replace(":", "-");
-            System.IO.Directory.CreateDirectory(folderPath);
-            string filename = folderPath + flow.Name + " (" + flow.ID + ").docx";
+            folderPath = path + folderPath;
+            Console.WriteLine(folderPath);
+            Directory.CreateDirectory(folderPath);
+            string filename = flow.Name + " (" + flow.ID + ").docx";
             filename = filename.Replace(":", "-");
-            Console.WriteLine("Creating file " + filename);
+            filename = folderPath + filename;
             using (WordprocessingDocument wordDocument =
             WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
             {
