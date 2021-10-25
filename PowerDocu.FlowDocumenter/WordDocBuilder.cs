@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -244,9 +243,9 @@ namespace PowerDocu.FlowDocumenter
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(action.Name));
                 string bookmarkID = (new Random()).Next(100000, 999999).ToString();
-                BookmarkStart start = new BookmarkStart(){ Name = action.Name, Id = bookmarkID};
-                BookmarkEnd end = new BookmarkEnd(){Id = bookmarkID};
-                para.Append(start,end);
+                BookmarkStart start = new BookmarkStart() { Name = action.Name, Id = bookmarkID };
+                BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
+                para.Append(start, end);
                 ApplyStyleToParagraph("Heading3", para);
                 Table actionDetailsTable = CreateTable();
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
@@ -266,12 +265,12 @@ namespace PowerDocu.FlowDocumenter
                         actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
                     }
                 }
-                
-                                        
+
+
                 if (action.Subactions.Count > 0 || action.Elseactions.Count > 0)
                 {
                     if (action.Subactions.Count > 0)
-                    {   
+                    {
                         var tr = new TableRow();
                         var tc = new TableCell();
                         tc.Append(new Paragraph(new Run(new Text("Subactions"))));
@@ -280,15 +279,16 @@ namespace PowerDocu.FlowDocumenter
                         foreach (ActionNode subaction in action.Subactions)
                         {
                             //adding a link to the subaction's section in the Word doc
-                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(subaction.Name))){
-											Anchor = subaction.Name,
-											DocLocation = ""
-										}));
+                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(subaction.Name)))
+                            {
+                                Anchor = subaction.Name,
+                                DocLocation = ""
+                            }));
                         }
                         //tc.Append(paragraph);
-                        tr.Append(tc);                        
+                        tr.Append(tc);
                         actionDetailsTable.Append(tr);
-                        
+
                     }
                     if (action.Elseactions.Count > 0)
                     {
@@ -296,14 +296,15 @@ namespace PowerDocu.FlowDocumenter
                         var tc = new TableCell();
                         tc.Append(new Paragraph(new Run(new Text("Elseactions"))));
                         tr.Append(tc);
-                        tc = new TableCell();                        
+                        tc = new TableCell();
                         foreach (ActionNode elseaction in action.Elseactions)
                         {
                             //adding a link to the elseaction's section in the Word doc
-                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(elseaction.Name))){
-											Anchor = elseaction.Name,
-											DocLocation = ""
-										}));
+                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(elseaction.Name)))
+                            {
+                                Anchor = elseaction.Name,
+                                DocLocation = ""
+                            }));
                         }
                         tr.Append(tc);
                         actionDetailsTable.Append(tr);
@@ -544,11 +545,10 @@ namespace PowerDocu.FlowDocumenter
             var part = doc.MainDocumentPart.AddNewPart<StyleDefinitionsPart>();
             var root = new Styles();
             root.Save(part);
-            FileStream stylesTemplate = new FileStream("Resources\\styles.xml", FileMode.Open, FileAccess.Read);
+            FileStream stylesTemplate = new FileStream(AssemblyHelper.AssemblyDirectory+@"\Resources\styles.xml", FileMode.Open, FileAccess.Read);
             part.FeedData(stylesTemplate);
             return part;
         }
-
 
         /* helper class to add the givens style to the provided paragraph */
         private void ApplyStyleToParagraph(string styleid, Paragraph p)
