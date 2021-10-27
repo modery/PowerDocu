@@ -254,13 +254,19 @@ namespace PowerDocu.FlowDocumenter
                 {
                     actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
                 }
-                if (action.actionInputs.Count > 0)
+                if (action.actionInputs.Count > 0 || !String.IsNullOrEmpty(action.Inputs))
                 {
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
-
-                    foreach (ActionInput actionInput in action.actionInputs)
+                    if (action.actionInputs.Count > 0)
                     {
-                        actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
+                        foreach (ActionInput actionInput in action.actionInputs)
+                        {
+                            actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
+                        }
+                    }
+                    if (!String.IsNullOrEmpty(action.Inputs))
+                    {
+                        actionDetailsTable.Append(CreateRow(new Text("Value"), new Text(action.Inputs)));
                     }
                 }
 
