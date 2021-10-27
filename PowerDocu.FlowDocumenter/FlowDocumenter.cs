@@ -15,18 +15,7 @@ namespace PowerDocu.FlowDocumenter
             }
             else
             {
-                if (File.Exists(args[0]))
-                {
-                    string path = Path.GetDirectoryName(args[0]);
-                    FlowParser flowParserFromZip = new FlowParser(args[0]);
-                    foreach (FlowEntity flow in flowParserFromZip.getFlows())
-                    {
-                        GraphBuilder gbzip = new GraphBuilder(flow, path);
-                        gbzip.buildTopLevelGraph();
-                        gbzip.buildDetailedGraph();
-                        WordDocBuilder wordzip = new WordDocBuilder(flow, path);
-                    }
-                }
+                FlowDocumentationGenerator.GenerateWordDocumentation(args[0]);
             }
         }
 
