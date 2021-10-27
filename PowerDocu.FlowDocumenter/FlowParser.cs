@@ -14,7 +14,7 @@ namespace PowerDocu.FlowDocumenter
 
         public FlowParser(string filename)
         {
-            Console.Write("Processing " + filename);
+            Console.WriteLine("Processing " + filename);
 
             if (filename.ToLower().EndsWith("zip"))
             {
