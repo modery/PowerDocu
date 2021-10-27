@@ -21,10 +21,6 @@ namespace PowerDocu.FlowDocumenter
             this.Name = name;
         }
 
-        public bool hasSubactions()
-        {
-            return Subactions.Count > 0;
-        }
         public bool AddNeighbour(ActionNode neighbour)
         {
             if (Neighbours.Contains(neighbour))
@@ -63,24 +59,7 @@ namespace PowerDocu.FlowDocumenter
         }
         public override string ToString()
         {
-            //TODO add subsactions?
-            StringBuilder nodeString = new StringBuilder();
-            nodeString.Append("[Node Value: " + Name + " with Neighbours");
-            foreach (var item in Neighbours)
-            {
-                nodeString.Append(" -> " + item.Name);
-            }
-            nodeString.Append(" ]");
-            if (hasSubactions())
-            {
-                nodeString.Append("  -[");
-                foreach (var item in Subactions)
-                {
-                    nodeString.Append(" -> " + item.Name);
-                }
-                nodeString.Append("]");
-            }
-            return nodeString.ToString();
+            return Name;
         }
     }
 

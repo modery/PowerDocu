@@ -31,7 +31,7 @@ namespace PowerDocu.FlowDocumenter
             }
             else if (filename.ToLower().EndsWith("json"))
             {
-                //TODO currently working with definition.json files, but need to consider logic app templates
+                //TODO currently working with definition.json files, but need to consider logic app templates as a next step
                 parseFlow(File.ReadAllText(filename));
             }
             else
@@ -126,7 +126,6 @@ namespace PowerDocu.FlowDocumenter
                 JObject runAfter = (JObject)actionDetails["runAfter"];
                 ActionNode aNode = flow.actions.FindOrCreate(action.Name);
                 aNode.Type = actionDetails["type"].ToString();
-                //TODO better expression parsing
                 if (actionDetails["expression"] != null)
                 {
                     //NOTE: sometimes JObject, sometimes JValue
@@ -136,7 +135,6 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
-                        //TODO better expressions parsing
                         aNode.Expression = actionDetails["expression"]?.ToString();
                         var expressionNodes = actionDetails["expression"].Children();
                         foreach (JProperty inputNode in expressionNodes)
@@ -155,7 +153,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
-                        //TODO better expressions parsing
+                        //TODO better inputs parsing
                         aNode.Inputs = actionDetails["inputs"]?.ToString();
                         var inputNodes = actionDetails["inputs"].Children();
                         foreach (JProperty inputNode in inputNodes)

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using PowerDocu.Common;
 using Rubjerg.Graphviz;
 using Svg;
 
@@ -17,9 +18,7 @@ namespace PowerDocu.FlowDocumenter
         public GraphBuilder(FlowEntity flowToUse, string path)
         {
             flow = flowToUse;
-            folderPath = @"\Flow Documentation - " + flow.Name + @"\";
-            folderPath = folderPath.Replace(":", "-");
-            folderPath = path + folderPath;
+            folderPath = path + CharsetHelper.GetSafeName(@"\Flow Documentation - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
         }
 
@@ -36,11 +35,11 @@ namespace PowerDocu.FlowDocumenter
         private string buildGraph(bool showSubactions)
         {
             edges = new List<string>();
-            RootGraph rootGraph = RootGraph.CreateNew(flow.Name, GraphType.Directed);
+            RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(flow.Name), GraphType.Directed);
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
             ActionNode rootAction = flow.actions.getRootNode();
 
-            Node trigger = rootGraph.GetOrAddNode(flow.trigger.Name);
+            Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
             trigger.SafeSetAttribute("color", "green", "");
 
             addNodesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
@@ -60,6 +59,7 @@ namespace PowerDocu.FlowDocumenter
             return folderPath + filename + ".png";
         }
 
+
         /** 
           * rootGraph - the RootGraph under which most new nodes get created
             node - the ActionNode to be processed now
@@ -75,38 +75,36 @@ namespace PowerDocu.FlowDocumenter
             SubGraph noCluster = null;
             string edgeName;
             //adding the current item as a new node
-            Node currentNode = rootGraph.GetOrAddNode(node.Name);
+            Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
             currentNode.SafeSetAttribute("shape", "record", "");
             currentNode.SafeSetAttribute("color", "blue", "");
             currentNode.SafeSetAttribute("style", "filled", "");
             currentNode.SafeSetAttribute("fillcolor", "white", "");
-            //TODO image attribute not working yet
-            //currentNode.SafeSetAttribute("image", "office365outlook.png", "office365outlook.png");
-            //currentNode.SafeSetAttribute("imagescale", "height", "");
-
+            //TODO create 32px version of connector icon and store it in current folder, then include it here
+            //nodeD.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"10to8.png\" height=\"32\" /></td><td>This is some text</td></tr></table>");
 
             //might not have subactions for yes/no? to check!
             //if there are actions inside (likely only for Control), let's create a container
             //How about a SCOPE? TODO
-            if (node.hasSubactions())
+            if (node.Subactions.Count > 0)
             {
                 // if there are subactions, then we need to create a cluster for the current node and its child nodes
                 // if we are inside a cluster, then we create the new cluster as a child
                 if (currentCluster != null)
                 {
-                    cluster = currentCluster.GetOrAddSubgraph("cluster_" + node.Name);
+                    cluster = currentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
                 }
                 else
                 {
                     if (parentCluster == null)
                     {
                         //create the new cluster inside the rootgraph itself
-                        cluster = rootGraph.GetOrAddSubgraph("cluster_" + node.Name);
+                        cluster = rootGraph.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
                     }
                     else
                     {
                         //create the new cluster inside the parent cluster
-                        cluster = parentCluster.GetOrAddSubgraph("cluster_" + node.Name);
+                        cluster = parentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
                     }
                 }
                 cluster.SafeSetAttribute("style", "filled", "");
@@ -120,7 +118,7 @@ namespace PowerDocu.FlowDocumenter
                         //connect the subactions to the current node inside the cluster
                         if (node.Elseactions.Count > 0)
                         {
-                            yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + node.Name);
+                            yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
                             yesCluster.SafeSetAttribute("style", "filled", "");
                             yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
                             addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, yesCluster, showSubactions, false);
@@ -134,7 +132,7 @@ namespace PowerDocu.FlowDocumenter
                     foreach (ActionNode subaction in node.Elseactions)
                     {
                         //connect the subactions to the current node inside the cluster                         
-                        noCluster = cluster.GetOrAddSubgraph("cluster_no" + node.Name);
+                        noCluster = cluster.GetOrAddSubgraph("cluster_no" + CharsetHelper.GetSafeName(node.Name));
                         noCluster.SafeSetAttribute("style", "filled", "");
                         noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
                         addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, noCluster, showSubactions, false);

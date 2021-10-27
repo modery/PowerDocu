@@ -35,11 +35,9 @@ namespace PowerDocu.FlowDocumenter
         public WordDocBuilder(FlowEntity flowToDocument, string path)
         {
             this.flow = flowToDocument;
-            folderPath = @"\Flow Documentation - " + flow.Name + @"\";
-            folderPath = folderPath.Replace(":", "-");
-            folderPath = path + folderPath;
+            folderPath = path + CharsetHelper.GetSafeName(@"\Flow Documentation - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
-            string filename = flow.Name + " (" + flow.ID + ").docx";
+            string filename = CharsetHelper.GetSafeName(flow.Name) + " (" + flow.ID + ").docx";
             filename = filename.Replace(":", "-");
             filename = folderPath + filename;
             using (WordprocessingDocument wordDocument =
@@ -545,7 +543,7 @@ namespace PowerDocu.FlowDocumenter
             var part = doc.MainDocumentPart.AddNewPart<StyleDefinitionsPart>();
             var root = new Styles();
             root.Save(part);
-            FileStream stylesTemplate = new FileStream(AssemblyHelper.AssemblyDirectory+@"\Resources\styles.xml", FileMode.Open, FileAccess.Read);
+            FileStream stylesTemplate = new FileStream(AssemblyHelper.AssemblyDirectory + @"\Resources\styles.xml", FileMode.Open, FileAccess.Read);
             part.FeedData(stylesTemplate);
             return part;
         }
