@@ -10,12 +10,13 @@ namespace PowerDocu.FlowDocumenter
 
             if (args.Length == 0 || args.Length > 1)
             {
-                Console.WriteLine("Please provide an exported Flow as parameter. For example:");
+                Console.WriteLine("Please provide an exported Flow package as parameter. For example:");
                 Console.WriteLine("  powerdocu.flowdocumenter.exe ExportedFlow.zip");
             }
             else
             {
-                if(File.Exists(args[0])) {
+                if (File.Exists(args[0]))
+                {
                     string path = Path.GetDirectoryName(args[0]);
                     FlowParser flowParserFromZip = new FlowParser(args[0]);
                     foreach (FlowEntity flow in flowParserFromZip.getFlows())
