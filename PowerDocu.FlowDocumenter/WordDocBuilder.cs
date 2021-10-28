@@ -162,6 +162,7 @@ namespace PowerDocu.FlowDocumenter
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Name"), new Text(flow.trigger.Name)));
             table.Append(CreateRow(new Text("Type"), new Text(flow.trigger.Type)));
+            table.Append(CreateRow(new Text("Connector"), new Text(flow.trigger.Connector)));
             table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
 
             //the following 2 IFs could be turned into their own function

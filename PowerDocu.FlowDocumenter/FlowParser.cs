@@ -69,34 +69,42 @@ namespace PowerDocu.FlowDocumenter
 		  */
         private void parseTrigger(FlowEntity flow)
         {
-            var dtriggers = flowDefinition.properties.definition.triggers.Children();
-            //only one trigger, need to revisit at some point to make it cleaner
-            foreach (JProperty trigger in dtriggers)
+            JProperty trigger = (JProperty)((JObject)flowDefinition.properties.definition.triggers).First;
+
+            flow.addTrigger(trigger.Name);
+            JObject triggerDetails = (JObject)trigger.Value;
+            flow.trigger.Description = triggerDetails["description"]?.ToString();
+            flow.trigger.Type = triggerDetails["type"].ToString();
+
+            //the following 2 IFs could be turned into their own function
+            if (triggerDetails["recurrence"] != null)
             {
-                flow.addTrigger(trigger.Name);
-                JObject triggerDetails = (JObject)trigger.Value;
-                flow.trigger.Description = triggerDetails["description"]?.ToString();
-                flow.trigger.Type = triggerDetails["type"].ToString();
-
-                //the following 2 IFs could be turned into their own function
-                if (triggerDetails["recurrence"] != null)
+                JObject recurrence = (JObject)triggerDetails["recurrence"];
+                foreach (JProperty property in recurrence.Children())
                 {
-                    JObject recurrence = (JObject)triggerDetails["recurrence"];
-                    foreach (JProperty property in recurrence.Children())
-                    {
-                        flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
-                    }
+                    flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
                 }
-                if (triggerDetails["inputs"] != null)
-                {
-                    JObject inputs = (JObject)triggerDetails["inputs"];
-                    foreach (JProperty property in inputs.Children())
-                    {
-                        flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
-                    }
-                }
-
             }
+            if (triggerDetails["inputs"] != null)
+            {
+                JObject inputs = (JObject)triggerDetails["inputs"];
+                foreach (JProperty property in inputs.Children())
+                {
+                    flow.trigger.Inputs.Add(property.Name, property.Value.ToString());
+                    if (property.Name == "host")
+                    {
+                        //this is not a nice way, but works so far
+                        flow.trigger.Connector = extractConnectorName(((JToken)property.Value["connection"]["name"]).ToString());
+                    }
+                }
+            }
+
+
+        }
+
+        private string extractConnectorName(string connectionstring)
+        {
+            return connectionstring.Replace("@parameters('$connections')['shared_", "").Replace("']['connectionId']", "");
         }
 
         /**
@@ -163,7 +171,7 @@ namespace PowerDocu.FlowDocumenter
                             if (inputNode.Name == "host")
                             {
                                 //this is not a nice way, but works so far
-                                aNode.Connection = ((JToken)inputNode.Value["connection"]["name"]).ToString().Replace("@parameters('$connections')['shared_", "").Replace("']['connectionId']", "");
+                                aNode.Connection = extractConnectorName(((JToken)inputNode.Value["connection"]["name"]).ToString());
                             }
                         }
                     }
