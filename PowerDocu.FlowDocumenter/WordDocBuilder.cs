@@ -73,11 +73,11 @@ namespace PowerDocu.FlowDocumenter
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Connection References"));
+            run.AppendChild(new Text("Connections"));
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("The following connection references are used in this Flow:"));
+            run.AppendChild(new Text("The following connections are used in this Flow:"));
             foreach (ConnectionReference cRef in flow.connectionReferences)
             {
                 string connectorUniqueName = cRef.Connector.Replace("/providers/Microsoft.PowerApps/apis/shared_", "");
@@ -248,6 +248,7 @@ namespace PowerDocu.FlowDocumenter
                 Table actionDetailsTable = CreateTable();
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
+                actionDetailsTable.Append(CreateRow(new Text("Connection"), new Text(action.Connection)));
 
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
                 if (action.actionExpression != null || !String.IsNullOrEmpty(action.Expression))

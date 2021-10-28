@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PowerDocu.Common;
 using Rubjerg.Graphviz;
 using Svg;
+using System.Xml;
 
 namespace PowerDocu.FlowDocumenter
 {
@@ -50,12 +51,27 @@ namespace PowerDocu.FlowDocumenter
             // can't save directly as PNG (limitation of the .Net Wrapper), saving as SVG is the only option 
             rootGraph.ToSvgFile(folderPath + filename + ".svg");
             //rootGraph.ToDotFile(folderPath + filename+".dot");
+
+            //updating the SVG, embedding any images as base64 content so that they are shown in the Word output
+            XmlDocument xmlDoc = new XmlDocument
+            {
+                XmlResolver = null
+            };
+            xmlDoc.Load(folderPath + filename + ".svg");
+            XmlNodeList elemList = xmlDoc.GetElementsByTagName("image");
+            foreach (XmlNode xn in elemList)
+            {
+                xn.Attributes["xlink:href"].Value = "data:image/png;base64," + ImageHelper.GetBase64(xn.Attributes["xlink:href"].Value);
+            }
+            xmlDoc.Save(folderPath + filename + ".svg");
             // converting SVG to PNG
             var svgDocument = SvgDocument.Open(folderPath + filename + ".svg");
+            //generating the PNG from the SVG
             using (var bitmap = svgDocument.Draw())
             {
                 bitmap?.Save(folderPath + filename + ".png");
             }
+
             return folderPath + filename + ".png";
         }
 
@@ -80,8 +96,20 @@ namespace PowerDocu.FlowDocumenter
             currentNode.SafeSetAttribute("color", "blue", "");
             currentNode.SafeSetAttribute("style", "filled", "");
             currentNode.SafeSetAttribute("fillcolor", "white", "");
-            //TODO create 32px version of connector icon and store it in current folder, then include it here
-            //nodeD.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"10to8.png\" height=\"32\" /></td><td>This is some text</td></tr></table>");
+            //setting the label here again with the name is required to make the connector icon code below work properly
+            currentNode.SafeSetAttribute("label", CharsetHelper.GetSafeName(node.Name), "");
+            if (!String.IsNullOrEmpty(node.Connection))
+            {
+                string connectorIcon = ConnectorHelper.getConnectorIconFile(node.Connection);
+
+                if (!String.IsNullOrEmpty(connectorIcon))
+                {
+                    string connectorIcon32Path = folderPath + Path.GetFileNameWithoutExtension(connectorIcon) + "32.png";
+                    ImageHelper.ConvertImageTo32(connectorIcon, connectorIcon32Path);
+                    //path to image is absolute here, as GraphViz wasn't able to render it properly if relative. Will be replaced in the SVG just before the PNG gets generated
+                    currentNode.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr></table>");
+                }
+            }
 
             //might not have subactions for yes/no? to check!
             //if there are actions inside (likely only for Control), let's create a container
