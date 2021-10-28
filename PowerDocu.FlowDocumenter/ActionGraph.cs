@@ -11,6 +11,7 @@ namespace PowerDocu.FlowDocumenter
         public ActionExpression actionExpression;
         public string Type;
         public string Inputs;
+        public string Connection;
         public List<ActionInput> actionInputs = new List<ActionInput>();
         public List<ActionNode> Neighbours = new List<ActionNode>();
         public List<ActionNode> Subactions = new List<ActionNode>();
