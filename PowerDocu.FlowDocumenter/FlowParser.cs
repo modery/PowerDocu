@@ -126,6 +126,7 @@ namespace PowerDocu.FlowDocumenter
                 JObject runAfter = (JObject)actionDetails["runAfter"];
                 ActionNode aNode = flow.actions.FindOrCreate(action.Name);
                 aNode.Type = actionDetails["type"].ToString();
+
                 if (actionDetails["expression"] != null)
                 {
                     //NOTE: sometimes JObject, sometimes JValue
@@ -139,7 +140,6 @@ namespace PowerDocu.FlowDocumenter
                         var expressionNodes = actionDetails["expression"].Children();
                         foreach (JProperty inputNode in expressionNodes)
                         {
-                            //there should be only one node here, code can be improved
                             aNode.actionExpression = parseExpressions(inputNode);
                         }
                     }
@@ -158,10 +158,13 @@ namespace PowerDocu.FlowDocumenter
                         var inputNodes = actionDetails["inputs"].Children();
                         foreach (JProperty inputNode in inputNodes)
                         {
-                            //there should be only one node here, code can be improved
-                            //also: preparing for input parsing similar to expressions
                             aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
-
+                            //If the node's name = host then there are details about the connection used inside
+                            if (inputNode.Name == "host")
+                            {
+                                //this is not a nice way, but works so far
+                                aNode.Connection = ((JToken)inputNode.Value["connection"]["name"]).ToString().Replace("@parameters('$connections')['shared_", "").Replace("']['connectionId']", "");
+                            }
                         }
                     }
                 }
