@@ -34,7 +34,7 @@ namespace PowerDocu.GUI
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 380);
             this.Text = "PowerDocu GUI";
             openFileDialog1 = new OpenFileDialog()
             {
@@ -57,6 +57,7 @@ namespace PowerDocu.GUI
                 Location = new Point(15, 60),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true
             };
             Controls.Add(textBox1);
         }
