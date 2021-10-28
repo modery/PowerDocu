@@ -42,7 +42,7 @@ namespace PowerDocu.FlowDocumenter
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
             trigger.SafeSetAttribute("color", "green", "");
-
+            trigger.SafeSetAttribute("label", CharsetHelper.GetSafeName(flow.trigger.Name), "");
             addNodesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
             rootGraph.ComputeLayout();
 
