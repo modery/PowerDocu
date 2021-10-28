@@ -218,15 +218,23 @@ namespace PowerDocu.FlowDocumenter
                         {
 
                             SubGraph curClusterParent = (clusterRelationship.ContainsKey(curCluster)) ? clusterRelationship[curCluster] : null;
+                            SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
                             if (curClusterParent == prevCluster)
                             {
                                 edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
                             }
                             else
                             {
-                                if (curClusterParent == null)
+                                if (curClusterParent == null || previousNeighbourNode.GetName().Equals(preceedingNeighbour?.Name))
                                 {
-                                    edgeAB = rootGraph.GetOrAddEdge(prevCluster, curCluster, false, edgeName);
+                                    if (prevClusterParent == curCluster)
+                                    {
+                                        edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
+                                    }
+                                    else
+                                    {
+                                        edgeAB = rootGraph.GetOrAddEdge(prevCluster, curCluster, false, edgeName);
+                                    }
                                 }
                                 else
                                 {
@@ -239,8 +247,6 @@ namespace PowerDocu.FlowDocumenter
                                     edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curClusterParent, false, edgeName);
                                 }
                             }
-
-
                         }
                         else
                         {
