@@ -33,8 +33,11 @@ namespace PowerDocu.GUI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 380);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.ClientSize = new System.Drawing.Size(1000, 380);
+            this.SizeChanged += new EventHandler(sizeChanged);
+            this.MinimumSize = new Size(500, 250);
             this.Text = "PowerDocu GUI";
             openFileDialog1 = new OpenFileDialog()
             {
@@ -45,7 +48,8 @@ namespace PowerDocu.GUI
 
             selectButton = new Button()
             {
-                Size = new Size(150, 30),
+                //this should properly size the button so that the Text is shown correctly
+                Size = new Size((int)(150 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
                 Location = new Point(15, 15),
                 Text = "Select Flow to document"
             };
@@ -53,7 +57,7 @@ namespace PowerDocu.GUI
             Controls.Add(selectButton);
             textBox1 = new TextBox
             {
-                Size = new Size(750, 300),
+                Size = new Size(ClientSize.Width - 30, ClientSize.Height - 70),
                 Location = new Point(15, 60),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
@@ -61,6 +65,8 @@ namespace PowerDocu.GUI
             };
             Controls.Add(textBox1);
         }
+
+
 
         private Button selectButton;
         private OpenFileDialog openFileDialog1;

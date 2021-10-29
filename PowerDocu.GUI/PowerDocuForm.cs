@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using PowerDocu.FlowDocumenter;
@@ -21,9 +22,12 @@ namespace PowerDocu.GUI
             {
                 try
                 {
-                    //run FlowParser from here
+                    textBox1.AppendText("Preparing to parse file " + openFileDialog1.FileName + ", please wait.");
+                    Cursor = Cursors.WaitCursor; // change cursor to hourglass type
+                    textBox1.AppendText(Environment.NewLine);
                     textBox1.AppendText(FlowDocumentationGenerator.GenerateWordDocumentation(openFileDialog1.FileName));
                     textBox1.AppendText(Environment.NewLine);
+                    Cursor = Cursors.Arrow; // change cursor to normal type
                 }
                 catch (Exception ex)
                 {
@@ -32,6 +36,12 @@ namespace PowerDocu.GUI
 
                 }
             }
+        }
+
+
+        private void sizeChanged(object sender, EventArgs e)
+        {
+            textBox1.Size = new Size(ClientSize.Width - 30,ClientSize.Height - 70);
         }
 
     }
