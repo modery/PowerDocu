@@ -9,8 +9,15 @@ namespace PowerDocu.FlowDocumenter
 {
     class FlowParser
     {
+        public enum PackageType
+        {
+            FlowPackage,
+            LogicAppsTemplate,
+            SolutionPackage
+        }
         private dynamic flowDefinition;
         private List<FlowEntity> flows = new List<FlowEntity>();
+        public PackageType packageType;
 
         public FlowParser(string filename)
         {
@@ -18,21 +25,34 @@ namespace PowerDocu.FlowDocumenter
 
             if (filename.ToLower().EndsWith("zip"))
             {
-                List<ZipArchiveEntry> definitions = ZipHelper.getFilesFromZip(filename, ZipHelper.FlowDefinitionFile);
+                List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(filename);
+                packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
                 foreach (ZipArchiveEntry definition in definitions)
                 {
                     using (StreamReader reader = new StreamReader(definition.Open()))
                     {
                         Console.WriteLine("Processing workflow definition " + definition.FullName);
                         string definitionContent = reader.ReadToEnd();
-                        parseFlow(definitionContent);
+                        FlowEntity flow = parseFlow(definitionContent);
+                        if (String.IsNullOrEmpty(flow.Name))
+                        {
+                            flow.Name = definition.Name.Replace(".json", "");
+                        }
+                        flows.Add(flow);
                     }
                 }
             }
             else if (filename.ToLower().EndsWith("json"))
             {
+                packageType = PackageType.LogicAppsTemplate;
                 //TODO currently working with definition.json files, but need to consider logic app templates as a next step
-                parseFlow(File.ReadAllText(filename));
+                // not parsing at the moment until it's been updated to work with Logic Apps       
+                /*FlowEntity flow = parseFlow(File.ReadAllText(filename));
+                if (String.IsNullOrEmpty(flow.Name))
+                {
+                    flow.Name = filename.Replace(".json", "");
+                }
+                flows.Add(flow);*/
             }
             else
             {
@@ -44,7 +64,7 @@ namespace PowerDocu.FlowDocumenter
         /**
 		  * This function takes a Flow's JSON definition and parses it for further processing
 		  */
-        private void parseFlow(string flowJSON)
+        private FlowEntity parseFlow(string flowJSON)
         {
             flowDefinition = JObject.Parse(flowJSON);
             FlowEntity flow = new FlowEntity();
@@ -52,7 +72,7 @@ namespace PowerDocu.FlowDocumenter
             parseTrigger(flow);
             parseActions(flow, flowDefinition.properties.definition.actions.Children(), null);
             parseConnectionReferences(flow);
-            flows.Add(flow);
+            return flow;
         }
 
         /**
@@ -94,7 +114,16 @@ namespace PowerDocu.FlowDocumenter
                     if (property.Name == "host")
                     {
                         //this is not a nice way, but works so far
-                        flow.trigger.Connector = extractConnectorName(((JToken)property.Value["connection"]["name"]).ToString());
+                        JToken connectionToken = (JToken)property.Value["connection"]?["name"];
+                        if (connectionToken == null)
+                        {
+                            //seen as part of a solution
+                            connectionToken = (JToken)property.Value["connectionName"];
+                        }
+                        if (connectionToken != null)
+                        {
+                            flow.trigger.Connector = extractConnectorName(connectionToken.ToString());
+                        }
                     }
                 }
             }
@@ -116,7 +145,48 @@ namespace PowerDocu.FlowDocumenter
             foreach (JProperty connRef in connectionReferences)
             {
                 JObject cRefDetails = (JObject)connRef.Value;
-                flow.connectionReferences.Add(new ConnectionReference(connRef.Name.Replace("shared_", ""), cRefDetails["source"].ToString(), cRefDetails["id"].ToString(), cRefDetails["connectionName"].ToString()));
+                //TODO connections work, connection references don't
+
+                //if it's a connection reference
+                /* Example:
+                {"shared_commondataserviceforapps": {
+                    "api": {
+                        "name": "shared_commondataserviceforapps"
+                    },
+                    "connection": {
+                        "connectionReferenceLogicalName": "admin_CoECoreDataverse"
+                    },
+                    "runtimeSource": "embedded"
+                }}*/
+                if (cRefDetails["api"] != null)
+                {
+                    flow.connectionReferences.Add(new ConnectionReference()
+                    {
+                        Name = connRef.Name.Replace("shared_", ""),
+                        Source = cRefDetails["runtimeSource"].ToString(),
+                        ConnectionReferenceLogicalName = cRefDetails["connection"]["connectionReferenceLogicalName"].ToString(),
+                        Type = ConnectionType.ConnectorReference
+                    });
+                }
+                //if it's a connector
+                /* Example:
+                "shared_office365": {
+                    "connectionName": "b612ac9b883942f8bb974a9581ed70c1",
+                    "source": "Embedded",
+                    "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                    "tier": "NotSpecified"
+                }*/
+                if (cRefDetails["connectionName"] != null)
+                {
+                    flow.connectionReferences.Add(new ConnectionReference()
+                    {
+                        Name = connRef.Name.Replace("shared_", ""),
+                        Source = cRefDetails["source"].ToString(),
+                        Connector = cRefDetails["id"].ToString(),
+                        ID = cRefDetails["connectionName"].ToString(),
+                        Type = ConnectionType.Connector
+                    });
+                }
             }
         }
 
@@ -171,7 +241,17 @@ namespace PowerDocu.FlowDocumenter
                             if (inputNode.Name == "host")
                             {
                                 //this is not a nice way, but works so far
-                                aNode.Connection = extractConnectorName(((JToken)inputNode.Value["connection"]["name"]).ToString());
+                                //exported Flow
+                                JToken connectionToken = (JToken)inputNode.Value["connection"]?["name"];
+                                if (connectionToken == null)
+                                {
+                                    //seen as part of a solution
+                                    connectionToken = (JToken)inputNode.Value["connectionName"];
+                                }
+                                if (connectionToken != null)
+                                {
+                                    aNode.Connection = extractConnectorName(connectionToken.ToString());
+                                }
                             }
                         }
                     }

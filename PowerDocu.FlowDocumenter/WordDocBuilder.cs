@@ -35,9 +35,9 @@ namespace PowerDocu.FlowDocumenter
         public WordDocBuilder(FlowEntity flowToDocument, string path)
         {
             this.flow = flowToDocument;
-            folderPath = path + CharsetHelper.GetSafeName(@"\Flow Documentation - " + flow.Name + @"\");
+            folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
-            string filename = CharsetHelper.GetSafeName(flow.Name) + " (" + flow.ID + ").docx";
+            string filename = CharsetHelper.GetSafeName(flow.Name) + " (" + ((flow.ID != null) ? flow.ID : "") + ").docx";
             filename = filename.Replace(":", "-");
             filename = folderPath + filename;
             using (WordprocessingDocument wordDocument =
@@ -80,11 +80,11 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Text("The following connections are used in this Flow:"));
             foreach (ConnectionReference cRef in flow.connectionReferences)
             {
-                string connectorUniqueName = cRef.Connector.Replace("/providers/Microsoft.PowerApps/apis/shared_", "");
+                string connectorUniqueName = cRef.Name;
                 ConnectorIcon connectorIcon = ConnectorHelper.getConnectorIcon(connectorUniqueName);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
-                run.AppendChild(new Text(connectorIcon.Name));
+                run.AppendChild(new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
                 ApplyStyleToParagraph("Heading3", para);
 
                 var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + connectorUniqueName), true);
@@ -113,13 +113,18 @@ namespace PowerDocu.FlowDocumenter
                 {
                     run = new Run(new RunProperties(
                         new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                                new Text(connectorIcon.Name));
+                                                new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
                 }
 
                 Table table = CreateTable();
                 table.Append(CreateRow(new Text("Connector"),
                             new Hyperlink(run) { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
-                table.Append(CreateRow(new Text("ID"), new Text(cRef.ID)));
+                table.Append(CreateRow(new Text("Connection Type"), new Text(cRef.Type.ToString())));
+                if (cRef.Type == ConnectionType.ConnectorReference)
+                {
+                    table.Append(CreateRow(new Text("Connection Reference Name"), new Text(cRef.ConnectionReferenceLogicalName)));
+                }
+                if (cRef.ID != null) { table.Append(CreateRow(new Text("ID"), new Text(cRef.ID))); }
                 table.Append(CreateRow(new Text("Source"), new Text(cRef.Source)));
                 body.Append(table);
                 para = body.AppendChild(new Paragraph());
@@ -144,7 +149,7 @@ namespace PowerDocu.FlowDocumenter
             run = para.AppendChild(new Run());
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Flow Name"), new Text(flow.Name)));
-            table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
+            if (!String.IsNullOrEmpty(flow.ID)) table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
             body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
@@ -202,7 +207,7 @@ namespace PowerDocu.FlowDocumenter
             //we generated a png and a svg file. We use both: SVG as the default, PNG as the fallback for older clients that can't display SVG
             ImagePart imagePart = wordDoc.MainDocumentPart.AddImagePart(ImagePartType.Png);
             int imageWidth, imageHeight;
-            using (FileStream stream = new FileStream(folderPath + flow.ID + ".png", FileMode.Open))
+            using (FileStream stream = new FileStream(folderPath + "flow.png", FileMode.Open))
             {
 
                 using (var image = Image.FromStream(stream, false, false))
@@ -215,7 +220,7 @@ namespace PowerDocu.FlowDocumenter
 
             }
             ImagePart svgPart = wordDoc.MainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
-            using (FileStream stream = new FileStream(folderPath + flow.ID + ".svg", FileMode.Open))
+            using (FileStream stream = new FileStream(folderPath + "flow.svg", FileMode.Open))
             {
                 svgPart.FeedData(stream);
             }
@@ -426,7 +431,7 @@ namespace PowerDocu.FlowDocumenter
             //We add both the SVG and the PNG here. Modern clients (Office 2016 onwards?) can display the SVG. Others should use PNG as fallback
             ImagePart imagePart = wordDoc.MainDocumentPart.AddImagePart(ImagePartType.Png);
             int imageWidth, imageHeight;
-            using (FileStream stream = new FileStream(folderPath + flow.ID + " detailed.png", FileMode.Open))
+            using (FileStream stream = new FileStream(folderPath + "flow detailed.png", FileMode.Open))
             {
 
                 using (var image = Image.FromStream(stream, false, false))
@@ -439,7 +444,7 @@ namespace PowerDocu.FlowDocumenter
 
             }
             ImagePart svgPart = wordDoc.MainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
-            using (FileStream stream = new FileStream(folderPath + flow.ID + " detailed.svg", FileMode.Open))
+            using (FileStream stream = new FileStream(folderPath + "flow detailed.svg", FileMode.Open))
             {
                 svgPart.FeedData(stream);
             }

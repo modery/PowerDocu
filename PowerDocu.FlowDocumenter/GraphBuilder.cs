@@ -21,7 +21,7 @@ namespace PowerDocu.FlowDocumenter
         public GraphBuilder(FlowEntity flowToUse, string path)
         {
             flow = flowToUse;
-            folderPath = path + CharsetHelper.GetSafeName(@"\Flow Documentation - " + flow.Name + @"\");
+            folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
         }
 
@@ -61,7 +61,7 @@ namespace PowerDocu.FlowDocumenter
             rootGraph.ComputeLayout();
 
             //Generate image files
-            string filename = flow.ID + (showSubactions ? " detailed" : "");
+            string filename = "flow" + (showSubactions ? " detailed" : "");
             // can't save directly as PNG (limitation of the .Net Wrapper), saving as SVG is the only option 
             rootGraph.ToSvgFile(folderPath + filename + ".svg");
             //rootGraph.ToDotFile(folderPath + filename+".dot");
