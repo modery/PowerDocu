@@ -49,9 +49,9 @@ namespace PowerDocu.GUI
             selectButton = new Button()
             {
                 //this should properly size the button so that the Text is shown correctly
-                Size = new Size((int)(150 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
+                Size = new Size((int)(210 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
                 Location = new Point(15, 15),
-                Text = "Select Flow to document"
+                Text = "Select Flow or Solution to document"
             };
             selectButton.Click += new EventHandler(selectButton_Click);
             Controls.Add(selectButton);
