@@ -5,6 +5,12 @@ using Newtonsoft.Json.Linq;
 
 namespace PowerDocu.Common
 {
+
+    public enum ConnectionType
+    {
+        Connector,
+        ConnectorReference
+    };
     public class ConnectorHelper
     {
         private static string folderPath = AssemblyHelper.AssemblyDirectory + @"\Resources\ConnectorIcons\";

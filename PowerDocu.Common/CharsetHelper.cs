@@ -11,7 +11,10 @@ namespace PowerDocu.Common
         // Problems are mostly happening in the graphviz library. Not sure how much control we have and what other options there are, considering this a temporary fix for the moment
         public static string GetSafeName(string s)
         {
-
+            if (String.IsNullOrEmpty(s))
+            {
+                return "NameNotDefined";
+            }
             String normalizedString = s.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
 
