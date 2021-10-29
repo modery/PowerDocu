@@ -344,6 +344,15 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
             }
+            else if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+            {
+                JObject expressionObject = (JObject)expression.Value;
+                var expressionNodes = expressionObject.Children();
+                foreach (JProperty inputNode in expressionNodes)
+                {
+                    actionExpression.experessionOperands.Add(parseExpressions(inputNode));
+                }
+            }
             return actionExpression;
         }
 

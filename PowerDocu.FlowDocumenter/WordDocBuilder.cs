@@ -37,7 +37,7 @@ namespace PowerDocu.FlowDocumenter
             this.flow = flowToDocument;
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
-            string filename = CharsetHelper.GetSafeName(flow.Name) + " (" + ((flow.ID != null) ? flow.ID : "") + ").docx";
+            string filename = CharsetHelper.GetSafeName(flow.Name) + ((flow.ID != null) ? ("(" + flow.ID + ")") : "") + ".docx";
             filename = filename.Replace(":", "-");
             filename = folderPath + filename;
             using (WordprocessingDocument wordDocument =
@@ -107,7 +107,7 @@ namespace PowerDocu.FlowDocumenter
                     Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
                     run = new Run(new RunProperties(
                         new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                                icon, new Break(), new Text(connectorIcon.Name));
+                                                icon, new Break(), new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
                 }
                 else
                 {
@@ -124,8 +124,14 @@ namespace PowerDocu.FlowDocumenter
                 {
                     table.Append(CreateRow(new Text("Connection Reference Name"), new Text(cRef.ConnectionReferenceLogicalName)));
                 }
-                if (cRef.ID != null) { table.Append(CreateRow(new Text("ID"), new Text(cRef.ID))); }
-                table.Append(CreateRow(new Text("Source"), new Text(cRef.Source)));
+                if (!String.IsNullOrEmpty(cRef.ID))
+                {
+                    table.Append(CreateRow(new Text("ID"), new Text(cRef.ID)));
+                }
+                if (!String.IsNullOrEmpty(cRef.Source))
+                {
+                    table.Append(CreateRow(new Text("Source"), new Text(cRef.Source)));
+                }
                 body.Append(table);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
@@ -149,7 +155,10 @@ namespace PowerDocu.FlowDocumenter
             run = para.AppendChild(new Run());
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Flow Name"), new Text(flow.Name)));
-            if (!String.IsNullOrEmpty(flow.ID)) table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
+            if (!String.IsNullOrEmpty(flow.ID))
+            {
+                table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
+            }
             body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
@@ -167,8 +176,14 @@ namespace PowerDocu.FlowDocumenter
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Name"), new Text(flow.trigger.Name)));
             table.Append(CreateRow(new Text("Type"), new Text(flow.trigger.Type)));
-            table.Append(CreateRow(new Text("Connector"), new Text(flow.trigger.Connector)));
-            table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
+            if (!String.IsNullOrEmpty(flow.trigger.Connector))
+            {
+                table.Append(CreateRow(new Text("Connector"), new Text(flow.trigger.Connector)));
+            }
+            if (!String.IsNullOrEmpty(flow.trigger.Description))
+            {
+                table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
+            }
 
             //the following 2 IFs could be turned into their own function
             if (flow.trigger.Recurrence.Count > 0)
@@ -251,16 +266,22 @@ namespace PowerDocu.FlowDocumenter
                 BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
                 para.Append(start, end);
                 ApplyStyleToParagraph("Heading3", para);
+
                 Table actionDetailsTable = CreateTable();
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
-                actionDetailsTable.Append(CreateRow(new Text("Connection"), new Text(action.Connection)));
+
+                if (!String.IsNullOrEmpty(action.Connection))
+                {
+                    actionDetailsTable.Append(CreateRow(new Text("Connection"), new Text(action.Connection)));
+                }
 
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
                 if (action.actionExpression != null || !String.IsNullOrEmpty(action.Expression))
                 {
                     actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
                 }
+                
                 if (action.actionInputs.Count > 0 || !String.IsNullOrEmpty(action.Inputs))
                 {
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
@@ -322,6 +343,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
                 body.Append(actionDetailsTable);
+
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Break());
