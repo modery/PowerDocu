@@ -11,8 +11,9 @@ namespace PowerDocu.FlowDocumenter
     class GraphBuilder
     {
 
-        Dictionary<Node, SubGraph> nodeClusterRelationship = new Dictionary<Node, SubGraph>();
-        Dictionary<SubGraph, SubGraph> clusterRelationship = new Dictionary<SubGraph, SubGraph>();
+        Dictionary<Node, SubGraph> nodeClusterRelationship;
+        Dictionary<SubGraph, SubGraph> clusterRelationship;
+        List<string> nodesInGraph;
         FlowEntity flow;
         private string folderPath;
         //using this list to store the names of edges. Some edges were created twice when creating an edge to a cluster (as it creates a dummy node when pointing to a cluster, which happens multiple times instead of getting reused)
@@ -38,13 +39,16 @@ namespace PowerDocu.FlowDocumenter
         private string buildGraph(bool showSubactions)
         {
             edges = new List<string>();
+            nodesInGraph = new List<string>();
+            nodeClusterRelationship = new Dictionary<Node, SubGraph>();
+            clusterRelationship = new Dictionary<SubGraph, SubGraph>();
             RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(flow.Name), GraphType.Directed);
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
             Node.IntroduceAttribute(rootGraph, "shape", "");
-            Node.IntroduceAttribute(rootGraph, "color",  "");
-            Node.IntroduceAttribute(rootGraph, "style",  "");
-            Node.IntroduceAttribute(rootGraph, "fillcolor",  "");
-            Node.IntroduceAttribute(rootGraph, "label","");
+            Node.IntroduceAttribute(rootGraph, "color", "");
+            Node.IntroduceAttribute(rootGraph, "style", "");
+            Node.IntroduceAttribute(rootGraph, "fillcolor", "");
+            Node.IntroduceAttribute(rootGraph, "label", "");
             ActionNode rootAction = flow.actions.getRootNode();
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
@@ -106,180 +110,185 @@ namespace PowerDocu.FlowDocumenter
           */
         void addNodesToGraph(RootGraph rootGraph, ActionNode node, Node previousNeighbourNode, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
         {
-            SubGraph cluster = null;
-            SubGraph yesCluster = null;
-            SubGraph noCluster = null;
-            string edgeName;
-            //adding the current item as a new node
-            Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
-            currentNode.SetAttribute("shape", "record");
-            currentNode.SetAttribute("color", "blue");
-            currentNode.SetAttribute("style", "filled");
-            currentNode.SetAttribute("fillcolor", "white");
-            //setting the label here again with the name is required to make the connector icon code below work properly
-            currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
-            if (!String.IsNullOrEmpty(node.Connection))
+            //we need to process each node only once
+            if (!nodesInGraph.Contains(CharsetHelper.GetSafeName(node.Name)))
             {
-                string connectorIcon = ConnectorHelper.getConnectorIconFile(node.Connection);
+                nodesInGraph.Add(CharsetHelper.GetSafeName(node.Name));
+                SubGraph cluster = null;
+                SubGraph yesCluster = null;
+                SubGraph noCluster = null;
+                string edgeName;
+                //adding the current item as a new node
+                Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
+                currentNode.SetAttribute("shape", "record");
+                currentNode.SetAttribute("color", "blue");
+                currentNode.SetAttribute("style", "filled");
+                currentNode.SetAttribute("fillcolor", "white");
+                //setting the label here again with the name is required to make the connector icon code below work properly
+                currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
+                if (!String.IsNullOrEmpty(node.Connection))
+                {
+                    string connectorIcon = ConnectorHelper.getConnectorIconFile(node.Connection);
 
-                if (!String.IsNullOrEmpty(connectorIcon))
-                {
-                    string connectorIcon32Path = folderPath + Path.GetFileNameWithoutExtension(connectorIcon) + "32.png";
-                    ImageHelper.ConvertImageTo32(connectorIcon, connectorIcon32Path);
-                    //path to image is absolute here, as GraphViz wasn't able to render it properly if relative. Will be replaced in the SVG just before the PNG gets generated
-                    currentNode.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr></table>");
-                }
-            }
-
-            //might not have subactions for yes/no? to check!
-            //if there are actions inside (likely only for Control), let's create a container
-            //How about a SCOPE? TODO
-            if (node.Subactions.Count > 0)
-            {
-                // if there are subactions, then we need to create a cluster for the current node and its child nodes
-                // if we are inside a cluster, then we create the new cluster as a child
-                if (currentCluster != null)
-                {
-                    cluster = currentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
-                    if (!clusterRelationship.ContainsKey(cluster))
-                        clusterRelationship.Add(cluster, currentCluster);
-                }
-                else
-                {
-                    if (parentCluster == null)
+                    if (!String.IsNullOrEmpty(connectorIcon))
                     {
-                        //create the new cluster inside the rootgraph itself
-                        cluster = rootGraph.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
+                        string connectorIcon32Path = folderPath + Path.GetFileNameWithoutExtension(connectorIcon) + "32.png";
+                        ImageHelper.ConvertImageTo32(connectorIcon, connectorIcon32Path);
+                        //path to image is absolute here, as GraphViz wasn't able to render it properly if relative. Will be replaced in the SVG just before the PNG gets generated
+                        currentNode.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr></table>");
+                    }
+                }
+
+                //might not have subactions for yes/no? to check!
+                //if there are actions inside (likely only for Control), let's create a container
+                //How about a SCOPE? TODO
+                if (node.Subactions.Count > 0)
+                {
+                    // if there are subactions, then we need to create a cluster for the current node and its child nodes
+                    // if we are inside a cluster, then we create the new cluster as a child
+                    if (currentCluster != null)
+                    {
+                        cluster = currentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
+                        if (!clusterRelationship.ContainsKey(cluster))
+                            clusterRelationship.Add(cluster, currentCluster);
                     }
                     else
                     {
-                        //create the new cluster inside the parent cluster
-                        cluster = parentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
-                        if (!clusterRelationship.ContainsKey(cluster))
-                            clusterRelationship.Add(cluster, parentCluster);
-                    }
-                }
-                cluster.SafeSetAttribute("style", "filled", "");
-                cluster.SafeSetAttribute("fillcolor", "grey90", "");
-                cluster.AddExisting(currentNode);
-                if (!nodeClusterRelationship.ContainsKey(currentNode))
-                    nodeClusterRelationship.Add(currentNode, cluster);
-
-                //TODO: what if there are no subactions but only elseactions?
-                if (showSubactions)
-                {
-                    foreach (ActionNode subaction in node.Subactions)
-                    {
-                        //connect the subactions to the current node inside the cluster
-                        if (node.Elseactions.Count > 0)
+                        if (parentCluster == null)
                         {
-                            yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
-                            if (!clusterRelationship.ContainsKey(yesCluster))
-                                clusterRelationship.Add(yesCluster, cluster);
-                            yesCluster.SafeSetAttribute("style", "filled", "");
-                            yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
-                            addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, yesCluster, showSubactions, false);
-
+                            //create the new cluster inside the rootgraph itself
+                            cluster = rootGraph.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
                         }
                         else
                         {
-                            addNodesToGraph(rootGraph, subaction, currentNode, null, cluster, showSubactions, false);
+                            //create the new cluster inside the parent cluster
+                            cluster = parentCluster.GetOrAddSubgraph("cluster_" + CharsetHelper.GetSafeName(node.Name));
+                            if (!clusterRelationship.ContainsKey(cluster))
+                                clusterRelationship.Add(cluster, parentCluster);
                         }
                     }
-                    foreach (ActionNode subaction in node.Elseactions)
-                    {
-                        //connect the subactions to the current node inside the cluster                         
-                        noCluster = cluster.GetOrAddSubgraph("cluster_no" + CharsetHelper.GetSafeName(node.Name));
-                        if (!clusterRelationship.ContainsKey(noCluster))
-                            clusterRelationship.Add(noCluster, cluster);
-                        noCluster.SafeSetAttribute("style", "filled", "");
-                        noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
-                        addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, noCluster, showSubactions, false);
-                    }
-                }
-            }
-            else if (currentCluster != null)
-            {
-                currentCluster.AddExisting(currentNode);
-                if (!nodeClusterRelationship.ContainsKey(currentNode))
-                    nodeClusterRelationship.Add(currentNode, currentCluster);
+                    cluster.SafeSetAttribute("style", "filled", "");
+                    cluster.SafeSetAttribute("fillcolor", "grey90", "");
+                    cluster.AddExisting(currentNode);
+                    if (!nodeClusterRelationship.ContainsKey(currentNode))
+                        nodeClusterRelationship.Add(currentNode, cluster);
 
-            }
-
-            // now that the node is created, we connect it accordingly
-            edgeName = "Edge " + previousNeighbourNode.GetName() + "-" + currentNode.GetName();
-            ActionNode preceedingNeighbour = flow.actions.getPrecedingNeighbour(node);
-            //Only connect if there is no previous node or if the 'parent' is the previous node), and if there's no existing edge (to avoid duplicates)
-            if ((preceedingNeighbour == null || previousNeighbourNode.GetName().Equals(preceedingNeighbour.Name)) && !edges.Contains(edgeName))
-            {
-                Edge edgeAB;
-                SubGraph prevCluster = (nodeClusterRelationship.ContainsKey(previousNeighbourNode)) ? nodeClusterRelationship[previousNeighbourNode] : null;
-                SubGraph curCluster = (nodeClusterRelationship.ContainsKey(currentNode)) ? nodeClusterRelationship[currentNode] : null;
-                if (prevCluster != null)
-                {
-                    if (curCluster != null)
+                    //TODO: what if there are no subactions but only elseactions?
+                    if (showSubactions)
                     {
-                        if (prevCluster != curCluster)
+                        foreach (ActionNode subaction in node.Subactions)
                         {
-
-                            SubGraph curClusterParent = (clusterRelationship.ContainsKey(curCluster)) ? clusterRelationship[curCluster] : null;
-                            SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
-                            if (curClusterParent == prevCluster)
+                            //connect the subactions to the current node inside the cluster
+                            if (node.Elseactions.Count > 0)
                             {
-                                edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
+                                yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
+                                if (!clusterRelationship.ContainsKey(yesCluster))
+                                    clusterRelationship.Add(yesCluster, cluster);
+                                yesCluster.SafeSetAttribute("style", "filled", "");
+                                yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
+                                addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, yesCluster, showSubactions, false);
+
                             }
                             else
                             {
-                                if (curClusterParent == null || previousNeighbourNode.GetName().Equals(preceedingNeighbour?.Name))
+                                addNodesToGraph(rootGraph, subaction, currentNode, null, cluster, showSubactions, false);
+                            }
+                        }
+                        foreach (ActionNode subaction in node.Elseactions)
+                        {
+                            //connect the subactions to the current node inside the cluster                         
+                            noCluster = cluster.GetOrAddSubgraph("cluster_no" + CharsetHelper.GetSafeName(node.Name));
+                            if (!clusterRelationship.ContainsKey(noCluster))
+                                clusterRelationship.Add(noCluster, cluster);
+                            noCluster.SafeSetAttribute("style", "filled", "");
+                            noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
+                            addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, noCluster, showSubactions, false);
+                        }
+                    }
+                }
+                else if (currentCluster != null)
+                {
+                    currentCluster.AddExisting(currentNode);
+                    if (!nodeClusterRelationship.ContainsKey(currentNode))
+                        nodeClusterRelationship.Add(currentNode, currentCluster);
+
+                }
+
+                // now that the node is created, we connect it accordingly
+                edgeName = "Edge " + previousNeighbourNode.GetName() + "-" + currentNode.GetName();
+                ActionNode preceedingNeighbour = flow.actions.getPrecedingNeighbour(node);
+                //Only connect if there is no previous node or if the 'parent' is the previous node), and if there's no existing edge (to avoid duplicates)
+                if ((preceedingNeighbour == null || previousNeighbourNode.GetName().Equals(preceedingNeighbour.Name)) && !edges.Contains(edgeName))
+                {
+                    Edge edgeAB;
+                    SubGraph prevCluster = (nodeClusterRelationship.ContainsKey(previousNeighbourNode)) ? nodeClusterRelationship[previousNeighbourNode] : null;
+                    SubGraph curCluster = (nodeClusterRelationship.ContainsKey(currentNode)) ? nodeClusterRelationship[currentNode] : null;
+                    if (prevCluster != null)
+                    {
+                        if (curCluster != null)
+                        {
+                            if (prevCluster != curCluster)
+                            {
+
+                                SubGraph curClusterParent = (clusterRelationship.ContainsKey(curCluster)) ? clusterRelationship[curCluster] : null;
+                                SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
+                                if (curClusterParent == prevCluster)
                                 {
-                                    if (prevClusterParent == curCluster)
-                                    {
-                                        edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
-                                    }
-                                    else
-                                    {
-                                        edgeAB = rootGraph.GetOrAddEdge(prevCluster, curCluster, false, edgeName);
-                                    }
+                                    edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
                                 }
                                 else
                                 {
-                                    SubGraph curClusterParentParent = clusterRelationship[curClusterParent];
-                                    while (curClusterParentParent != prevCluster)
+                                    if (curClusterParent == null || previousNeighbourNode.GetName().Equals(preceedingNeighbour?.Name))
                                     {
-                                        curClusterParent = curClusterParentParent;
-                                        curClusterParentParent = clusterRelationship[curClusterParent];
+                                        if (prevClusterParent == curCluster)
+                                        {
+                                            edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
+                                        }
+                                        else
+                                        {
+                                            edgeAB = rootGraph.GetOrAddEdge(prevCluster, curCluster, false, edgeName);
+                                        }
                                     }
-                                    edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curClusterParent, false, edgeName);
+                                    else
+                                    {
+                                        SubGraph curClusterParentParent = clusterRelationship[curClusterParent];
+                                        while (curClusterParentParent != prevCluster)
+                                        {
+                                            curClusterParent = curClusterParentParent;
+                                            curClusterParentParent = clusterRelationship[curClusterParent];
+                                        }
+                                        edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curClusterParent, false, edgeName);
+                                    }
                                 }
                             }
+                            else
+                            {
+                                edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                            }
+                        }
+                        else
+                        {
+                            edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
+                        }
+                    }
+                    else
+                    {
+                        if (curCluster != null)
+                        {
+                            edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
                         }
                         else
                         {
                             edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
                         }
                     }
-                    else
-                    {
-                        edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
-                    }
+                    edges.Add(edgeName);
                 }
-                else
-                {
-                    if (curCluster != null)
-                    {
-                        edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
-                    }
-                    else
-                    {
-                        edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
-                    }
-                }
-                edges.Add(edgeName);
-            }
 
-            foreach (ActionNode neighbour in node.Neighbours)
-            {
-                addNodesToGraph(rootGraph, neighbour, currentNode, isTopLevel ? null : cluster, currentCluster, showSubactions, isTopLevel);
+                foreach (ActionNode neighbour in node.Neighbours)
+                {
+                    addNodesToGraph(rootGraph, neighbour, currentNode, isTopLevel ? null : cluster, currentCluster, showSubactions, isTopLevel);
+                }
             }
         }
 
