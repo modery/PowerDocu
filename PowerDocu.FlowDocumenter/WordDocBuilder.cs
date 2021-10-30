@@ -140,7 +140,7 @@ namespace PowerDocu.FlowDocumenter
                 Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
                 run = new Run(new RunProperties(
                     new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                            icon, new Text(" "), new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
+                                            icon, new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
             }
             else
             {
@@ -620,7 +620,7 @@ namespace PowerDocu.FlowDocumenter
             pPr.ParagraphStyleId = new ParagraphStyleId() { Val = styleid };
         }
 
-        private Table CreateTable()
+        private Table CreateTable(BorderValues border = BorderValues.Dotted)
         {
             Table table = new Table();
 
@@ -628,32 +628,32 @@ namespace PowerDocu.FlowDocumenter
                 new TableBorders(
                 new TopBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 },
                 new BottomBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 },
                 new LeftBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 },
                 new RightBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 },
                 new InsideHorizontalBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 },
                 new InsideVerticalBorder
                 {
-                    Val = new EnumValue<BorderValues>(BorderValues.Dotted),
+                    Val = new EnumValue<BorderValues>(border),
                     Size = 12
                 }));
 
