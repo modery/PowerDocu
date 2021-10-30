@@ -11,6 +11,7 @@ namespace PowerDocu.FlowDocumenter
             if (File.Exists(filePath))
             {
                 string path = Path.GetDirectoryName(filePath);
+                DateTime startDocGeneration = DateTime.Now;
                 FlowParser flowParserFromZip = new FlowParser(filePath);
                 if (flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
                 {
@@ -23,7 +24,8 @@ namespace PowerDocu.FlowDocumenter
                     gbzip.buildDetailedGraph();
                     WordDocBuilder wordzip = new WordDocBuilder(flow, path);
                 }
-                return "Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed";
+                DateTime endDocGeneration = DateTime.Now;
+                return "Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.";
             }
             return "File not found: " + filePath;
         }
