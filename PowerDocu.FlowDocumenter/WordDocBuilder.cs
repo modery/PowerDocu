@@ -138,9 +138,11 @@ namespace PowerDocu.FlowDocumenter
 
                 }
                 Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
-                run = new Run(new RunProperties(
+                Table iconTable = CreateTable(BorderValues.None);
+                iconTable.Append(CreateRow(icon, new Run(new RunProperties(
                     new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                            icon, new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
+                                            new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName))));
+                run = new Run(iconTable);
             }
             else
             {
@@ -280,7 +282,9 @@ namespace PowerDocu.FlowDocumenter
 
                 if (!String.IsNullOrEmpty(action.Connection))
                 {
-                    actionDetailsTable.Append(CreateRow(new Text("Connection"), appendConnectorNameAndIcon(action.Connection, mainPart)));
+                    var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + action.Connection), true);
+                    run = appendConnectorNameAndIcon(action.Connection, mainPart);
+                    actionDetailsTable.Append(CreateRow(new Text("Connection"), new Hyperlink(run) { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
                 }
 
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
