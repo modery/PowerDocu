@@ -9,10 +9,11 @@ namespace PowerDocu.FlowDocumenter
         public string Name;
         public string Expression;
         public ActionExpression actionExpression;
+        public ActionExpression actionInput;
         public string Type;
         public string Inputs;
         public string Connection;
-        public List<ActionInput> actionInputs = new List<ActionInput>();
+        public List<ActionExpression> actionInputs = new List<ActionExpression>();
         public List<ActionNode> Neighbours = new List<ActionNode>();
         public List<ActionNode> Subactions = new List<ActionNode>();
         public List<ActionNode> Elseactions = new List<ActionNode>();
@@ -183,18 +184,6 @@ namespace PowerDocu.FlowDocumenter
         public void setRootNode(ActionNode root)
         {
             rootNode = root;
-        }
-    }
-
-    public class ActionInput
-    {
-        public string Name;
-        public string Value;
-
-        public ActionInput(string name, string value)
-        {
-            this.Name = name;
-            this.Value = value;
         }
     }
 

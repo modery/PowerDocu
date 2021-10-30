@@ -133,7 +133,14 @@ namespace PowerDocu.FlowDocumenter
 
         private string extractConnectorName(string connectionstring)
         {
-            return connectionstring.Replace("@parameters('$connections')['shared_", "").Replace("']['connectionId']", "");
+            if (connectionstring.StartsWith("@"))
+            {
+                return connectionstring.Replace("@parameters('$connections')['shared_", "").Replace("']['connectionId']", "");
+            }
+            else
+            {
+                return connectionstring.Replace("/providers/Microsoft.PowerApps/apis/shared_", "");
+            }
         }
 
         /**
@@ -162,7 +169,7 @@ namespace PowerDocu.FlowDocumenter
                 {
                     flow.connectionReferences.Add(new ConnectionReference()
                     {
-                        Name = connRef.Name.Replace("shared_", ""),
+                        Name = cRefDetails["api"]["name"].ToString().Replace("shared_", ""),
                         Source = cRefDetails["runtimeSource"].ToString(),
                         ConnectionReferenceLogicalName = cRefDetails["connection"]["connectionReferenceLogicalName"].ToString(),
                         Type = ConnectionType.ConnectorReference
@@ -182,8 +189,8 @@ namespace PowerDocu.FlowDocumenter
                     {
                         Name = connRef.Name.Replace("shared_", ""),
                         Source = cRefDetails["source"].ToString(),
-                        Connector = cRefDetails["id"].ToString(),
-                        ID = cRefDetails["connectionName"].ToString(),
+                        Connector = extractConnectorName(cRefDetails["id"].ToString()),
+                        ID = connRef.Name,
                         Type = ConnectionType.Connector
                     });
                 }
@@ -231,12 +238,11 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
-                        //TODO better inputs parsing
-                        aNode.Inputs = actionDetails["inputs"]?.ToString();
                         var inputNodes = actionDetails["inputs"].Children();
                         foreach (JProperty inputNode in inputNodes)
                         {
-                            aNode.actionInputs.Add(new ActionInput(inputNode.Name, inputNode.Value.ToString()));
+                            aNode.actionInputs.Add(parseExpressions(inputNode));
+
                             //If the node's name = host then there are details about the connection used inside
                             if (inputNode.Name == "host")
                             {
@@ -246,7 +252,7 @@ namespace PowerDocu.FlowDocumenter
                                 if (connectionToken == null)
                                 {
                                     //seen as part of a solution
-                                    connectionToken = (JToken)inputNode.Value["connectionName"];
+                                    connectionToken = (JToken)inputNode.Value["apiId"];
                                 }
                                 if (connectionToken != null)
                                 {
@@ -352,6 +358,10 @@ namespace PowerDocu.FlowDocumenter
                 {
                     actionExpression.experessionOperands.Add(parseExpressions(inputNode));
                 }
+            }
+            else if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+            {
+                actionExpression.experessionOperands.Add(expression.Value.ToString());
             }
             return actionExpression;
         }

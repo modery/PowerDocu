@@ -62,7 +62,7 @@ namespace PowerDocu.FlowDocumenter
                 addFlowOverview(body, wordDocument);
                 addConnectionReferenceInfo(mainPart, body);
                 addTriggerInfo(body);
-                addActionInfo(body, wordDocument);
+                addActionInfo(body, wordDocument, mainPart);
                 addFlowDetails(body, wordDocument);
             }
             Console.WriteLine("Created Word documentation for " + flow.Name);
@@ -88,33 +88,7 @@ namespace PowerDocu.FlowDocumenter
                 ApplyStyleToParagraph("Heading3", para);
 
                 var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + connectorUniqueName), true);
-                //todo put into its own function?
-                ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
-                int imageWidth, imageHeight;
-                if (ConnectorHelper.getConnectorIconFile(connectorUniqueName) != "")
-                {
-                    using (FileStream stream = new FileStream(ConnectorHelper.getConnectorIconFile(connectorUniqueName), FileMode.Open))
-                    {
-                        using (var image = Image.FromStream(stream, false, false))
-                        {
-                            imageWidth = image.Width;
-                            imageHeight = image.Height;
-                        }
-                        stream.Position = 0;
-                        imagePart.FeedData(stream);
-
-                    }
-                    Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
-                    run = new Run(new RunProperties(
-                        new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                                icon, new Break(), new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
-                }
-                else
-                {
-                    run = new Run(new RunProperties(
-                        new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                                new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
-                }
+                run = appendConnectorNameAndIcon(connectorUniqueName, mainPart);
 
                 Table table = CreateTable();
                 table.Append(CreateRow(new Text("Connector"),
@@ -142,6 +116,39 @@ namespace PowerDocu.FlowDocumenter
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
 
+        }
+
+        private Run appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart)
+        {
+            Run run;
+            ConnectorIcon connectorIcon = ConnectorHelper.getConnectorIcon(connectorUniqueName);
+            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+            int imageWidth, imageHeight;
+            if (ConnectorHelper.getConnectorIconFile(connectorUniqueName) != "")
+            {
+                using (FileStream stream = new FileStream(ConnectorHelper.getConnectorIconFile(connectorUniqueName), FileMode.Open))
+                {
+                    using (var image = Image.FromStream(stream, false, false))
+                    {
+                        imageWidth = image.Width;
+                        imageHeight = image.Height;
+                    }
+                    stream.Position = 0;
+                    imagePart.FeedData(stream);
+
+                }
+                Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
+                run = new Run(new RunProperties(
+                    new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
+                                            icon, new Text(" "), new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
+            }
+            else
+            {
+                run = new Run(new RunProperties(
+                    new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
+                                            new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
+            }
+            return run;
         }
 
         private void addFlowMetadata(Body body)
@@ -247,7 +254,7 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Break());
         }
 
-        private void addActionInfo(Body body, WordprocessingDocument wordDoc)
+        private void addActionInfo(Body body, WordprocessingDocument wordDoc, MainDocumentPart mainPart)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -273,7 +280,7 @@ namespace PowerDocu.FlowDocumenter
 
                 if (!String.IsNullOrEmpty(action.Connection))
                 {
-                    actionDetailsTable.Append(CreateRow(new Text("Connection"), new Text(action.Connection)));
+                    actionDetailsTable.Append(CreateRow(new Text("Connection"), appendConnectorNameAndIcon(action.Connection, mainPart)));
                 }
 
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
@@ -281,16 +288,30 @@ namespace PowerDocu.FlowDocumenter
                 {
                     actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
                 }
-                
                 if (action.actionInputs.Count > 0 || !String.IsNullOrEmpty(action.Inputs))
                 {
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
                     if (action.actionInputs.Count > 0)
                     {
-                        foreach (ActionInput actionInput in action.actionInputs)
+                        foreach (ActionExpression actionInput in action.actionInputs)
                         {
-                            actionDetailsTable.Append(CreateRow(new Text(actionInput.Name), new Text(actionInput.Value)));
+                            Run run2 = new Run();
+                            foreach (object actionInputOperand in actionInput.experessionOperands)
+                            {
+
+
+                                if (actionInputOperand.GetType() == typeof(ActionExpression))
+                                {
+                                    run2.Append(AddExpressionTable((ActionExpression)actionInputOperand));
+                                }
+                                else
+                                {
+                                    run2.Append(new Text(actionInputOperand.ToString()));
+                                }
+                            }
+                            actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), new Paragraph(run2)));
                         }
+
                     }
                     if (!String.IsNullOrEmpty(action.Inputs))
                     {
