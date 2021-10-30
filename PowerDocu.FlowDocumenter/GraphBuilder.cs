@@ -40,11 +40,16 @@ namespace PowerDocu.FlowDocumenter
             edges = new List<string>();
             RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(flow.Name), GraphType.Directed);
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
+            Node.IntroduceAttribute(rootGraph, "shape", "");
+            Node.IntroduceAttribute(rootGraph, "color",  "");
+            Node.IntroduceAttribute(rootGraph, "style",  "");
+            Node.IntroduceAttribute(rootGraph, "fillcolor",  "");
+            Node.IntroduceAttribute(rootGraph, "label","");
             ActionNode rootAction = flow.actions.getRootNode();
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
-            trigger.SafeSetAttribute("color", "green", "");
-            trigger.SafeSetAttribute("label", CharsetHelper.GetSafeName(flow.trigger.Name), "");
+            trigger.SetAttribute("color", "green");
+            trigger.SetAttribute("label", CharsetHelper.GetSafeName(flow.trigger.Name));
             if (!String.IsNullOrEmpty(flow.trigger.Connector))
             {
                 string connectorIcon = ConnectorHelper.getConnectorIconFile(flow.trigger.Connector);
@@ -107,12 +112,12 @@ namespace PowerDocu.FlowDocumenter
             string edgeName;
             //adding the current item as a new node
             Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
-            currentNode.SafeSetAttribute("shape", "record", "");
-            currentNode.SafeSetAttribute("color", "blue", "");
-            currentNode.SafeSetAttribute("style", "filled", "");
-            currentNode.SafeSetAttribute("fillcolor", "white", "");
+            currentNode.SetAttribute("shape", "record");
+            currentNode.SetAttribute("color", "blue");
+            currentNode.SetAttribute("style", "filled");
+            currentNode.SetAttribute("fillcolor", "white");
             //setting the label here again with the name is required to make the connector icon code below work properly
-            currentNode.SafeSetAttribute("label", CharsetHelper.GetSafeName(node.Name), "");
+            currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
             if (!String.IsNullOrEmpty(node.Connection))
             {
                 string connectorIcon = ConnectorHelper.getConnectorIconFile(node.Connection);
