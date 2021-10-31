@@ -32,14 +32,27 @@ To generate documentation for a Flow, you need to export it from the web as a ZI
 
 ## Run FlowDocumenter
 
-Run FlowDocumenter by doing the following:
+You can run FlowDocumenter by either using the PowerDocu.GUI Windows application or the PowerDocu.FlowDocumenter console application. Both applications generate the same set of documentation:
 
-1. Open a command prompt or PowerShell window in the folder that contains FlowDocumenter
-2. Execute FlowDocumenter and provide an exported Flow package as parameter. For example: *PowerDocu.FlowDocumenter.exe FlowPackage.zip*
-![Execute FlowDocumenter](Images/PowerDocu.FlowDocumenter-run.png)
-3. A new folder will be created within the current folder, using the exported Flow's name as folder name. Inside this folder you can find the generated diagrams as well as the generated documentation
+**Flow Package**
+
+A new folder will be created within the current folder, using the exported Flow's name as folder name. Inside this folder you can find the generated diagrams as well as the generated documentation
 ![Email me with a list of upcoming Calendar events](Images/PowerDocu.FlowDocumenter-generated-output.png)
 
+**Solution Package**
+
+A folder with the Solution package file's name will be created, and each individual Flow will be processed and its generated files stored inside this folder
+![Email me with a list of upcoming Calendar events](Images/Solution-CoEStartKit-AuditComponents.png)
+
+### Use the PowerDocu.GUI
+1. Open a command prompt or PowerShell window in the folder that contains FlowDocumenter
+2. Execute FlowDocumenter and provide an exported Flow package as parameter. For example: *PowerDocu.FlowDocumenter.exe FlowPackage.zip*
+![Execute FlowDocumenter](Images/PowerDocu.GUI.png)
+
+### Run the PowerDocu.FlowDocumenter console application
+1. Open a command prompt or PowerShell window in the folder that contains FlowDocumenter
+2. Execute FlowDocumenter and provide an exported Flow or Solution package as parameter. For example: *PowerDocu.FlowDocumenter.exe FlowPackage.zip*
+![Execute FlowDocumenter](Images/PowerDocu.FlowDocumenter-run.png)
 
 ## Use custom Word style formatting
 

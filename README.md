@@ -3,7 +3,7 @@ After you have built a Flow in Power Automate, you may consider documenting it a
 
 This is where **FlowDocumenter** can help!
 
-Currently, this repository contains a solution to document Power Automate Flows, called **FlowDocumenter**. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package.
+Currently, this repository contains a solution to document Power Automate Flows, called **FlowDocumenter**. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package or an exported Solution package.
 
 ![Example of generated Word documentation](Images/Weather-Flow-Documentation-1.png)
 ![Example of generated Word documentation](Images/Weather-Flow-Documentation-2.png)
@@ -11,7 +11,7 @@ Currently, this repository contains a solution to document Power Automate Flows,
 
 ## What is generated as part of the technical documentation?
 
-The documentation includes
+The documentation for each Flow includes
 
 1. A generated Word document including sections on
     1. General information of the Flow
