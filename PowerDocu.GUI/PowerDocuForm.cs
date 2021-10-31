@@ -41,7 +41,7 @@ namespace PowerDocu.GUI
 
         private void sizeChanged(object sender, EventArgs e)
         {
-            textBox1.Size = new Size(ClientSize.Width - 30,ClientSize.Height - 70);
+            textBox1.Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectButton.Height - 40);
         }
 
     }

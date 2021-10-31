@@ -57,8 +57,8 @@ namespace PowerDocu.GUI
             Controls.Add(selectButton);
             textBox1 = new TextBox
             {
-                Size = new Size(ClientSize.Width - 30, ClientSize.Height - 70),
-                Location = new Point(15, 60),
+                Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectButton.Height - 40),
+                Location = new Point(15, 30 + selectButton.Height),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true
