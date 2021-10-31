@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerDocu.FlowDocumenter", "PowerDocu.FlowDocumenter\PowerDocu.FlowDocumenter.csproj", "{602B2214-EE6C-48B6-A47A-823CCE685253}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.FlowDocumenter", "PowerDocu.FlowDocumenter\PowerDocu.FlowDocumenter.csproj", "{602B2214-EE6C-48B6-A47A-823CCE685253}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerDocu.GUI", "PowerDocu.GUI\PowerDocu.GUI.csproj", "{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.GUI", "PowerDocu.GUI\PowerDocu.GUI.csproj", "{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.Common", "PowerDocu.Common\PowerDocu.Common.csproj", "{006E057F-1D12-4FBA-94B9-94A1E4A75A17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{602B2214-EE6C-48B6-A47A-823CCE685253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,5 +43,23 @@ Global
 		{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}.Release|x64.Build.0 = Release|Any CPU
 		{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}.Release|x86.ActiveCfg = Release|Any CPU
 		{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}.Release|x86.Build.0 = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|x64.Build.0 = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Debug|x86.Build.0 = Debug|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|x64.ActiveCfg = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|x64.Build.0 = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|x86.ActiveCfg = Release|Any CPU
+		{006E057F-1D12-4FBA-94B9-94A1E4A75A17}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D1B3356E-BA93-4E04-9046-2F7BA6B760A3}
 	EndGlobalSection
 EndGlobal
