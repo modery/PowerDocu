@@ -213,6 +213,7 @@ namespace PowerDocu.FlowDocumenter
                                                     new Text(properties.Value)));
                 }
             }
+            
             body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
@@ -265,7 +266,8 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("The following actions are used in this Flow:"));
-            foreach (ActionNode action in flow.actions.ActionNodes)
+            List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o=>o.Name).ToList();
+            foreach (ActionNode action in actionNodesList)
             {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
