@@ -184,7 +184,7 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             Table table = CreateTable();
-            table.Append(CreateRow(new Text("Name"), new Text("Type"), new Text("Initial Value")));
+            table.Append(CreateHeaderRow(new Text("Name"), new Text("Type"), new Text("Initial Value")));
             List<ActionNode> variablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "InitializeVariable").ToList();
             List<ActionExpression> variablesExpressionNodes = new List<ActionExpression>();
             foreach (ActionNode node in variablesNodes)
@@ -238,6 +238,31 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
+        }
+
+        private TableRow CreateHeaderRow(params OpenXmlElement[] cellValues)
+        {
+            TableRow tr = new TableRow();
+            foreach (var cellValue in cellValues)
+            {
+                TableCell tc = new TableCell();
+                var run = new Run(cellValue);
+                RunProperties runProperties = new RunProperties();
+                runProperties.Append(new Bold());
+                run.RunProperties = runProperties;
+                tc.Append(new Paragraph(run));
+                tc.TableCellProperties = new TableCellProperties();
+                var shading = new Shading()
+                {
+                    Color = "auto",
+                    Fill = cellHeaderBackground,
+                    Val = ShadingPatternValues.Clear
+                };
+
+                tc.TableCellProperties.Append(shading);
+                tr.Append(tc);
+            }
+            return tr;
         }
 
         private void addTriggerInfo(Body body)
