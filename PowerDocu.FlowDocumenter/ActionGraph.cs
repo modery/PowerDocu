@@ -190,7 +190,7 @@ namespace PowerDocu.FlowDocumenter
     public class ActionExpression
     {
         public string expressionOperator;
-        public List<object> experessionOperands = new List<object>();
+        public List<object> expressionOperands = new List<object>();
 
         public ActionExpression()
         {
@@ -202,7 +202,7 @@ namespace PowerDocu.FlowDocumenter
             StringBuilder sb = new StringBuilder();
             sb.Append(expressionOperator + ": ");
             sb.Append("\n");
-            foreach (object eo in experessionOperands)
+            foreach (object eo in expressionOperands)
             {
                 sb.Append(eo.ToString() + ", ");
             }

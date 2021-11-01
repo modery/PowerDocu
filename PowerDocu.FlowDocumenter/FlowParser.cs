@@ -338,14 +338,14 @@ namespace PowerDocu.FlowDocumenter
                 {
                     if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
                     {
-                        actionExpression.experessionOperands.Add(operandExpression.ToString());
+                        actionExpression.expressionOperands.Add(operandExpression.ToString());
                     }
                     else if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
                         var expressionNodes = operandExpression.Children();
                         foreach (JProperty inputNode in expressionNodes)
                         {
-                            actionExpression.experessionOperands.Add(parseExpressions(inputNode));
+                            actionExpression.expressionOperands.Add(parseExpressions(inputNode));
                         }
                     }
                 }
@@ -356,12 +356,12 @@ namespace PowerDocu.FlowDocumenter
                 var expressionNodes = expressionObject.Children();
                 foreach (JProperty inputNode in expressionNodes)
                 {
-                    actionExpression.experessionOperands.Add(parseExpressions(inputNode));
+                    actionExpression.expressionOperands.Add(parseExpressions(inputNode));
                 }
             }
             else if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
             {
-                actionExpression.experessionOperands.Add(expression.Value.ToString());
+                actionExpression.expressionOperands.Add(expression.Value.ToString());
             }
             return actionExpression;
         }

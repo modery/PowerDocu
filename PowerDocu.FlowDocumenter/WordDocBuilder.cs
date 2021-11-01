@@ -61,6 +61,7 @@ namespace PowerDocu.FlowDocumenter
                 addFlowMetadata(body);
                 addFlowOverview(body, wordDocument);
                 addConnectionReferenceInfo(mainPart, body);
+                addVariablesInfo(body);
                 addTriggerInfo(body);
                 addActionInfo(body, wordDocument, mainPart);
                 addFlowDetails(body, wordDocument);
@@ -174,6 +175,71 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Break());
         }
 
+        private void addVariablesInfo(Body body)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Variables"));
+            ApplyStyleToParagraph("Heading2", para);
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            Table table = CreateTable();
+            table.Append(CreateRow(new Text("Name"), new Text("Type"), new Text("Initial Value")));
+            List<ActionNode> variablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "InitializeVariable").ToList();
+            List<ActionExpression> variablesExpressionNodes = new List<ActionExpression>();
+            foreach (ActionNode node in variablesNodes)
+            {
+                foreach (ActionExpression exp in node.actionInputs)
+                {
+                    if (exp.expressionOperator == "variables")
+                    {
+                        string vname = "";
+                        string vtype = "";
+                        OpenXmlElement vval = null;
+                        foreach (ActionExpression expO in exp.expressionOperands)
+                        {
+                            if (expO.expressionOperator == "name")
+                            {
+                                vname = expO.expressionOperands.First().ToString();
+                            }
+                            if (expO.expressionOperator == "type")
+                            {
+                                vtype = expO.expressionOperands.First().ToString();
+                            }
+                            if (expO.expressionOperator == "value")
+                            {
+                                if (expO.expressionOperands.Count == 1)
+                                {
+                                    vval = new Text(expO.expressionOperands.First().ToString());
+                                }
+                                else
+                                {
+                                    vval = CreateTable();
+                                    foreach (var eop in expO.expressionOperands)
+                                    {
+                                        if (eop.GetType() == typeof(string))
+                                        {
+                                            vval = new Text(expO.expressionOperands.ToString());
+                                        }
+                                        else
+                                        {
+                                            vval.Append(CreateRow(new Text(((ActionExpression)eop).expressionOperator), new Text(((ActionExpression)eop).expressionOperands.First().ToString())));
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        table.Append(CreateRow(new Text(vname), new Text(vtype), (vval == null) ? new Text("") : vval));
+                    }
+                }
+            }
+            body.Append(table);
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Break());
+        }
+
         private void addTriggerInfo(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -213,7 +279,7 @@ namespace PowerDocu.FlowDocumenter
                                                     new Text(properties.Value)));
                 }
             }
-            
+
             body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
@@ -266,7 +332,7 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("The following actions are used in this Flow:"));
-            List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o=>o.Name).ToList();
+            List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
             foreach (ActionNode action in actionNodesList)
             {
                 para = body.AppendChild(new Paragraph());
@@ -302,7 +368,7 @@ namespace PowerDocu.FlowDocumenter
                         foreach (ActionExpression actionInput in action.actionInputs)
                         {
                             Run run2 = new Run();
-                            foreach (object actionInputOperand in actionInput.experessionOperands)
+                            foreach (object actionInputOperand in actionInput.expressionOperands)
                             {
 
 
@@ -709,7 +775,7 @@ namespace PowerDocu.FlowDocumenter
                 tc.TableCellProperties.Append(shading);
                 tr.Append(tc);
                 tc = new TableCell();
-                foreach (var expressionOperand in expression.experessionOperands)
+                foreach (var expressionOperand in expression.expressionOperands)
                 {
 
                     if (expressionOperand.GetType().Equals(typeof(string)))
