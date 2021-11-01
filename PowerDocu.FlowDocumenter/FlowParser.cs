@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using PowerDocu.Common;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace PowerDocu.FlowDocumenter
 {
@@ -66,7 +67,9 @@ namespace PowerDocu.FlowDocumenter
 		  */
         private FlowEntity parseFlow(string flowJSON)
         {
-            flowDefinition = JObject.Parse(flowJSON);
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+            var _jsonSerializer = JsonSerializer.Create(settings);
+            flowDefinition = JsonConvert.DeserializeObject<JObject>(flowJSON, settings).ToObject(typeof(object), _jsonSerializer);
             FlowEntity flow = new FlowEntity();
             parseMetadata(flow);
             parseTrigger(flow);
