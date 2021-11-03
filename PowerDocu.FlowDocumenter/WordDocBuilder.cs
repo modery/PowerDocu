@@ -186,17 +186,17 @@ namespace PowerDocu.FlowDocumenter
             Table table = CreateTable();
             table.Append(CreateHeaderRow(new Text("Name"), new Text("Type"), new Text("Initial Value")));
             List<ActionNode> variablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "InitializeVariable").ToList();
-            List<ActionExpression> variablesExpressionNodes = new List<ActionExpression>();
+            List<Expression> variablesExpressionNodes = new List<Expression>();
             foreach (ActionNode node in variablesNodes)
             {
-                foreach (ActionExpression exp in node.actionInputs)
+                foreach (Expression exp in node.actionInputs)
                 {
                     if (exp.expressionOperator == "variables")
                     {
                         string vname = "";
                         string vtype = "";
                         OpenXmlElement vval = null;
-                        foreach (ActionExpression expO in exp.expressionOperands)
+                        foreach (Expression expO in exp.expressionOperands)
                         {
                             if (expO.expressionOperator == "name")
                             {
@@ -223,7 +223,7 @@ namespace PowerDocu.FlowDocumenter
                                         }
                                         else
                                         {
-                                            vval.Append(CreateRow(new Text(((ActionExpression)eop).expressionOperator), new Text(((ActionExpression)eop).expressionOperands.First().ToString())));
+                                            vval.Append(CreateRow(new Text(((Expression)eop).expressionOperator), new Text(((Expression)eop).expressionOperands.First().ToString())));
                                         }
                                     }
                                 }
@@ -390,16 +390,16 @@ namespace PowerDocu.FlowDocumenter
                     actionDetailsTable.Append(CreateMergedRow(new Text("Inputs"), 2, cellHeaderBackground));
                     if (action.actionInputs.Count > 0)
                     {
-                        foreach (ActionExpression actionInput in action.actionInputs)
+                        foreach (Expression actionInput in action.actionInputs)
                         {
                             Run run2 = new Run();
                             foreach (object actionInputOperand in actionInput.expressionOperands)
                             {
 
 
-                                if (actionInputOperand.GetType() == typeof(ActionExpression))
+                                if (actionInputOperand.GetType() == typeof(Expression))
                                 {
-                                    run2.Append(AddExpressionTable((ActionExpression)actionInputOperand));
+                                    run2.Append(AddExpressionTable((Expression)actionInputOperand));
                                 }
                                 else
                                 {
@@ -781,7 +781,7 @@ namespace PowerDocu.FlowDocumenter
         }
 
 
-        private Table AddExpressionTable(ActionExpression expression)
+        private Table AddExpressionTable(Expression expression)
         {
             Table table = CreateTable();
             if (expression != null && expression.expressionOperator != null)
@@ -807,9 +807,9 @@ namespace PowerDocu.FlowDocumenter
                     {
                         tc.Append(new Paragraph(new Run(new Text((string)expressionOperand))));
                     }
-                    else if (expressionOperand.GetType().Equals(typeof(ActionExpression)))
+                    else if (expressionOperand.GetType().Equals(typeof(Expression)))
                     {
-                        tc.Append(new Paragraph(new Run(AddExpressionTable((ActionExpression)expressionOperand))));
+                        tc.Append(new Paragraph(new Run(AddExpressionTable((Expression)expressionOperand))));
                     }
                     else
                     {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using PowerDocu.Common;
 
 namespace PowerDocu.FlowDocumenter
 {
@@ -8,12 +9,12 @@ namespace PowerDocu.FlowDocumenter
     {
         public string Name;
         public string Expression;
-        public ActionExpression actionExpression;
-        public ActionExpression actionInput;
+        public Expression actionExpression;
+        public Expression actionInput;
         public string Type;
         public string Inputs;
         public string Connection;
-        public List<ActionExpression> actionInputs = new List<ActionExpression>();
+        public List<Expression> actionInputs = new List<Expression>();
         public List<ActionNode> Neighbours = new List<ActionNode>();
         public List<ActionNode> Subactions = new List<ActionNode>();
         public List<ActionNode> Elseactions = new List<ActionNode>();
@@ -187,29 +188,4 @@ namespace PowerDocu.FlowDocumenter
         }
     }
 
-    public class ActionExpression
-    {
-        public string expressionOperator;
-        public List<object> expressionOperands = new List<object>();
-
-        public ActionExpression()
-        {
-
-        }
-
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(expressionOperator + ": ");
-            sb.Append("\n");
-            foreach (object eo in expressionOperands)
-            {
-                sb.Append(eo.ToString() + ", ");
-            }
-            sb.Append("\n");
-
-            return sb.ToString();
-        }
-
-    }
 }

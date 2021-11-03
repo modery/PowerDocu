@@ -330,43 +330,43 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private ActionExpression parseExpressions(JProperty expression)
+        private Expression parseExpressions(JProperty jsonExpression)
         {
-            ActionExpression actionExpression = new ActionExpression();
-            actionExpression.expressionOperator = expression.Name.ToString();
-            if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
+            Expression expression = new Expression();
+            expression.expressionOperator = jsonExpression.Name.ToString();
+            if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
             {
-                JArray operands = (JArray)expression.Value;
+                JArray operands = (JArray)jsonExpression.Value;
                 foreach (JToken operandExpression in operands)
                 {
                     if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
                     {
-                        actionExpression.expressionOperands.Add(operandExpression.ToString());
+                        expression.expressionOperands.Add(operandExpression.ToString());
                     }
                     else if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
                         var expressionNodes = operandExpression.Children();
                         foreach (JProperty inputNode in expressionNodes)
                         {
-                            actionExpression.expressionOperands.Add(parseExpressions(inputNode));
+                            expression.expressionOperands.Add(parseExpressions(inputNode));
                         }
                     }
                 }
             }
-            else if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+            else if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
             {
-                JObject expressionObject = (JObject)expression.Value;
+                JObject expressionObject = (JObject)jsonExpression.Value;
                 var expressionNodes = expressionObject.Children();
                 foreach (JProperty inputNode in expressionNodes)
                 {
-                    actionExpression.expressionOperands.Add(parseExpressions(inputNode));
+                    expression.expressionOperands.Add(parseExpressions(inputNode));
                 }
             }
-            else if (expression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+            else if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
             {
-                actionExpression.expressionOperands.Add(expression.Value.ToString());
+                expression.expressionOperands.Add(jsonExpression.Value.ToString());
             }
-            return actionExpression;
+            return expression;
         }
 
         public List<FlowEntity> getFlows()
