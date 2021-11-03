@@ -27,6 +27,8 @@ namespace PowerDocu.FlowDocumenter
         private const int PageMarginBottom = 1000;
         private const double DocumentSizePerPixel = 15;
         private const double EmuPerPixel = 9525;
+        private const int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
+        private const int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
         private const string cellHeaderBackground = "#E5E5FF";
         private FlowEntity flow;
 
@@ -68,7 +70,6 @@ namespace PowerDocu.FlowDocumenter
             }
             Console.WriteLine("Created Word documentation for " + flow.Name);
         }
-
 
         private void addConnectionReferenceInfo(MainDocumentPart mainPart, Body body)
         {
@@ -116,7 +117,6 @@ namespace PowerDocu.FlowDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Break());
-
         }
 
         private Run appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart)
@@ -136,7 +136,6 @@ namespace PowerDocu.FlowDocumenter
                     }
                     stream.Position = 0;
                     imagePart.FeedData(stream);
-
                 }
                 Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
                 Table iconTable = CreateTable(BorderValues.None);
@@ -228,7 +227,6 @@ namespace PowerDocu.FlowDocumenter
                                     }
                                 }
                             }
-
                         }
                         table.Append(CreateRow(new Text(vname), new Text(vtype), (vval == null) ? new Text("") : vval));
                     }
@@ -298,11 +296,6 @@ namespace PowerDocu.FlowDocumenter
             if (flow.trigger.Inputs.Count > 0)
             {
                 table.Append(CreateMergedRow(new Text("Inputs Details"), 2, cellHeaderBackground));
-                /*foreach (KeyValuePair<string, string> properties in flow.trigger.Inputs)
-                {
-                    table.Append(CreateRow(new Text(properties.Key),
-                                                    new Text(properties.Value)));
-                }*/
                 foreach (Expression input in flow.trigger.Inputs)
                 {
                     Run run2 = new Run();
@@ -341,7 +334,6 @@ namespace PowerDocu.FlowDocumenter
             int imageWidth, imageHeight;
             using (FileStream stream = new FileStream(folderPath + "flow.png", FileMode.Open))
             {
-
                 using (var image = Image.FromStream(stream, false, false))
                 {
                     imageWidth = image.Width;
@@ -349,7 +341,6 @@ namespace PowerDocu.FlowDocumenter
                 }
                 stream.Position = 0;
                 imagePart.FeedData(stream);
-
             }
             ImagePart svgPart = wordDoc.MainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
             using (FileStream stream = new FileStream(folderPath + "flow.svg", FileMode.Open))
@@ -411,8 +402,6 @@ namespace PowerDocu.FlowDocumenter
                             Run run2 = new Run();
                             foreach (object actionInputOperand in actionInput.expressionOperands)
                             {
-
-
                                 if (actionInputOperand.GetType() == typeof(Expression))
                                 {
                                     run2.Append(AddExpressionTable((Expression)actionInputOperand));
@@ -424,14 +413,12 @@ namespace PowerDocu.FlowDocumenter
                             }
                             actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), new Paragraph(run2)));
                         }
-
                     }
                     if (!String.IsNullOrEmpty(action.Inputs))
                     {
                         actionDetailsTable.Append(CreateRow(new Text("Value"), new Text(action.Inputs)));
                     }
                 }
-
 
                 if (action.Subactions.Count > 0 || action.Elseactions.Count > 0)
                 {
@@ -454,7 +441,6 @@ namespace PowerDocu.FlowDocumenter
                         //tc.Append(paragraph);
                         tr.Append(tc);
                         actionDetailsTable.Append(tr);
-
                     }
                     if (action.Elseactions.Count > 0)
                     {
@@ -490,8 +476,6 @@ namespace PowerDocu.FlowDocumenter
 
         private Drawing InsertImage(string relationshipId, int imageWidth, int imageHeight)
         {
-            int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
-            int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
             //image too wide for a page?
             if (maxImageWidth / DocumentSizePerPixel < imageWidth)
             {
@@ -573,7 +557,6 @@ namespace PowerDocu.FlowDocumenter
             return element;
         }
 
-
         private void addFlowDetails(Body body, WordprocessingDocument wordDoc)
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -589,7 +572,6 @@ namespace PowerDocu.FlowDocumenter
             int imageWidth, imageHeight;
             using (FileStream stream = new FileStream(folderPath + "flow detailed.png", FileMode.Open))
             {
-
                 using (var image = Image.FromStream(stream, false, false))
                 {
                     imageWidth = image.Width;
@@ -597,7 +579,6 @@ namespace PowerDocu.FlowDocumenter
                 }
                 stream.Position = 0;
                 imagePart.FeedData(stream);
-
             }
             ImagePart svgPart = wordDoc.MainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
             using (FileStream stream = new FileStream(folderPath + "flow detailed.svg", FileMode.Open))
@@ -615,8 +596,7 @@ namespace PowerDocu.FlowDocumenter
 
         private Drawing InsertSvgImage(string svgRelationshipId, string imgRelationshipId, int imageWidth, int imageHeight)
         {
-            int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
-            int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
+
             //image too wide for a page?
             if (maxImageWidth / DocumentSizePerPixel < imageWidth)
             {
@@ -721,7 +701,7 @@ namespace PowerDocu.FlowDocumenter
         private void ApplyStyleToParagraph(string styleid, Paragraph p)
         {
             // If the paragraph has no ParagraphProperties object, create one.
-            if (p.Elements<ParagraphProperties>().Count() == 0)
+            if (!p.Elements<ParagraphProperties>().Any())
             {
                 p.PrependChild<ParagraphProperties>(new ParagraphProperties());
             }
@@ -796,11 +776,10 @@ namespace PowerDocu.FlowDocumenter
             return tr;
         }
 
-
         private Table AddExpressionTable(Expression expression)
         {
             Table table = CreateTable();
-            if (expression != null && expression.expressionOperator != null)
+            if (expression?.expressionOperator != null)
             {
                 var tr = new TableRow();
                 var tc = new TableCell();
@@ -818,7 +797,6 @@ namespace PowerDocu.FlowDocumenter
                 tc = new TableCell();
                 foreach (var expressionOperand in expression.expressionOperands)
                 {
-
                     if (expressionOperand.GetType().Equals(typeof(string)))
                     {
                         tc.Append(new Paragraph(new Run(new Text((string)expressionOperand))));
@@ -872,7 +850,5 @@ namespace PowerDocu.FlowDocumenter
 
             return tr;
         }
-
-
     }
 }
