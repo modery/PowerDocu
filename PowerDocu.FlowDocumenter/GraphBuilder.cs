@@ -66,7 +66,7 @@ namespace PowerDocu.FlowDocumenter
                     trigger.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr></table>");
                 }
             }
-            addNodesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
+            addNodesToGraph(rootGraph, rootAction, null, null, showSubactions, true);
             nodesInGraph = new List<string>();
             addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
             rootGraph.ComputeLayout();
@@ -113,7 +113,7 @@ namespace PowerDocu.FlowDocumenter
             showSubactions - bool that controls if subactions are shown (showing all detail). If false, only the top level actions are shown
             isTopLevel - bool 
           */
-        void addNodesToGraph(RootGraph rootGraph, ActionNode node, Node previousNeighbourNode, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
+        void addNodesToGraph(RootGraph rootGraph, ActionNode node, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
         {
             //we need to process each node only once
             if (!nodesInGraph.Contains(CharsetHelper.GetSafeName(node.Name)))
@@ -190,12 +190,11 @@ namespace PowerDocu.FlowDocumenter
                                     clusterRelationship.Add(yesCluster, cluster);
                                 yesCluster.SafeSetAttribute("style", "filled", "");
                                 yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
-                                addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, yesCluster, showSubactions, false);
-
+                                addNodesToGraph(rootGraph, subaction, parentCluster, yesCluster, showSubactions, false);
                             }
                             else
                             {
-                                addNodesToGraph(rootGraph, subaction, currentNode, null, cluster, showSubactions, false);
+                                addNodesToGraph(rootGraph, subaction, null, cluster, showSubactions, false);
                             }
                         }
                         foreach (ActionNode subaction in node.Elseactions)
@@ -206,7 +205,7 @@ namespace PowerDocu.FlowDocumenter
                                 clusterRelationship.Add(noCluster, cluster);
                             noCluster.SafeSetAttribute("style", "filled", "");
                             noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
-                            addNodesToGraph(rootGraph, subaction, currentNode, parentCluster, noCluster, showSubactions, false);
+                            addNodesToGraph(rootGraph, subaction, parentCluster, noCluster, showSubactions, false);
                         }
                     }
                 }
@@ -215,16 +214,14 @@ namespace PowerDocu.FlowDocumenter
                     currentCluster.AddExisting(currentNode);
                     if (!nodeClusterRelationship.ContainsKey(currentNode))
                         nodeClusterRelationship.Add(currentNode, currentCluster);
-
                 }
 
                 foreach (ActionNode neighbour in node.Neighbours)
                 {
-                    addNodesToGraph(rootGraph, neighbour, currentNode, isTopLevel ? null : cluster, currentCluster, showSubactions, isTopLevel);
+                    addNodesToGraph(rootGraph, neighbour, isTopLevel ? null : cluster, currentCluster, showSubactions, isTopLevel);
                 }
             }
         }
-
 
         void addEdgesToGraph(RootGraph rootGraph, ActionNode node, Node previousNeighbourNode, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
         {
@@ -287,17 +284,14 @@ namespace PowerDocu.FlowDocumenter
                 if ((precedingNeighbour == null || previousNeighbourNode.GetName().Equals(precedingNeighbour.Name)) && !edges.Contains(edgeName))
                 {
                     CreateEdge(currentNode, previousNeighbourNode, precedingNeighbour, edgeName, rootGraph);
-
                 }
                 else if (precedingNeighbour != null && !edges.Contains(edgeName))
                 {
-
                     edgeName = "Edge " + precedingNeighbour.Name + "-" + currentNode.GetName();
                     Node precNode = rootGraph.GetNode(precedingNeighbour.Name);
                     if (precNode != null)
                     {
                         CreateEdge(currentNode, precNode, precedingNeighbour, edgeName, rootGraph);
-
                     }
                 }
 
@@ -320,7 +314,6 @@ namespace PowerDocu.FlowDocumenter
                 {
                     if (prevCluster != curCluster)
                     {
-
                         SubGraph curClusterParent = (clusterRelationship.ContainsKey(curCluster)) ? clusterRelationship[curCluster] : null;
                         SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
                         if (curClusterParent == prevCluster)
@@ -375,6 +368,5 @@ namespace PowerDocu.FlowDocumenter
             }
             edges.Add(edgeName);
         }
-
     }
 }
