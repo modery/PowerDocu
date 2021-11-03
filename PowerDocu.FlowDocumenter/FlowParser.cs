@@ -24,7 +24,7 @@ namespace PowerDocu.FlowDocumenter
         {
             Console.WriteLine("Processing " + filename);
 
-            if (filename.ToLower().EndsWith("zip"))
+            if (filename.EndsWith("zip", StringComparison.OrdinalIgnoreCase))
             {
                 List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(filename);
                 packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
@@ -43,7 +43,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
             }
-            else if (filename.ToLower().EndsWith("json"))
+            else if (filename.EndsWith("json", StringComparison.OrdinalIgnoreCase))
             {
                 packageType = PackageType.LogicAppsTemplate;
                 //TODO currently working with definition.json files, but need to consider logic app templates as a next step
@@ -59,7 +59,6 @@ namespace PowerDocu.FlowDocumenter
             {
                 Console.WriteLine("Invalid file " + filename);
             }
-
         }
 
         /**
@@ -186,7 +185,6 @@ namespace PowerDocu.FlowDocumenter
 		  */
         private void parseActions(FlowEntity flow, JEnumerable<JToken> actions, ActionNode parentAction, bool isElseActions = false)
         {
-
             foreach (JProperty action in actions)
             {
                 JObject actionDetails = (JObject)action.Value;
@@ -285,7 +283,6 @@ namespace PowerDocu.FlowDocumenter
                         parseActions(flow, defaultCase["actions"].Children(), aNode);
                     }
                 }
-
             }
         }
 
