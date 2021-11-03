@@ -122,7 +122,7 @@ namespace PowerDocu.FlowDocumenter
             }
             else
             {
-                return connectionstring.Replace("/providers/Microsoft.PowerApps/apis/shared_", "");
+                return connectionstring.Replace("/providers/Microsoft.PowerApps/apis/shared_", "").Split("_")[0];
             }
         }
 
@@ -152,7 +152,7 @@ namespace PowerDocu.FlowDocumenter
                 {
                     flow.connectionReferences.Add(new ConnectionReference()
                     {
-                        Name = cRefDetails["api"]["name"].ToString().Replace("shared_", ""),
+                        Name = extractConnectorName(cRefDetails["api"]["name"].ToString()),
                         Source = cRefDetails["runtimeSource"].ToString(),
                         ConnectionReferenceLogicalName = cRefDetails["connection"]["connectionReferenceLogicalName"].ToString(),
                         Type = ConnectionType.ConnectorReference
@@ -170,9 +170,8 @@ namespace PowerDocu.FlowDocumenter
                 {
                     flow.connectionReferences.Add(new ConnectionReference()
                     {
-                        Name = connRef.Name.Replace("shared_", ""),
+                        Name = extractConnectorName(cRefDetails["id"].ToString()),
                         Source = cRefDetails["source"].ToString(),
-                        Connector = extractConnectorName(cRefDetails["id"].ToString()),
                         ID = connRef.Name,
                         Type = ConnectionType.Connector
                     });

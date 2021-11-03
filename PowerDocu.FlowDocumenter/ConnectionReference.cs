@@ -9,7 +9,6 @@ namespace PowerDocu.FlowDocumenter
         public string Name;
         public string Source;
         public string ID;
-        public string Connector;
         public string ConnectionReferenceLogicalName;
         public ConnectionType Type;
 
