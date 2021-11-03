@@ -99,7 +99,6 @@ namespace PowerDocu.FlowDocumenter
             flow.trigger.Description = triggerDetails["description"]?.ToString();
             flow.trigger.Type = triggerDetails["type"].ToString();
 
-            //the following 2 IFs could be turned into their own function
             if (triggerDetails["recurrence"] != null)
             {
                 JObject recurrence = (JObject)triggerDetails["recurrence"];
@@ -111,27 +110,8 @@ namespace PowerDocu.FlowDocumenter
             if (triggerDetails["inputs"] != null)
             {
                 JObject inputs = (JObject)triggerDetails["inputs"];
-                foreach (JProperty property in inputs.Children())
-                {
-                    flow.trigger.Inputs.Add(property.Name, property.Value.ToString());
-                    if (property.Name == "host")
-                    {
-                        //this is not a nice way, but works so far
-                        JToken connectionToken = (JToken)property.Value["connection"]?["name"];
-                        if (connectionToken == null)
-                        {
-                            //seen as part of a solution
-                            connectionToken = (JToken)property.Value["connectionName"];
-                        }
-                        if (connectionToken != null)
-                        {
-                            flow.trigger.Connector = extractConnectorName(connectionToken.ToString());
-                        }
-                    }
-                }
+                parseInputObject(inputs.Children(), flow.trigger.Inputs, ref flow.trigger.Connector);
             }
-
-
         }
 
         private string extractConnectorName(string connectionstring)
@@ -242,27 +222,7 @@ namespace PowerDocu.FlowDocumenter
                     else if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
                     {
                         var inputNodes = actionDetails["inputs"].Children();
-                        foreach (JProperty inputNode in inputNodes)
-                        {
-                            aNode.actionInputs.Add(parseExpressions(inputNode));
-
-                            //If the node's name = host then there are details about the connection used inside
-                            if (inputNode.Name == "host")
-                            {
-                                //this is not a nice way, but works so far
-                                //exported Flow
-                                JToken connectionToken = (JToken)inputNode.Value["connection"]?["name"];
-                                if (connectionToken == null)
-                                {
-                                    //seen as part of a solution
-                                    connectionToken = (JToken)inputNode.Value["apiId"];
-                                }
-                                if (connectionToken != null)
-                                {
-                                    aNode.Connection = extractConnectorName(connectionToken.ToString());
-                                }
-                            }
-                        }
+                        parseInputObject(inputNodes, aNode.actionInputs, ref aNode.Connection);
                     }
                 }
 
@@ -367,6 +327,30 @@ namespace PowerDocu.FlowDocumenter
                 expression.expressionOperands.Add(jsonExpression.Value.ToString());
             }
             return expression;
+        }
+
+        private void parseInputObject(JEnumerable<JToken> inputNodes, List<Expression> inputList, ref string conn)
+        {
+            foreach (JProperty inputNode in inputNodes)
+            {
+                inputList.Add(parseExpressions(inputNode));
+                //If the node's name = host then there are details about the connection used inside
+                if (inputNode.Name == "host")
+                {
+                    //this is not a nice way, but works so far
+                    //exported Flow
+                    JToken connectionToken = (JToken)inputNode.Value["connection"]?["name"];
+                    if (connectionToken == null)
+                    {
+                        //seen as part of a solution
+                        connectionToken = (JToken)inputNode.Value["apiId"];
+                    }
+                    if (connectionToken != null)
+                    {
+                        conn = extractConnectorName(connectionToken.ToString());
+                    }
+                }
+            }
         }
 
         public List<FlowEntity> getFlows()

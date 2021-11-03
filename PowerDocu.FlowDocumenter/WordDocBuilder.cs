@@ -298,10 +298,26 @@ namespace PowerDocu.FlowDocumenter
             if (flow.trigger.Inputs.Count > 0)
             {
                 table.Append(CreateMergedRow(new Text("Inputs Details"), 2, cellHeaderBackground));
-                foreach (KeyValuePair<string, string> properties in flow.trigger.Inputs)
+                /*foreach (KeyValuePair<string, string> properties in flow.trigger.Inputs)
                 {
                     table.Append(CreateRow(new Text(properties.Key),
                                                     new Text(properties.Value)));
+                }*/
+                foreach (Expression input in flow.trigger.Inputs)
+                {
+                    Run run2 = new Run();
+                    foreach (object actionInputOperand in input.expressionOperands)
+                    {
+                        if (actionInputOperand.GetType() == typeof(Expression))
+                        {
+                            run2.Append(AddExpressionTable((Expression)actionInputOperand));
+                        }
+                        else
+                        {
+                            run2.Append(new Text(actionInputOperand.ToString()));
+                        }
+                    }
+                    table.Append(CreateRow(new Text(input.expressionOperator), new Paragraph(run2)));
                 }
             }
 
