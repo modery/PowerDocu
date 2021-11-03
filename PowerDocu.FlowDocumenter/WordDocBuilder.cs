@@ -65,7 +65,7 @@ namespace PowerDocu.FlowDocumenter
                 addConnectionReferenceInfo(mainPart, body);
                 addVariablesInfo(body);
                 addTriggerInfo(body);
-                addActionInfo(body, wordDocument, mainPart);
+                addActionInfo(body, mainPart);
                 addFlowDetails(body, wordDocument);
             }
             Console.WriteLine("Created Word documentation for " + flow.Name);
@@ -121,7 +121,6 @@ namespace PowerDocu.FlowDocumenter
 
         private Run appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart)
         {
-            Run run;
             ConnectorIcon connectorIcon = ConnectorHelper.getConnectorIcon(connectorUniqueName);
             ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
             int imageWidth, imageHeight;
@@ -142,15 +141,14 @@ namespace PowerDocu.FlowDocumenter
                 iconTable.Append(CreateRow(icon, new Run(new RunProperties(
                     new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
                                             new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName))));
-                run = new Run(iconTable);
+                return new Run(iconTable);
             }
             else
             {
-                run = new Run(new RunProperties(
+                return new Run(new RunProperties(
                     new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
                                             new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
             }
-            return run;
         }
 
         private void addFlowMetadata(Body body)
@@ -355,7 +353,7 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Break());
         }
 
-        private void addActionInfo(Body body, WordprocessingDocument wordDoc, MainDocumentPart mainPart)
+        private void addActionInfo(Body body, MainDocumentPart mainPart)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
