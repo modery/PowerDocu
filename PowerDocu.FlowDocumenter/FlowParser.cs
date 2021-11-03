@@ -237,7 +237,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
                 //TODO: runfter can be based on different conditions, such as succeeded, failed?, others. Review if current effort is enough, or if more things need to be done
-                if (runAfter.HasValues == false && parentAction == null && !flow.actions.hasRoot())
+                if (!runAfter.HasValues && parentAction == null && !flow.actions.hasRoot())
                 {
                     //root node does not run after another node and is not inside
                     flow.actions.setRootNode(aNode);
@@ -292,7 +292,7 @@ namespace PowerDocu.FlowDocumenter
         private Expression parseExpressions(JProperty jsonExpression)
         {
             Expression expression = new Expression();
-            expression.expressionOperator = jsonExpression.Name.ToString();
+            expression.expressionOperator = jsonExpression.Name;
             if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
             {
                 JArray operands = (JArray)jsonExpression.Value;

@@ -12,8 +12,6 @@ namespace PowerDocu.GUI
         public PowerDocuForm()
         {
             InitializeComponent();
-
-
         }
 
         private void selectButton_Click(object sender, EventArgs e)
@@ -33,11 +31,9 @@ namespace PowerDocu.GUI
                 {
                     MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
                     $"Details:\n\n{ex.StackTrace}");
-
                 }
             }
         }
-
 
         private void sizeChanged(object sender, EventArgs e)
         {
