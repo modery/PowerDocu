@@ -26,14 +26,14 @@ namespace PowerDocu.FlowDocumenter
         private const int PageMarginBottom = 1000;
         private const double DocumentSizePerPixel = 15;
         private const double EmuPerPixel = 9525;
-        private const int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
-        private const int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
+        private int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
+        private int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
         private const string cellHeaderBackground = "#E5E5FF";
         private FlowEntity flow;
 
         private string folderPath;
 
-        public WordDocBuilder(FlowEntity flowToDocument, string path)
+        public WordDocBuilder(FlowEntity flowToDocument, string path, string template)
         {
             this.flow = flowToDocument;
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
@@ -41,23 +41,22 @@ namespace PowerDocu.FlowDocumenter
             string filename = CharsetHelper.GetSafeName(flow.Name) + ((flow.ID != null) ? ("(" + flow.ID + ")") : "") + ".docx";
             filename = filename.Replace(":", "-");
             filename = folderPath + filename;
-            using (WordprocessingDocument wordDocument =
-            WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
+            PrepareWordDocument(filename, template);
+            using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
             {
-                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
-
-                // Create the document structure and add some text.
-                mainPart.Document = new Document();
-                AddStylesPartToPackage(wordDocument);
-                Body body = mainPart.Document.AppendChild(new Body());
-
-                // Set Page Size and Page Margin so that we can place the image as desired.
-                // Available Width = PageWidth - PageMarginLeft - PageMarginRight (= 17000 - 1000 - 1000 = 15000 for default values)
-                var sectionProperties = new SectionProperties();
-                sectionProperties.AppendChild(new PageSize { Width = PageWidth, Height = PageHeight });
-                sectionProperties.AppendChild(new PageMargin { Left = PageMarginLeft, Bottom = PageMarginBottom, Top = PageMarginTop, Right = PageMarginRight });
-                body.AppendChild(sectionProperties);
-
+                MainDocumentPart mainPart = wordDocument.MainDocumentPart;
+                Body body = mainPart.Document.Body;
+                if (!String.IsNullOrEmpty(template))
+                {
+                    // Set Page Size and Page Margin so that we can place the image as desired.
+                    var sectionProperties = body.GetFirstChild<SectionProperties>();
+                    // pageSize contains Width and Height properties
+                    var pageSize = sectionProperties.GetFirstChild<PageSize>();
+                    // this contains information about surrounding margins
+                    var pageMargin = sectionProperties.GetFirstChild<PageMargin>();
+                    maxImageWidth = (int)(pageSize.Width.Value - pageMargin.Right.Value - pageMargin.Left.Value);
+                    maxImageHeight = (int)(pageSize.Height.Value - pageMargin.Top.Value - pageMargin.Bottom.Value);
+                }
                 //add all the relevant content
                 addFlowMetadata(body);
                 addFlowOverview(body, wordDocument);
@@ -68,6 +67,36 @@ namespace PowerDocu.FlowDocumenter
                 addFlowDetails(body, wordDocument);
             }
             Console.WriteLine("Created Word documentation for " + flow.Name);
+        }
+
+        private void PrepareWordDocument(string filename, string template)
+        {
+            //create a new document if no template is provided
+            if (String.IsNullOrEmpty(template))
+            {
+                using (WordprocessingDocument wordDocument =
+                WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
+                {
+                    MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+
+                    // Create the document structure and add some text.
+                    mainPart.Document = new Document();
+                    AddStylesPartToPackage(wordDocument);
+                    Body body = mainPart.Document.AppendChild(new Body());
+
+                    // Set Page Size and Page Margin so that we can place the image as desired.
+                    // Available Width = PageWidth - PageMarginLeft - PageMarginRight (= 17000 - 1000 - 1000 = 15000 for default values)
+                    var sectionProperties = new SectionProperties();
+                    sectionProperties.AppendChild(new PageSize { Width = PageWidth, Height = PageHeight });
+                    sectionProperties.AppendChild(new PageMargin { Left = PageMarginLeft, Bottom = PageMarginBottom, Top = PageMarginTop, Right = PageMarginRight });
+                    body.AppendChild(sectionProperties);
+                }
+            }
+            else
+            {
+                //Create a copy of the Word template that will be used to add the documentation
+                File.Copy(template, filename, true);
+            }
         }
 
         private void addConnectionReferenceInfo(MainDocumentPart mainPart, Body body)

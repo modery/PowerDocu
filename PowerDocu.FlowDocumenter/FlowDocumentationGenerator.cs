@@ -6,7 +6,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public class FlowDocumentationGenerator
     {
-        public static string GenerateWordDocumentation(string filePath)
+        public static string GenerateWordDocumentation(string filePath, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -22,7 +22,15 @@ namespace PowerDocu.FlowDocumenter
                     GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
-                    WordDocBuilder wordzip = new WordDocBuilder(flow, path);
+                    if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                    {
+                        WordDocBuilder wordzip = new WordDocBuilder(flow, path, null);
+                    }
+                    else
+                    {
+                        Console.WriteLine(wordTemplate);
+                        WordDocBuilder wordzip = new WordDocBuilder(flow, path, wordTemplate);
+                    }
                 }
                 DateTime endDocGeneration = DateTime.Now;
                 return "Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.";
