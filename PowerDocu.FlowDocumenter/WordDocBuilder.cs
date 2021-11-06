@@ -16,7 +16,6 @@ namespace PowerDocu.FlowDocumenter
 {
     class WordDocBuilder
     {
-
         // Define Constants for Page Width and Page Margin
         //using A4 by default
         private const int PageWidth = 11906;
@@ -86,7 +85,7 @@ namespace PowerDocu.FlowDocumenter
                 ConnectorIcon connectorIcon = ConnectorHelper.getConnectorIcon(connectorUniqueName);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
-                run.AppendChild(new Text(((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)));
+                run.AppendChild(new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
                 ApplyStyleToParagraph("Heading3", para);
 
                 var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + connectorUniqueName), true);
@@ -98,7 +97,8 @@ namespace PowerDocu.FlowDocumenter
                 table.Append(CreateRow(new Text("Connection Type"), new Text(cRef.Type.ToString())));
                 if (cRef.Type == ConnectionType.ConnectorReference)
                 {
-                    table.Append(CreateRow(new Text("Connection Reference Name"), new Text(cRef.ConnectionReferenceLogicalName)));
+                    if (!String.IsNullOrEmpty(cRef.ConnectionReferenceLogicalName))
+                        table.Append(CreateRow(new Text("Connection Reference Name"), new Text(cRef.ConnectionReferenceLogicalName)));
                 }
                 if (!String.IsNullOrEmpty(cRef.ID))
                 {
@@ -197,17 +197,17 @@ namespace PowerDocu.FlowDocumenter
                         {
                             if (expO.expressionOperator == "name")
                             {
-                                vname = expO.expressionOperands.First().ToString();
+                                vname = expO.expressionOperands[0].ToString();
                             }
                             if (expO.expressionOperator == "type")
                             {
-                                vtype = expO.expressionOperands.First().ToString();
+                                vtype = expO.expressionOperands[0].ToString();
                             }
                             if (expO.expressionOperator == "value")
                             {
                                 if (expO.expressionOperands.Count == 1)
                                 {
-                                    vval = new Text(expO.expressionOperands.First().ToString());
+                                    vval = new Text(expO.expressionOperands[0].ToString());
                                 }
                                 else
                                 {
@@ -220,7 +220,7 @@ namespace PowerDocu.FlowDocumenter
                                         }
                                         else
                                         {
-                                            vval.Append(CreateRow(new Text(((Expression)eop).expressionOperator), new Text(((Expression)eop).expressionOperands.First().ToString())));
+                                            vval.Append(CreateRow(new Text(((Expression)eop).expressionOperator), new Text(((Expression)eop).expressionOperands[0].ToString())));
                                         }
                                     }
                                 }
@@ -477,20 +477,19 @@ namespace PowerDocu.FlowDocumenter
             //image too wide for a page?
             if (maxImageWidth / DocumentSizePerPixel < imageWidth)
             {
-                imageHeight = (int)(imageHeight * ((maxImageWidth / DocumentSizePerPixel) / imageWidth));
+                imageHeight = (int)(imageHeight * (maxImageWidth / DocumentSizePerPixel / imageWidth));
                 imageWidth = (int)Math.Round(maxImageWidth / DocumentSizePerPixel);
             }
             //image too high for a page?
             if (maxImageHeight / DocumentSizePerPixel < imageHeight)
             {
-                imageWidth = (int)(imageWidth * ((maxImageHeight / DocumentSizePerPixel) / imageHeight));
+                imageWidth = (int)(imageWidth * (maxImageHeight / DocumentSizePerPixel / imageHeight));
                 imageHeight = (int)Math.Round(maxImageHeight / DocumentSizePerPixel);
             }
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
 
-            var element =
-                new Drawing(
+            return new Drawing(
                     new DW.Inline(
                         new DW.Extent() { Cx = width, Cy = height },
                         new DW.EffectExtent()
@@ -551,8 +550,6 @@ namespace PowerDocu.FlowDocumenter
                         DistanceFromRight = (UInt32Value)0U,
                         EditId = "50D07946"
                     });
-
-            return element;
         }
 
         private void addFlowDetails(Body body, WordprocessingDocument wordDoc)
@@ -591,33 +588,35 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Break());
         }
 
-
         private Drawing InsertSvgImage(string svgRelationshipId, string imgRelationshipId, int imageWidth, int imageHeight)
         {
-
             //image too wide for a page?
             if (maxImageWidth / DocumentSizePerPixel < imageWidth)
             {
-                imageHeight = (int)(imageHeight * ((maxImageWidth / DocumentSizePerPixel) / imageWidth));
+                imageHeight = (int)(imageHeight * (maxImageWidth / DocumentSizePerPixel / imageWidth));
                 imageWidth = (int)Math.Round(maxImageWidth / DocumentSizePerPixel);
             }
             //image too high for a page?
             if (maxImageHeight / DocumentSizePerPixel < imageHeight)
             {
-                imageWidth = (int)(imageWidth * ((maxImageHeight / DocumentSizePerPixel) / imageHeight));
+                imageWidth = (int)(imageWidth * (maxImageHeight / DocumentSizePerPixel / imageHeight));
                 imageHeight = (int)Math.Round(maxImageHeight / DocumentSizePerPixel);
             }
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
 
-            A.BlipExtension svgelement = new A.BlipExtension();
-            svgelement.Uri = "{96DAC541-7B7A-43D3-8B79-37D633B846F1}";
-            svgelement.InnerXml = "<asvg:svgBlip xmlns:asvg=\"http://schemas.microsoft.com/office/drawing/2016/SVG/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" r:embed=\"" + svgRelationshipId + "\"/>";
+            A.BlipExtension svgelement = new A.BlipExtension
+            {
+                Uri = "{96DAC541-7B7A-43D3-8B79-37D633B846F1}",
+                InnerXml = "<asvg:svgBlip xmlns:asvg=\"http://schemas.microsoft.com/office/drawing/2016/SVG/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" r:embed=\"" + svgRelationshipId + "\"/>"
+            };
 
             A14.UseLocalDpi useLocalDpi1 = new A14.UseLocalDpi() { Val = false };
             useLocalDpi1.AddNamespaceDeclaration("a14", "http://schemas.microsoft.com/office/drawing/2010/main");
-            A.BlipExtension blipExtension1 = new A.BlipExtension();
-            blipExtension1.Uri = "{28A0092B-C50C-407E-A947-70E740481C1C}";
+            A.BlipExtension blipExtension1 = new A.BlipExtension
+            {
+                Uri = "{28A0092B-C50C-407E-A947-70E740481C1C}"
+            };
             blipExtension1.Append(useLocalDpi1);
 
             var element =
@@ -820,11 +819,15 @@ namespace PowerDocu.FlowDocumenter
             var tc = new TableCell();
             RunProperties run1Properties = new RunProperties();
             run1Properties.Append(new Bold());
-            var run = new Run(cellValue);
-            run.RunProperties = run1Properties;
+            var run = new Run(cellValue)
+            {
+                RunProperties = run1Properties
+            };
             tc.Append(new Paragraph(run));
-            tc.TableCellProperties = new TableCellProperties();
-            tc.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Restart };
+            tc.TableCellProperties = new TableCellProperties
+            {
+                HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Restart }
+            };
             var shading = new Shading()
             {
                 Color = "auto",
@@ -838,8 +841,10 @@ namespace PowerDocu.FlowDocumenter
             {
                 for (int i = 2; i <= colSpan; i++)
                 {
-                    var tc2 = new TableCell();
-                    tc2.TableCellProperties = new TableCellProperties();
+                    var tc2 = new TableCell
+                    {
+                        TableCellProperties = new TableCellProperties()
+                    };
                     tc2.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Continue };
                     tc2.Append(new Paragraph());
                     tr.Append(tc2);

@@ -8,13 +8,12 @@ using System.Xml;
 
 namespace PowerDocu.FlowDocumenter
 {
-    class GraphBuilder
+    public class GraphBuilder
     {
-
-        Dictionary<Node, SubGraph> nodeClusterRelationship;
-        Dictionary<SubGraph, SubGraph> clusterRelationship;
-        List<string> nodesInGraph;
-        FlowEntity flow;
+        private Dictionary<Node, SubGraph> nodeClusterRelationship;
+        private Dictionary<SubGraph, SubGraph> clusterRelationship;
+        private List<string> nodesInGraph;
+        private FlowEntity flow;
         private string folderPath;
         //using this list to store the names of edges. Some edges were created twice when creating an edge to a cluster (as it creates a dummy node when pointing to a cluster, which happens multiple times instead of getting reused)
         private List<string> edges;
@@ -104,16 +103,16 @@ namespace PowerDocu.FlowDocumenter
             return filename;
         }
 
-        /** 
+        /**
           * rootGraph - the RootGraph under which most new nodes get created
             node - the ActionNode to be processed now
             previousNeighbourNode - the Node that comes before the current node
-            parentCluster - 
-            currentCluster - 
+            parentCluster -
+            currentCluster -
             showSubactions - bool that controls if subactions are shown (showing all detail). If false, only the top level actions are shown
-            isTopLevel - bool 
+            isTopLevel - bool
           */
-        void addNodesToGraph(RootGraph rootGraph, ActionNode node, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
+        private void addNodesToGraph(RootGraph rootGraph, ActionNode node, SubGraph parentCluster, SubGraph currentCluster, bool showSubactions, bool isTopLevel)
         {
             //we need to process each node only once
             if (!nodesInGraph.Contains(CharsetHelper.GetSafeName(node.Name)))
@@ -301,7 +300,6 @@ namespace PowerDocu.FlowDocumenter
                 }
             }
         }
-
 
         private void CreateEdge(Node currentNode, Node previousNeighbourNode, ActionNode precedingNeighbour, string edgeName, RootGraph rootGraph)
         {

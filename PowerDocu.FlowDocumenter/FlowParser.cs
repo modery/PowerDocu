@@ -78,7 +78,7 @@ namespace PowerDocu.FlowDocumenter
         }
 
         /**
-		  * 
+		  *
 		  */
         private void parseMetadata(FlowEntity flow)
         {
@@ -87,7 +87,7 @@ namespace PowerDocu.FlowDocumenter
         }
 
         /**
-		  * 
+		  *
 		  */
         private void parseTrigger(FlowEntity flow)
         {
@@ -126,7 +126,7 @@ namespace PowerDocu.FlowDocumenter
         }
 
         /**
-		  * 
+		  *
 		  */
         private void parseConnectionReferences(FlowEntity flow)
         {
@@ -153,7 +153,7 @@ namespace PowerDocu.FlowDocumenter
                     {
                         Name = extractConnectorName(cRefDetails["api"]["name"].ToString()),
                         Source = cRefDetails["runtimeSource"].ToString(),
-                        ConnectionReferenceLogicalName = cRefDetails["connection"]["connectionReferenceLogicalName"].ToString(),
+                        ConnectionReferenceLogicalName = cRefDetails["connection"]?["connectionReferenceLogicalName"]?.ToString(),
                         Type = ConnectionType.ConnectorReference
                     });
                 }
@@ -288,8 +288,10 @@ namespace PowerDocu.FlowDocumenter
 
         private Expression parseExpressions(JProperty jsonExpression)
         {
-            Expression expression = new Expression();
-            expression.expressionOperator = jsonExpression.Name;
+            Expression expression = new Expression
+            {
+                expressionOperator = jsonExpression.Name
+            };
             if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
             {
                 JArray operands = (JArray)jsonExpression.Value;
