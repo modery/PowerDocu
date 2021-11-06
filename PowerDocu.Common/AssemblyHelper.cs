@@ -4,7 +4,6 @@ using System.Reflection;
 
 namespace PowerDocu.Common
 {
-
     public class AssemblyHelper
     {
         public static string AssemblyDirectory
@@ -17,7 +16,5 @@ namespace PowerDocu.Common
                 return Path.GetDirectoryName(path);
             }
         }
-
     }
-
 }

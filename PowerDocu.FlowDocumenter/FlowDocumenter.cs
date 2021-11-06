@@ -7,7 +7,6 @@ namespace PowerDocu.FlowDocumenter
     {
         static void Main(string[] args)
         {
-
             if (args.Length == 0 || args.Length > 1)
             {
                 Console.WriteLine("Please provide an exported Flow package as parameter. For example:");
@@ -18,6 +17,5 @@ namespace PowerDocu.FlowDocumenter
                 FlowDocumentationGenerator.GenerateWordDocumentation(args[0]);
             }
         }
-
     }
 }

@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 
 namespace PowerDocu.Common
 {
-
     public enum ConnectionType
     {
         Connector,
@@ -40,7 +39,6 @@ namespace PowerDocu.Common
             }
         }
     }
-
 
     public class ConnectorIcon
     {

@@ -3,7 +3,6 @@ using PowerDocu.Common;
 
 namespace PowerDocu.FlowDocumenter
 {
-
     public class ConnectionReference
     {
         public string Name;

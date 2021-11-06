@@ -25,7 +25,5 @@ namespace PowerDocu.Common
             }
             return entries;
         }
-
-
     }
 }

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace PowerDocu.FlowDocumenter
 {
-
     public class FlowEntity
     {
-
         public string ID;
         public string Name;
         public Trigger trigger;
@@ -15,14 +13,12 @@ namespace PowerDocu.FlowDocumenter
 
         public FlowEntity()
         {
-
         }
 
         public void addTrigger(string name)
         {
             this.trigger = new Trigger(name);
         }
-
 
         public override string ToString()
         {

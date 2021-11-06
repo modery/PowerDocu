@@ -4,7 +4,6 @@ using PowerDocu.Common;
 
 namespace PowerDocu.FlowDocumenter
 {
-
     public class Trigger
     {
         public string Name;

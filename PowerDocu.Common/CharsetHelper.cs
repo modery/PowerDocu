@@ -6,7 +6,6 @@ namespace PowerDocu.Common
 {
     public class CharsetHelper
     {
-
         // this function cleans up names a lot. Replaces Umlauts and similar with "safe letters" (e.g. ä to a), and strips most other characters that would cause errors (e.g. Chinese chracters)
         // Problems are mostly happening in the graphviz library. Not sure how much control we have and what other options there are, considering this a temporary fix for the moment
         public static string GetSafeName(string s)
@@ -32,6 +31,5 @@ namespace PowerDocu.Common
             var cleaned = ascii.GetString(encodedBytes).Replace("?", "-");
             return cleaned;
         }
-
     }
 }

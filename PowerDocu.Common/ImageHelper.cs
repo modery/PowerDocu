@@ -5,7 +5,6 @@ using System.IO;
 
 namespace PowerDocu.Common
 {
-
     public class ImageHelper
     {
         public static void ConvertImageTo32(string imagepath, string destinationpath)
@@ -15,7 +14,6 @@ namespace PowerDocu.Common
             resized.Save(destinationpath, ImageFormat.Png);
             resized.Dispose();
             bmp.Dispose();
-
         }
 
         public static string GetBase64(string filepath)
@@ -27,7 +25,5 @@ namespace PowerDocu.Common
             }
             return "";
         }
-
     }
-
 }
