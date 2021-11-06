@@ -4,7 +4,6 @@ using System.Text;
 
 namespace PowerDocu.Common
 {
-
     public class Expression
     {
         public string expressionOperator;
@@ -17,16 +16,16 @@ namespace PowerDocu.Common
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(expressionOperator + ": ");
+            sb.Append(expressionOperator).Append(": ");
             sb.Append("\n");
             foreach (object eo in expressionOperands)
             {
-                sb.Append(eo.ToString() + ", ");
+                sb.Append(eo.ToString()).Append(", ");
             }
+
             sb.Append("\n");
 
             return sb.ToString();
         }
-
     }
 }

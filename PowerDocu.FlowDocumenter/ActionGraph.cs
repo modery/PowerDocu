@@ -66,16 +66,13 @@ namespace PowerDocu.FlowDocumenter
         }
     }
 
-
     public class ActionGraph
     {
-
-        List<ActionNode> myActionNodes = new List<ActionNode>();
-        ActionNode rootNode = null;
+        private List<ActionNode> myActionNodes = new List<ActionNode>();
+        private ActionNode rootNode = null;
 
         public ActionGraph()
         {
-
         }
 
         public int Count
@@ -187,5 +184,4 @@ namespace PowerDocu.FlowDocumenter
             rootNode = root;
         }
     }
-
 }
