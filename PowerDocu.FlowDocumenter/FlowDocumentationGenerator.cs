@@ -28,7 +28,6 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else
                     {
-                        Console.WriteLine(wordTemplate);
                         WordDocBuilder wordzip = new WordDocBuilder(flow, path, wordTemplate);
                     }
                 }
