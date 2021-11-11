@@ -8,24 +8,41 @@ namespace PowerDocu.GUI
 {
     public partial class PowerDocuForm : Form
     {
-
         public PowerDocuForm()
         {
             InitializeComponent();
         }
 
-        private void selectButton_Click(object sender, EventArgs e)
+        private void selectZIPFileButton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            if (openFileToParseDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    textBox1.AppendText("Preparing to parse file " + openFileDialog1.FileName + ", please wait.");
+                    appStatusTextBox.AppendText("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    textBox1.AppendText(Environment.NewLine);
-                    textBox1.AppendText(FlowDocumentationGenerator.GenerateWordDocumentation(openFileDialog1.FileName));
-                    textBox1.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null));
+                    appStatusTextBox.AppendText(Environment.NewLine);
                     Cursor = Cursors.Arrow; // change cursor to normal type
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
+                    $"Details:\n\n{ex.StackTrace}");
+                }
+            }
+        }
+
+        private void selectWordTemplateButton_Click(object sender, EventArgs e)
+        {
+            if (openWordTemplateDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    wordTemplateInfoLabel.Text = "Template: " + Path.GetFileName(openWordTemplateDialog.FileName);
+                    appStatusTextBox.AppendText("Selected Word template " + openWordTemplateDialog.FileName);
+                    appStatusTextBox.AppendText(Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
@@ -37,7 +54,7 @@ namespace PowerDocu.GUI
 
         private void sizeChanged(object sender, EventArgs e)
         {
-            textBox1.Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectButton.Height - 40);
+            appStatusTextBox.Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40);
         }
     }
 }

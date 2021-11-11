@@ -39,38 +39,62 @@ namespace PowerDocu.GUI
             this.SizeChanged += new EventHandler(sizeChanged);
             this.MinimumSize = new Size(500, 250);
             this.Text = "PowerDocu GUI";
-            openFileDialog1 = new OpenFileDialog()
+            openFileToParseDialog = new OpenFileDialog()
             {
                 FileName = "*.zip",
                 Filter = "ZIP files (*.zip)|*.zip",
                 Title = "Open exported Flow ZIP file"
             };
-
-            selectButton = new Button()
+            openWordTemplateDialog = new OpenFileDialog()
+            {
+                FileName = "",
+                Filter = "Word Documents (*.docx)|*.docx",
+                Title = "Select the Word document to use as template"
+            };
+            selectWordTemplateButton = new Button()
+            {
+                //this should properly size the button so that the Text is shown correctly
+                Size = new Size((int)(300 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
+                Location = new Point(15, 15),
+                Text = "Optional: Select Word document to use as Template"
+            };
+            selectFileToParseButton = new Button()
             {
                 //this should properly size the button so that the Text is shown correctly
                 Size = new Size((int)(210 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
-                Location = new Point(15, 15),
-                Text = "Select Flow or Solution to document"
+                Location = new Point(15, 15 + selectWordTemplateButton.Height),
+                Text = "Select Flow or Solution to document",
             };
-            selectButton.Click += new EventHandler(selectButton_Click);
-            Controls.Add(selectButton);
-            textBox1 = new TextBox
+            selectFileToParseButton.Click += new EventHandler(selectZIPFileButton_Click);
+            selectWordTemplateButton.Click += new EventHandler(selectWordTemplateButton_Click);
+            Controls.Add(selectFileToParseButton);
+            Controls.Add(selectWordTemplateButton);
+            wordTemplateInfoLabel = new Label()
             {
-                Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectButton.Height - 40),
-                Location = new Point(15, 30 + selectButton.Height),
+                Location = new Point(30 + selectWordTemplateButton.Width, 25),
+                Text = "No template selected",
+                Width = 300
+            };
+            Controls.Add(wordTemplateInfoLabel);
+            appStatusTextBox = new TextBox
+            {
+                Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40),
+                Location = new Point(15, 30 + selectFileToParseButton.Height + selectWordTemplateButton.Height),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true
             };
-            Controls.Add(textBox1);
+            Controls.Add(appStatusTextBox);
         }
 
 
 
-        private Button selectButton;
-        private OpenFileDialog openFileDialog1;
-        private TextBox textBox1;
+        private Button selectFileToParseButton;
+        private Button selectWordTemplateButton;
+        private OpenFileDialog openFileToParseDialog;
+        private OpenFileDialog openWordTemplateDialog;
+        private TextBox appStatusTextBox;
+        private Label wordTemplateInfoLabel;
 
         #endregion
     }
