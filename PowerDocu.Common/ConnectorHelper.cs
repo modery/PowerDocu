@@ -10,7 +10,7 @@ namespace PowerDocu.Common
         Connector,
         ConnectorReference
     };
-    public class ConnectorHelper
+    public static class ConnectorHelper
     {
         private static string folderPath = AssemblyHelper.AssemblyDirectory + @"\Resources\ConnectorIcons\";
         public static List<ConnectorIcon> connectorIcons;

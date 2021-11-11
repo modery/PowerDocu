@@ -5,7 +5,7 @@ using System.IO.Compression;
 
 namespace PowerDocu.Common
 {
-    public class ZipHelper
+    public static class ZipHelper
     {
         public const string FlowDefinitionFile = "definition.json";
         public const string SolutionPackageWorkflowsPath = "Workflows/";

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace PowerDocu.Common
 {
-    public class AssemblyHelper
+    public static class AssemblyHelper
     {
         public static string AssemblyDirectory
         {

@@ -4,7 +4,7 @@ using PowerDocu.Common;
 
 namespace PowerDocu.FlowDocumenter
 {
-    public class FlowDocumentationGenerator
+    public static class FlowDocumentationGenerator
     {
         public static string GenerateWordDocumentation(string filePath, string wordTemplate = null)
         {

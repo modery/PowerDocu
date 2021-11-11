@@ -5,7 +5,7 @@ using System.IO;
 
 namespace PowerDocu.Common
 {
-    public class ImageHelper
+    public static class ImageHelper
     {
         public static void ConvertImageTo32(string imagepath, string destinationpath)
         {
