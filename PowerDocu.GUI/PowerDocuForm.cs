@@ -43,11 +43,20 @@ namespace PowerDocu.GUI
                     wordTemplateInfoLabel.Text = "Template: " + Path.GetFileName(openWordTemplateDialog.FileName);
                     appStatusTextBox.AppendText("Selected Word template " + openWordTemplateDialog.FileName);
                     appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
-                    $"Details:\n\n{ex.StackTrace}");
+                    appStatusTextBox.AppendText("Security error:");
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText("Error message: " + ex.Message);
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText("Details:");
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(ex.StackTrace);
+                    appStatusTextBox.AppendText(Environment.NewLine);
+                    appStatusTextBox.AppendText(Environment.NewLine);
                 }
             }
         }

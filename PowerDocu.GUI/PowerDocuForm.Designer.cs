@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using FontAwesome.Sharp;
 
 namespace PowerDocu.GUI
 {
@@ -35,9 +36,9 @@ namespace PowerDocu.GUI
             this.components = new System.ComponentModel.Container();
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1000, 380);
+            this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.MinimumSize = new Size(convertToDPISpecific(500), convertToDPISpecific(250));
             this.SizeChanged += new EventHandler(sizeChanged);
-            this.MinimumSize = new Size(500, 250);
             this.Text = "PowerDocu GUI";
             openFileToParseDialog = new OpenFileDialog()
             {
@@ -51,31 +52,50 @@ namespace PowerDocu.GUI
                 Filter = "Word Documents (*.docx)|*.docx",
                 Title = "Select the Word document to use as template"
             };
-            selectWordTemplateButton = new Button()
+            selectWordTemplateButton = new IconButton()
             {
                 //this should properly size the button so that the Text is shown correctly
-                Size = new Size((int)(300 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
                 Location = new Point(15, 15),
-                Text = "Optional: Select Word document to use as Template"
+                //Text = "Optional: Select Word document to use as Template",
+                IconChar = IconChar.FileWord,
+                IconColor = Color.Blue,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                ImageAlign = ContentAlignment.MiddleCenter
             };
-            selectFileToParseButton = new Button()
+            selectFileToParseButton = new IconButton()
             {
-                //this should properly size the button so that the Text is shown correctly
-                Size = new Size((int)(210 * this.DeviceDpi / 96), (int)(30 * this.DeviceDpi / 96)),
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
                 Location = new Point(15, 15 + selectWordTemplateButton.Height),
-                Text = "Select Flow or Solution to document",
+                IconChar = IconChar.FileArchive,
+                IconColor = Color.Orange,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+
             };
             selectFileToParseButton.Click += new EventHandler(selectZIPFileButton_Click);
             selectWordTemplateButton.Click += new EventHandler(selectWordTemplateButton_Click);
             Controls.Add(selectFileToParseButton);
             Controls.Add(selectWordTemplateButton);
+
             wordTemplateInfoLabel = new Label()
             {
                 Location = new Point(30 + selectWordTemplateButton.Width, 25),
-                Text = "No template selected",
-                Width = 300
+                Text = "Optional: Select a Word template",
+                Width = convertToDPISpecific(300),
+                Height = convertToDPISpecific(30)
             };
             Controls.Add(wordTemplateInfoLabel);
+
+            fileToParseInfoLabel = new Label()
+            {
+                Location = new Point(30 + selectFileToParseButton.Width, 25 + selectWordTemplateButton.Height),
+                Text = "Select Flow or Solution to document",
+                Width = convertToDPISpecific(300),
+                Height = convertToDPISpecific(30)
+            };
+            Controls.Add(fileToParseInfoLabel);
             appStatusTextBox = new TextBox
             {
                 Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40),
@@ -87,14 +107,18 @@ namespace PowerDocu.GUI
             Controls.Add(appStatusTextBox);
         }
 
-
-
-        private Button selectFileToParseButton;
-        private Button selectWordTemplateButton;
+        private int convertToDPISpecific(int number)
+        {
+            //96 DPI is the default
+            return (int)number * this.DeviceDpi / 96;
+        }
+        private IconButton selectFileToParseButton;
+        private IconButton selectWordTemplateButton;
         private OpenFileDialog openFileToParseDialog;
         private OpenFileDialog openWordTemplateDialog;
         private TextBox appStatusTextBox;
         private Label wordTemplateInfoLabel;
+        private Label fileToParseInfoLabel;
 
         #endregion
     }
