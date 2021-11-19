@@ -25,17 +25,17 @@ namespace PowerDocu.FlowDocumenter
             Directory.CreateDirectory(folderPath);
         }
 
-        public string buildTopLevelGraph()
+        public void buildTopLevelGraph()
         {
-            return buildGraph(false);
+            buildGraph(false);
         }
 
-        public string buildDetailedGraph()
+        public void buildDetailedGraph()
         {
-            return buildGraph(true);
+            buildGraph(true);
         }
 
-        private string buildGraph(bool showSubactions)
+        private void buildGraph(bool showSubactions)
         {
             edges = new List<string>();
             nodesInGraph = new List<string>();
@@ -70,7 +70,7 @@ namespace PowerDocu.FlowDocumenter
             addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
             rootGraph.ComputeLayout();
 
-            return folderPath + generateImageFiles(rootGraph, showSubactions) + ".png";
+            NotificationHelper.SendNotification("Created Graph " + folderPath + generateImageFiles(rootGraph, showSubactions) + ".png");
         }
 
         private string generateImageFiles(RootGraph rootGraph, bool showSubactions)

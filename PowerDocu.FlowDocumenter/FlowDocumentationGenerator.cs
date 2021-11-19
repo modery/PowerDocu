@@ -6,7 +6,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static string GenerateWordDocumentation(string filePath, string wordTemplate = null)
+        public static void GenerateWordDocumentation(string filePath, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -32,9 +32,12 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;
-                return "Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.";
+                NotificationHelper.SendNotification("Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
             }
-            return "File not found: " + filePath;
+            else
+            {
+                NotificationHelper.SendNotification("File not found: " + filePath);
+            }
         }
     }
 }

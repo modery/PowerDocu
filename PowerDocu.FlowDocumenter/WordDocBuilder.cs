@@ -66,7 +66,7 @@ namespace PowerDocu.FlowDocumenter
                 addActionInfo(body, mainPart);
                 addFlowDetails(body, wordDocument);
             }
-            Console.WriteLine("Created Word documentation for " + flow.Name);
+            NotificationHelper.SendNotification("Created Word documentation for " + flow.Name);
         }
 
         private void PrepareWordDocument(string filename, string template)

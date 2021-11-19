@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using PowerDocu.FlowDocumenter;
+using PowerDocu.Common;
 
 namespace PowerDocu.GUI
 {
@@ -11,6 +12,7 @@ namespace PowerDocu.GUI
         public PowerDocuForm()
         {
             InitializeComponent();
+            NotificationHelper.AddNotificationReceiver(new PowerDocuFormNotificationReceiver(appStatusTextBox));
         }
 
         private void selectZIPFileButton_Click(object sender, EventArgs e)
@@ -19,11 +21,9 @@ namespace PowerDocu.GUI
             {
                 try
                 {
-                    appStatusTextBox.AppendText("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
+                    NotificationHelper.SendNotification("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText(FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null));
-                    appStatusTextBox.AppendText(Environment.NewLine);
+                    FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
                     Cursor = Cursors.Arrow; // change cursor to normal type
                 }
                 catch (Exception ex)
@@ -41,22 +41,16 @@ namespace PowerDocu.GUI
                 try
                 {
                     wordTemplateInfoLabel.Text = "Template: " + Path.GetFileName(openWordTemplateDialog.FileName);
-                    appStatusTextBox.AppendText("Selected Word template " + openWordTemplateDialog.FileName);
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText(Environment.NewLine);
+                    NotificationHelper.SendNotification("Selected Word template " + openWordTemplateDialog.FileName);
                 }
                 catch (Exception ex)
                 {
-                    appStatusTextBox.AppendText("Security error:");
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText("Error message: " + ex.Message);
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText("Details:");
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText(ex.StackTrace);
-                    appStatusTextBox.AppendText(Environment.NewLine);
-                    appStatusTextBox.AppendText(Environment.NewLine);
+                    NotificationHelper.SendNotification("Security error:");
+                    NotificationHelper.SendNotification("Error message: " + ex.Message);
+                    NotificationHelper.SendNotification(Environment.NewLine);
+                    NotificationHelper.SendNotification("Details:");
+                    NotificationHelper.SendNotification(ex.StackTrace);
+                    NotificationHelper.SendNotification(Environment.NewLine);
                 }
             }
         }
@@ -64,6 +58,21 @@ namespace PowerDocu.GUI
         private void sizeChanged(object sender, EventArgs e)
         {
             appStatusTextBox.Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40);
+        }
+    }
+
+    public class PowerDocuFormNotificationReceiver : NotificationReceiverBase
+    {
+        private readonly TextBox notificationTextBox;
+        public PowerDocuFormNotificationReceiver(TextBox textBox)
+        {
+            notificationTextBox = textBox;
+        }
+
+        public override void Notify(string notification)
+        {
+            notificationTextBox.AppendText(notification);
+            notificationTextBox.AppendText(Environment.NewLine);
         }
     }
 }
