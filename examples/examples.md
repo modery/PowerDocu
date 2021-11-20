@@ -38,3 +38,6 @@ Detailed Graph of the Flow
 
 Example of the documented actions
 ![AdminSyncTemplatev3Apps](../Images/AdminSyncTemplatev3Apps-documented-actions.png)
+
+If you use a Word document as a template, the output will look differently. Here's an example based on a free Word template available from Microsoft:
+![Word template](../Images/Word-Template-Flow-Documentation.png)
