@@ -195,6 +195,7 @@ namespace PowerDocu.FlowDocumenter
             {
                 table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
             }
+            table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
             body.Append(table);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
