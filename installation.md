@@ -45,13 +45,15 @@ A folder with the Solution package file's name will be created, and each individ
 ![Email me with a list of upcoming Calendar events](Images/Solution-CoEStartKit-AuditComponents.png)
 
 ### Use the PowerDocu.GUI
-1. Open a command prompt or PowerShell window in the folder that contains FlowDocumenter
-2. Execute FlowDocumenter and provide an exported Flow package as parameter. For example: *PowerDocu.FlowDocumenter.exe FlowPackage.zip*
+1. Open the PowerDocu.GUI.exe application
+2. Optionally, select a Word document (.docx) as template
+3. Select a Flow or Solution package to havve it converted
 ![Execute FlowDocumenter](Images/PowerDocu.GUI.png)
 
 ### Run the PowerDocu.FlowDocumenter console application
 1. Open a command prompt or PowerShell window in the folder that contains FlowDocumenter
 2. Execute FlowDocumenter and provide an exported Flow or Solution package as parameter. For example: *PowerDocu.FlowDocumenter.exe FlowPackage.zip*
+3. To use a Word document (.docx) as template, use it as an additional parameter: *PowerDocu.FlowDocumenter.exe ExportedFlow.zip WordTemplate.docx*
 ![Execute FlowDocumenter](Images/PowerDocu.FlowDocumenter-run.png)
 
 ## Use custom Word style formatting

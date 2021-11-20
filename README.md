@@ -5,6 +5,8 @@ This is where **FlowDocumenter** can help!
 
 Currently, this repository contains a solution to document Power Automate Flows, called **FlowDocumenter**. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package or an exported Solution package.
 
+![PowerDocu.GUI](Images/PowerDocu.GUI.png)
+
 ![Example of generated Word documentation](Images/Weather-Flow-Documentation-1.png)
 ![Example of generated Word documentation](Images/Weather-Flow-Documentation-2.png)
 
