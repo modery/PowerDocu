@@ -13,8 +13,8 @@ namespace PowerDocu.FlowDocumenter
         private Dictionary<Node, SubGraph> nodeClusterRelationship;
         private Dictionary<SubGraph, SubGraph> clusterRelationship;
         private List<string> nodesInGraph;
-        private FlowEntity flow;
-        private string folderPath;
+        private readonly FlowEntity flow;
+        private readonly string folderPath;
         //using this list to store the names of edges. Some edges were created twice when creating an edge to a cluster (as it creates a dummy node when pointing to a cluster, which happens multiple times instead of getting reused)
         private List<string> edges;
 
@@ -233,7 +233,6 @@ namespace PowerDocu.FlowDocumenter
                 SubGraph noCluster = null;
                 string edgeName;
                 Node currentNode = rootGraph.GetNode(CharsetHelper.GetSafeName(node.Name));
-
                 if (node.Subactions.Count > 0)
                 {
                     if (currentCluster != null)
@@ -316,19 +315,36 @@ namespace PowerDocu.FlowDocumenter
                         SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
                         if (curClusterParent == prevCluster)
                         {
-                            edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
+                            edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                            edgeAB.SetLogicalHead(curCluster);
                         }
                         else
                         {
                             if (curClusterParent == null || previousNeighbourNode.GetName().Equals(precedingNeighbour?.Name))
                             {
-                                if (prevClusterParent == curCluster)
+                                //adding an invisible node at the bottom of the previous cluster
+                                Node invisNode = prevCluster.GetOrAddNode("invisnode" + prevCluster + ((prevClusterParent == curCluster) ? currentNode : curCluster));
+                                invisNode.SafeSetAttribute("style", "invis", "");
+                                invisNode.SafeSetAttribute("margin", "0", "");
+                                invisNode.SafeSetAttribute("width", "0", "");
+                                invisNode.SafeSetAttribute("height", "0", "");
+                                invisNode.SafeSetAttribute("shape", "point", "");
+                                edgeAB = rootGraph.GetOrAddEdge(invisNode, currentNode, edgeName);
+                                if (prevClusterParent != curCluster)
                                 {
-                                    edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
+                                    edgeAB.SetLogicalHead(curCluster);
                                 }
-                                else
+                                edgeAB.SetLogicalTail(prevCluster);
+                                //invisible node is at the bottom during the layout process because we connect all other "end nodes" in the preCluster, that is nodes that do not have any neighbour nodes, with it
+                                foreach (Node clusterNode in prevCluster.Nodes())
                                 {
-                                    edgeAB = rootGraph.GetOrAddEdge(prevCluster, curCluster, false, edgeName);
+                                    ActionNode clusterActionNode = flow.actions.Find(clusterNode.GetName());
+                                    if (clusterActionNode?.Neighbours.Count + clusterActionNode?.Subactions.Count + clusterActionNode?.Elseactions.Count == 0)
+                                    {
+                                        //creating an invisible edge only if there are no other subsequent nodes (neighbors or subnodes)
+                                        edgeAB = rootGraph.GetOrAddEdge(clusterNode, invisNode, clusterNode + "-" + invisNode);
+                                        edgeAB.SafeSetAttribute("style", "invis", "");
+                                    }
                                 }
                             }
                             else
@@ -339,7 +355,8 @@ namespace PowerDocu.FlowDocumenter
                                     curClusterParent = curClusterParentParent;
                                     curClusterParentParent = clusterRelationship[curClusterParent];
                                 }
-                                edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curClusterParent, false, edgeName);
+                                edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                                edgeAB.SetLogicalHead(curClusterParent);
                             }
                         }
                     }
@@ -350,14 +367,35 @@ namespace PowerDocu.FlowDocumenter
                 }
                 else
                 {
-                    edgeAB = rootGraph.GetOrAddEdge(prevCluster, currentNode, false, edgeName);
+                    //adding an invisible node at the bottom of the cluster
+                    Node invisNode = prevCluster.GetOrAddNode("invisnode" + prevCluster + currentNode);
+                    invisNode.SafeSetAttribute("style", "invis", "");
+                    invisNode.SafeSetAttribute("margin", "0", "");
+                    invisNode.SafeSetAttribute("width", "0", "");
+                    invisNode.SafeSetAttribute("height", "0", "");
+                    invisNode.SafeSetAttribute("shape", "point", "");
+                    edgeAB = rootGraph.GetOrAddEdge(invisNode, currentNode, edgeName);
+                    edgeAB.SetLogicalTail(prevCluster);
+                    //invisible node is at the bottom because we connect all other "end nodes" in the preCluster, that is nodes that do not have any neighbour nodes, with it
+                    foreach (Node clusterNode in prevCluster.Nodes())
+                    {
+                        ActionNode clusterActionNode = flow.actions.Find(clusterNode.GetName());
+                        if (clusterActionNode?.Neighbours.Count + clusterActionNode?.Subactions.Count + clusterActionNode?.Elseactions.Count == 0)
+                        {
+                            //creating an invisible edge only if there are no other subsequent nodes (neighbors or subnodes)
+                            edgeAB = rootGraph.GetOrAddEdge(clusterNode, invisNode, clusterNode + "-" + invisNode);
+                            edgeAB.SafeSetAttribute("style", "invis", "");
+                        }
+                    }
                 }
             }
             else
             {
                 if (curCluster != null)
                 {
-                    edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, curCluster, false, edgeName);
+                    //update 5
+                    edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                    edgeAB.SetLogicalHead(curCluster);
                 }
                 else
                 {
