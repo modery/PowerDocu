@@ -124,7 +124,7 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        ActionNode Find(string value)
+        public ActionNode Find(string value)
         {
             foreach (ActionNode item in myActionNodes)
             {
