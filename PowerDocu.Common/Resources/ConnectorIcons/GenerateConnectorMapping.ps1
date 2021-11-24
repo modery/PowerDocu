@@ -29,14 +29,14 @@ $parsedconnectors| %{
     $name = $nameextract.substring(0,$nameextract.IndexOf('"'))
     $uniquenameextract = $_.innerHTML.substring($_.innerHTML.IndexOf('href="/en-us/connectors/shared_')+31)
     $uniquename = $uniquenameextract.substring(0,$uniquenameextract.IndexOf('/'))
-    $imageurlextract = $_.innerHTML.substring($_.innerHTML.IndexOf('https://connectoricons-prod.azureedge.net/releases')+51)
+    $imageurlextract = $_.innerHTML.substring($_.innerHTML.IndexOf('https://connectoricons-prod.azureedge.net/')+42)
     $imageurl = $imageurlextract.substring(0,$imageurlextract.IndexOf('"'))
     $connectors += New-Object PSObject -Property @{
                                                 Name = $name
                                                 Uniquename = $uniquename
-                                                Url = "https://connectoricons-prod.azureedge.net/releases/$($imageurl)"
+                                                Url = "https://connectoricons-prod.azureedge.net/$($imageurl)"
                                                 }
-   try{ Invoke-WebRequest "https://connectoricons-prod.azureedge.net/releases/$($imageurl)" -OutFile "$($uniquename).png" } catch {}
+	try{ Invoke-WebRequest "https://connectoricons-prod.azureedge.net/$($imageurl)" -OutFile "$($uniquename).png" } catch {}
 }
 write-host "Exporting json"
 $connectors | ConvertTo-Json | out-file connectors.json
