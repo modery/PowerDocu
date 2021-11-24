@@ -745,55 +745,34 @@ namespace PowerDocu.FlowDocumenter
             pPr.ParagraphStyleId = new ParagraphStyleId() { Val = styleid };
         }
 
-        private Table CreateTable(BorderValues border = BorderValues.Single)
+        private Table CreateTable(BorderValues borderType = BorderValues.Single)
         {
             Table table = new Table();
 
             TableProperties props = new TableProperties(
 
                 new TableBorders(
-                new TopBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                },
-                new BottomBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                },
-                new LeftBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                },
-                new RightBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                },
-                new InsideHorizontalBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                },
-                new InsideVerticalBorder
-                {
-                    Val = new EnumValue<BorderValues>(border),
-                    Size = 12,
-                    Color = "A6A6A6"
-                }),
+                    SetDefaultTableBorderStyle(new TopBorder(), borderType),
+                    SetDefaultTableBorderStyle(new BottomBorder(), borderType),
+                    SetDefaultTableBorderStyle(new LeftBorder(), borderType),
+                    SetDefaultTableBorderStyle(new RightBorder(), borderType),
+                    SetDefaultTableBorderStyle(new InsideHorizontalBorder(), borderType),
+                    SetDefaultTableBorderStyle(new InsideVerticalBorder(), borderType)
+                ),
                 new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
                 new TableStyle() { Val = "TableGridLight" }
                 );
 
             table.AppendChild<TableProperties>(props);
             return table;
+        }
+
+        private BorderType SetDefaultTableBorderStyle(BorderType border, BorderValues borderType)
+        {
+            border.Val = new EnumValue<BorderValues>(borderType);
+            border.Size = 12;
+            border.Color = "A6A6A6";
+            return border;
         }
 
         private TableRow CreateRow(params OpenXmlElement[] cellValues)
