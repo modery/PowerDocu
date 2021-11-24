@@ -107,7 +107,7 @@ namespace PowerDocu.FlowDocumenter
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("The following connections are used in this Flow:"));
+            run.AppendChild(new Text($"There are a total of {flow.connectionReferences.Count} connections used in this Flow:"));
             foreach (ConnectionReference cRef in flow.connectionReferences)
             {
                 string connectorUniqueName = cRef.Name;
@@ -310,8 +310,6 @@ namespace PowerDocu.FlowDocumenter
             {
                 table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
             }
-
-            //the following 2 IFs could be turned into their own function
             if (flow.trigger.Recurrence.Count > 0)
             {
                 table.Append(CreateMergedRow(new Text("Recurrence Details"), 2, cellHeaderBackground));
@@ -385,14 +383,14 @@ namespace PowerDocu.FlowDocumenter
 
         private void addActionInfo(Body body, MainDocumentPart mainPart)
         {
+            List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Actions"));
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("The following actions are used in this Flow:"));
-            List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
+            run.AppendChild(new Text($"There are a total of {actionNodesList.Count} actions used in this Flow:"));
             foreach (ActionNode action in actionNodesList)
             {
                 para = body.AppendChild(new Paragraph());
