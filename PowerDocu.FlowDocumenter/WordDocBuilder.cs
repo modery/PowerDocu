@@ -210,10 +210,8 @@ namespace PowerDocu.FlowDocumenter
             ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            Table table = CreateTable();
-            table.Append(CreateHeaderRow(new Text("Name"), new Text("Type"), new Text("Initial Value")));
-            List<ActionNode> variablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "InitializeVariable").ToList();
-            List<Expression> variablesExpressionNodes = new List<Expression>();
+            List<ActionNode> variablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "InitializeVariable").OrderBy(o => o.Name).ToList();
+            List<ActionNode> modifyVariablesNodes = flow.actions.ActionNodes.Where(o => o.Type == "SetVariable" || o.Type == "IncrementVariable").ToList();
             foreach (ActionNode node in variablesNodes)
             {
                 foreach (Expression exp in node.actionInputs)
@@ -256,14 +254,77 @@ namespace PowerDocu.FlowDocumenter
                                 }
                             }
                         }
-                        table.Append(CreateRow(new Text(vname), new Text(vtype), (vval == null) ? new Text("") : vval));
+                        List<ActionNode> referencedInNodes = new List<ActionNode>();
+                        referencedInNodes.Add(node);
+                        foreach (ActionNode actionNode in modifyVariablesNodes)
+                        {
+                            foreach (Expression expO in actionNode.actionInputs)
+                            {
+                                if (expO.expressionOperator == "name")
+                                {
+                                    if (expO.expressionOperands[0].ToString().Equals(vname))
+                                    {
+                                        referencedInNodes.Add(actionNode);
+                                    }
+                                }
+                            }
+                        }
+                        foreach (ActionNode actionNode in flow.actions.ActionNodes)
+                        {
+                            if (actionNode.actionExpression?.ToString().Contains($"@variables('{vname}')") == true || actionNode.Expression?.Contains($"@variables('{vname}')") == true || actionNode.actionInput?.ToString().Contains($"@variables('{vname}')") == true)
+                            {
+                                referencedInNodes.Add(actionNode);
+                            }
+                            else
+                            {
+                                foreach (Expression actionInput in actionNode.actionInputs)
+                                {
+                                    if (actionInput.ToString().Contains($"@variables('{vname}')"))
+                                    {
+                                        referencedInNodes.Add(actionNode);
+                                    }
+                                }
+                            }
+                        }
+                        para = body.AppendChild(new Paragraph());
+                        run = para.AppendChild(new Run());
+                        run.AppendChild(new Text(vname));
+                        string bookmarkID = (new Random()).Next(100000, 999999).ToString();
+                        BookmarkStart start = new BookmarkStart() { Name = vname, Id = bookmarkID };
+                        BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
+                        para.Append(start, end);
+                        ApplyStyleToParagraph("Heading3", para);
+                        Table table = CreateTable();
+                        table.Append(CreateRow(new Text("Name"), new Text(vname)));
+                        table.Append(CreateRow(new Text("Type"), new Text(vtype)));
+                        table.Append(CreateRow(new Text("Initial Value"), (vval == null) ? new Text("") : vval));
+                        var tr = new TableRow();
+                        var tc = new TableCell();
+                        run = new Run(new Text("Used in these Actions"));
+                        RunProperties runProperties = new RunProperties();
+                        runProperties.Append(new Bold());
+                        run.RunProperties = runProperties;
+                        tc.Append(new Paragraph(run));
+                        tr.Append(tc);
+                        tc = new TableCell();
+                        foreach (ActionNode action in referencedInNodes.OrderBy(o => o.Name).ToList())
+                        {
+                            //adding a link to the action's section in the Word doc
+                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(action.Name)))
+                            {
+                                Anchor = action.Name,
+                                DocLocation = ""
+                            }));
+                        }
+                        tr.Append(tc);
+                        table.Append(tr);
+                        body.Append(table);
+                        para = body.AppendChild(new Paragraph());
+                        run = para.AppendChild(new Run());
+                        run.AppendChild(new Break());
                     }
                 }
             }
-            body.Append(table);
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
         }
 
         private TableRow CreateHeaderRow(params OpenXmlElement[] cellValues)
