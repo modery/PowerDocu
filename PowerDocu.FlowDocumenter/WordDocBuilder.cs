@@ -26,12 +26,12 @@ namespace PowerDocu.FlowDocumenter
         private const int PageMarginBottom = 1000;
         private const double DocumentSizePerPixel = 15;
         private const double EmuPerPixel = 9525;
-        private int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
-        private int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
+        private readonly int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
+        private readonly int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
         private const string cellHeaderBackground = "#E5E5FF";
-        private FlowEntity flow;
+        private readonly FlowEntity flow;
 
-        private string folderPath;
+        private readonly string folderPath;
 
         public WordDocBuilder(FlowEntity flowToDocument, string path, string template)
         {
@@ -452,7 +452,11 @@ namespace PowerDocu.FlowDocumenter
                     {
                         var tr = new TableRow();
                         var tc = new TableCell();
-                        tc.Append(new Paragraph(new Run(new Text("Subactions"))));
+                        run = new Run(new Text("Subactions"));
+                        RunProperties runProperties = new RunProperties();
+                        runProperties.Append(new Bold());
+                        run.RunProperties = runProperties;
+                        tc.Append(new Paragraph(run));
                         tr.Append(tc);
                         tc = new TableCell();
                         foreach (ActionNode subaction in action.Subactions)
@@ -464,7 +468,6 @@ namespace PowerDocu.FlowDocumenter
                                 DocLocation = ""
                             }));
                         }
-                        //tc.Append(paragraph);
                         tr.Append(tc);
                         actionDetailsTable.Append(tr);
                     }
@@ -472,7 +475,11 @@ namespace PowerDocu.FlowDocumenter
                     {
                         var tr = new TableRow();
                         var tc = new TableCell();
-                        tc.Append(new Paragraph(new Run(new Text("Elseactions"))));
+                        run = new Run(new Text("Elseactions"));
+                        RunProperties runProperties = new RunProperties();
+                        runProperties.Append(new Bold());
+                        run.RunProperties = runProperties;
+                        tc.Append(new Paragraph(run));
                         tr.Append(tc);
                         tc = new TableCell();
                         foreach (ActionNode elseaction in action.Elseactions)
@@ -738,45 +745,54 @@ namespace PowerDocu.FlowDocumenter
             pPr.ParagraphStyleId = new ParagraphStyleId() { Val = styleid };
         }
 
-        private Table CreateTable(BorderValues border = BorderValues.Dotted)
+        private Table CreateTable(BorderValues border = BorderValues.Single)
         {
             Table table = new Table();
 
             TableProperties props = new TableProperties(
+
                 new TableBorders(
                 new TopBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
+                    Size = 12,
+                    Color = "A6A6A6"
                 },
                 new BottomBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
+                    Size = 12,
+                    Color = "A6A6A6"
                 },
                 new LeftBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
+                    Size = 12,
+                    Color = "A6A6A6"
                 },
                 new RightBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
+                    Size = 12,
+                    Color = "A6A6A6"
                 },
                 new InsideHorizontalBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
+                    Size = 12,
+                    Color = "A6A6A6"
                 },
                 new InsideVerticalBorder
                 {
                     Val = new EnumValue<BorderValues>(border),
-                    Size = 12
-                }));
+                    Size = 12,
+                    Color = "A6A6A6"
+                }),
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableStyle() { Val = "TableGridLight" }
+                );
 
             table.AppendChild<TableProperties>(props);
-
             return table;
         }
 
@@ -794,6 +810,9 @@ namespace PowerDocu.FlowDocumenter
                     runProperties.Append(new Bold());
                     run.RunProperties = runProperties;
                     isFirstCell = false;
+                    TableCellProperties tcp = new TableCellProperties();
+                    tcp.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "900" });
+                    tc.TableCellProperties = tcp;
                 }
                 tc.Append(new Paragraph(run));
                 tr.Append(tc);
@@ -818,6 +837,7 @@ namespace PowerDocu.FlowDocumenter
                 };
 
                 tc.TableCellProperties.Append(shading);
+                tc.TableCellProperties.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "700" });
                 tr.Append(tc);
                 tc = new TableCell();
                 foreach (var expressionOperand in expression.expressionOperands)
