@@ -22,7 +22,7 @@ $connectors = @()
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $req = Invoke-Webrequest -URI $myURI
 $parsedconnectors = $req.ParsedHtml.getElementsByClassName($searchClass)
-write-host "$($parsedconnectors.length) connectors found. Starting processing"
+write-host "$($parsedconnectors.length) potential connectors found. Starting processing"
 $parsedconnectors| %{
     #lots of manual parsing here. Does its job at the moment, could be improved if needed
     $nameextract = $_.innerHTML.substring($_.innerHTML.IndexOf('title="')+7)
@@ -38,7 +38,9 @@ $parsedconnectors| %{
                                                 }
 	try{ Invoke-WebRequest "https://connectoricons-prod.azureedge.net/$($imageurl)" -OutFile "$($uniquename).png" } catch {}
 }
+$uniqueconnectors =  $connectors | Sort-Object -Property Uniquename -Unique
+write-host "A total of $($uniqueconnectors.Count) unique connectors found"
 write-host "Exporting json"
-$connectors | ConvertTo-Json | out-file connectors.json
+$uniqueconnectors | ConvertTo-Json | out-file connectors.json
 
 write-host "All done"
