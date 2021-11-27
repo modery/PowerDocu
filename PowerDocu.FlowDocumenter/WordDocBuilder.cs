@@ -850,8 +850,10 @@ namespace PowerDocu.FlowDocumenter
                     runProperties.Append(new Bold());
                     run.RunProperties = runProperties;
                     isFirstCell = false;
+                    //if it's the first cell and the content is of type Drawing (an icon!), then we use a reduced width
+                    string cellWidth = (cellValue.GetType() == typeof(Drawing)) ? "100" : "900";
                     TableCellProperties tcp = new TableCellProperties();
-                    tcp.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "900" });
+                    tcp.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = cellWidth });
                     tc.TableCellProperties = tcp;
                 }
                 tc.Append(new Paragraph(run));
