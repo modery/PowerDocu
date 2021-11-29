@@ -301,14 +301,14 @@ namespace PowerDocu.FlowDocumenter
                         table.Append(CreateRow(new Text("Type"), new Text(vtype)));
                         table.Append(CreateRow(new Text("Initial Value"), (vval == null) ? new Text("") : vval));
                         var tr = new TableRow();
-                        var tc = new TableCell();
+                        var tc = CreateTableCell();
                         run = new Run(new Text("Used in these Actions"));
                         RunProperties runProperties = new RunProperties();
                         runProperties.Append(new Bold());
                         run.RunProperties = runProperties;
                         tc.Append(new Paragraph(run));
                         tr.Append(tc);
-                        tc = new TableCell();
+                        tc = CreateTableCell();
                         foreach (ActionNode action in referencedInNodes.OrderBy(o => o.Name).ToList())
                         {
                             //adding a link to the action's section in the Word doc
@@ -334,13 +334,12 @@ namespace PowerDocu.FlowDocumenter
             TableRow tr = new TableRow();
             foreach (var cellValue in cellValues)
             {
-                TableCell tc = new TableCell();
+                TableCell tc = CreateTableCell();
                 var run = new Run(cellValue);
                 RunProperties runProperties = new RunProperties();
                 runProperties.Append(new Bold());
                 run.RunProperties = runProperties;
                 tc.Append(new Paragraph(run));
-                tc.TableCellProperties = new TableCellProperties();
                 var shading = new Shading()
                 {
                     Color = "auto",
@@ -352,6 +351,16 @@ namespace PowerDocu.FlowDocumenter
                 tr.Append(tc);
             }
             return tr;
+        }
+
+        private TableCell CreateTableCell()
+        {
+            TableCell tc = new TableCell();
+            TableCellProperties tableCellProperties = new TableCellProperties();
+            TableCellWidth tableCellWidth = new TableCellWidth() { Width = "0", Type = TableWidthUnitValues.Auto };
+            tableCellProperties.Append(tableCellWidth);
+            tc.Append(tableCellProperties);
+            return tc;
         }
 
         private void addTriggerInfo(Body body)
@@ -514,14 +523,14 @@ namespace PowerDocu.FlowDocumenter
                     if (action.Subactions.Count > 0)
                     {
                         var tr = new TableRow();
-                        var tc = new TableCell();
+                        var tc = CreateTableCell();
                         run = new Run(new Text("Subactions"));
                         RunProperties runProperties = new RunProperties();
                         runProperties.Append(new Bold());
                         run.RunProperties = runProperties;
                         tc.Append(new Paragraph(run));
                         tr.Append(tc);
-                        tc = new TableCell();
+                        tc = CreateTableCell();
                         foreach (ActionNode subaction in action.Subactions)
                         {
                             //adding a link to the subaction's section in the Word doc
@@ -537,14 +546,14 @@ namespace PowerDocu.FlowDocumenter
                     if (action.Elseactions.Count > 0)
                     {
                         var tr = new TableRow();
-                        var tc = new TableCell();
+                        var tc = CreateTableCell();
                         run = new Run(new Text("Elseactions"));
                         RunProperties runProperties = new RunProperties();
                         runProperties.Append(new Bold());
                         run.RunProperties = runProperties;
                         tc.Append(new Paragraph(run));
                         tr.Append(tc);
-                        tc = new TableCell();
+                        tc = CreateTableCell();
                         foreach (ActionNode elseaction in action.Elseactions)
                         {
                             //adding a link to the elseaction's section in the Word doc
@@ -850,7 +859,7 @@ namespace PowerDocu.FlowDocumenter
             bool isFirstCell = true;
             foreach (var cellValue in cellValues)
             {
-                TableCell tc = new TableCell();
+                TableCell tc = CreateTableCell();
                 var run = new Run(cellValue);
                 if (isFirstCell)
                 {
@@ -860,9 +869,7 @@ namespace PowerDocu.FlowDocumenter
                     isFirstCell = false;
                     //if it's the first cell and the content is of type Drawing (an icon!), then we use a reduced width
                     string cellWidth = (cellValue.GetType() == typeof(Drawing)) ? "100" : "900";
-                    TableCellProperties tcp = new TableCellProperties();
-                    tcp.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = cellWidth });
-                    tc.TableCellProperties = tcp;
+                    tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = cellWidth };
                 }
                 tc.Append(new Paragraph(run));
                 tr.Append(tc);
@@ -876,18 +883,16 @@ namespace PowerDocu.FlowDocumenter
             if (expression?.expressionOperator != null)
             {
                 var tr = new TableRow();
-                var tc = new TableCell();
+                var tc = CreateTableCell();
                 tc.Append(new Paragraph(new Run(new Text(expression.expressionOperator))));
-                tc.TableCellProperties = new TableCellProperties();
                 var shading = new Shading()
                 {
                     Color = "auto",
                     Fill = "#E5FFE5",
                     Val = ShadingPatternValues.Clear
                 };
-
                 tc.TableCellProperties.Append(shading);
-                tc.TableCellProperties.Append(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "700" });
+                tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "700" };
                 tr.Append(tc);
                 tc = new TableCell();
                 foreach (var expressionOperand in expression.expressionOperands)
@@ -914,7 +919,7 @@ namespace PowerDocu.FlowDocumenter
         private TableRow CreateMergedRow(OpenXmlElement cellValue, int colSpan, string colour)
         {
             TableRow tr = new TableRow();
-            var tc = new TableCell();
+            var tc = CreateTableCell();
             RunProperties run1Properties = new RunProperties();
             run1Properties.Append(new Bold());
             var run = new Run(cellValue)
@@ -922,10 +927,7 @@ namespace PowerDocu.FlowDocumenter
                 RunProperties = run1Properties
             };
             tc.Append(new Paragraph(run));
-            tc.TableCellProperties = new TableCellProperties
-            {
-                GridSpan = new GridSpan() { Val = colSpan }
-            };
+            tc.TableCellProperties.GridSpan = new GridSpan() { Val = colSpan };
             var shading = new Shading()
             {
                 Color = "auto",
