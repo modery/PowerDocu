@@ -138,14 +138,9 @@ namespace PowerDocu.FlowDocumenter
                     table.Append(CreateRow(new Text("Source"), new Text(cRef.Source)));
                 }
                 body.Append(table);
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Break());
+                body.AppendChild(new Paragraph(new Run(new Break())));
             }
-
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private OpenXmlElement appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart, HyperlinkRelationship rel)
@@ -199,9 +194,7 @@ namespace PowerDocu.FlowDocumenter
             }
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
             body.Append(table);
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private void addVariablesInfo(Body body)
@@ -321,9 +314,7 @@ namespace PowerDocu.FlowDocumenter
                         tr.Append(tc);
                         table.Append(tr);
                         body.Append(table);
-                        para = body.AppendChild(new Paragraph());
-                        run = para.AppendChild(new Run());
-                        run.AppendChild(new Break());
+                        body.AppendChild(new Paragraph(new Run(new Break())));
                     }
                 }
             }
@@ -396,26 +387,33 @@ namespace PowerDocu.FlowDocumenter
                 table.Append(CreateMergedRow(new Text("Inputs Details"), 2, cellHeaderBackground));
                 foreach (Expression input in flow.trigger.Inputs)
                 {
-                    Run run2 = new Run();
-                    foreach (object actionInputOperand in input.expressionOperands)
+                    TableCell operandsCell = CreateTableCell();
+
+                    Table operandsTable = CreateTable(BorderValues.Single, 0.8);
+                    if (input.expressionOperands.Count > 1)
                     {
-                        if (actionInputOperand.GetType() == typeof(Expression))
+                        foreach (object actionInputOperand in input.expressionOperands)
                         {
-                            run2.Append(AddExpressionTable((Expression)actionInputOperand));
+                            if (actionInputOperand.GetType() == typeof(Expression))
+                            {
+                                AddExpressionTable((Expression)actionInputOperand, operandsTable);
+                            }
+                            else
+                            {
+                                operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
+                            }
                         }
-                        else
-                        {
-                            run2.Append(new Text(actionInputOperand.ToString()));
-                        }
+                        operandsCell.Append(operandsTable, new Paragraph());
                     }
-                    table.Append(CreateRow(new Text(input.expressionOperator), new Paragraph(run2)));
+                    else
+                    {
+                        operandsCell.Append(new Paragraph(new Run(new Text(input.expressionOperands[0]?.ToString()))));
+                    }
+                    table.Append(CreateRow(new Text(input.expressionOperator), operandsCell));
                 }
             }
-
             body.Append(table);
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private void addFlowOverview(Body body, WordprocessingDocument wordDoc)
@@ -448,9 +446,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(
                 InsertSvgImage(wordDoc.MainDocumentPart.GetIdOfPart(svgPart), wordDoc.MainDocumentPart.GetIdOfPart(imagePart), imageWidth, imageHeight)
             )));
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private void addActionInfo(Body body, MainDocumentPart mainPart)
@@ -497,19 +493,29 @@ namespace PowerDocu.FlowDocumenter
                     {
                         foreach (Expression actionInput in action.actionInputs)
                         {
-                            Run run2 = new Run();
-                            foreach (object actionInputOperand in actionInput.expressionOperands)
+                            TableCell operandsCell = CreateTableCell();
+                            if (actionInput.expressionOperands.Count > 1)
                             {
-                                if (actionInputOperand.GetType() == typeof(Expression))
+                                Table operandsTable = CreateTable(BorderValues.Single, 0.8);
+                                foreach (object actionInputOperand in actionInput.expressionOperands)
                                 {
-                                    run2.Append(AddExpressionTable((Expression)actionInputOperand, 0.8));
+                                    if (actionInputOperand.GetType() == typeof(Expression))
+                                    {
+                                        AddExpressionTable((Expression)actionInputOperand, operandsTable, 0.8);
+                                    }
+                                    else
+                                    {
+                                        operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
+                                    }
                                 }
-                                else
-                                {
-                                    run2.Append(new Text(actionInputOperand.ToString()));
-                                }
+                                operandsCell.Append(operandsTable, new Paragraph());
                             }
-                            actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), new Paragraph(run2)));
+                            else
+                            {
+                                operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+
+                            }
+                            actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), operandsCell));
                         }
                     }
                     if (!String.IsNullOrEmpty(action.Inputs))
@@ -569,14 +575,9 @@ namespace PowerDocu.FlowDocumenter
                 }
                 body.Append(actionDetailsTable);
 
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Break());
+                body.AppendChild(new Paragraph(new Run(new Break())));
             }
-
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private Drawing InsertImage(string relationshipId, int imageWidth, int imageHeight)
@@ -692,9 +693,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(
                 InsertSvgImage(wordDoc.MainDocumentPart.GetIdOfPart(svgPart), wordDoc.MainDocumentPart.GetIdOfPart(imagePart), imageWidth, imageHeight)
             )));
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Break());
+            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private Drawing InsertSvgImage(string svgRelationshipId, string imgRelationshipId, int imageWidth, int imageHeight)
@@ -835,7 +834,7 @@ namespace PowerDocu.FlowDocumenter
                     SetDefaultTableBorderStyle(new InsideHorizontalBorder(), borderType),
                     SetDefaultTableBorderStyle(new InsideVerticalBorder(), borderType)
                 )
-            );
+                );
             table.AppendChild<TableProperties>(props);
             table.AppendChild(new TableGrid(new GridColumn() { Width = Math.Round(1822 * factor).ToString() }, new GridColumn() { Width = Math.Round(8300 * factor).ToString() }));
             return table;
@@ -864,7 +863,7 @@ namespace PowerDocu.FlowDocumenter
                 {
                     TableCell tc = CreateTableCell();
                     RunProperties runProperties = new RunProperties();
-                    if (isFirstCell)
+                    if (isFirstCell && cellValues.Length > 1)
                     {
                         runProperties.Append(new Bold());
                         isFirstCell = false;
@@ -875,8 +874,7 @@ namespace PowerDocu.FlowDocumenter
                     //if we are inserting a table, we do so directly, but also need to add an empty paragraph right after it
                     if (cellValue.GetType() == typeof(Table))
                     {
-                        tc.Append(cellValue);
-                        tc.Append(new Paragraph());
+                        tc.Append(cellValue, new Paragraph());
                     }
                     //hyperlinks get added within a paragraph
                     else if (cellValue.GetType() == typeof(Hyperlink))
@@ -900,38 +898,49 @@ namespace PowerDocu.FlowDocumenter
             return tr;
         }
 
-        private Table AddExpressionTable(Expression expression, double factor = 1)
+        private Table AddExpressionTable(Expression expression, Table table = null, double factor = 1)
         {
-            Table table = CreateTable(BorderValues.Single, factor);
+            if (table == null)
+                table = CreateTable(BorderValues.Single, factor);
             if (expression?.expressionOperator != null)
             {
                 var tr = new TableRow();
                 var tc = CreateTableCell();
-                tc.Append(new Paragraph(new Run(new Text(expression.expressionOperator))));
                 var shading = new Shading()
                 {
                     Color = "auto",
-                    Fill = "#E5FFE5",
+                    Fill = "E5FFE5",
                     Val = ShadingPatternValues.Clear
                 };
+
                 tc.TableCellProperties.Append(shading);
                 tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "700" };
+                tc.Append(new Paragraph(new Run(new Text(expression.expressionOperator))));
                 tr.Append(tc);
-                tc = new TableCell();
-                foreach (var expressionOperand in expression.expressionOperands)
+                tc = CreateTableCell();
+                if (expression.expressionOperands.Count > 1)
                 {
-                    if (expressionOperand.GetType().Equals(typeof(string)))
+                    Table operandsTable = CreateTable(BorderValues.Single, factor * factor);
+                    foreach (var expressionOperand in expression.expressionOperands)
                     {
-                        tc.Append(new Paragraph(new Run(new Text((string)expressionOperand))));
+                        if (expressionOperand.GetType().Equals(typeof(string)))
+                        {
+                            operandsTable.Append(CreateRow(new Text((string)expressionOperand)));
+                        }
+                        else if (expressionOperand.GetType().Equals(typeof(Expression)))
+                        {
+                            AddExpressionTable((Expression)expressionOperand, operandsTable, factor * factor);
+                        }
+                        else
+                        {
+                            operandsTable.Append(CreateRow(new Text("")));
+                        }
                     }
-                    else if (expressionOperand.GetType().Equals(typeof(Expression)))
-                    {
-                        tc.Append(new Paragraph(new Run(AddExpressionTable((Expression)expressionOperand, factor))));
-                    }
-                    else
-                    {
-                        tc.Append(new Paragraph(new Run(new Text(""))));
-                    }
+                    tc.Append(operandsTable, new Paragraph());
+                }
+                else
+                {
+                    tc.Append(new Paragraph(new Run(new Text((expression.expressionOperands.Count == 0) ? "" : expression.expressionOperands[0]?.ToString()))));
                 }
                 tr.Append(tc);
                 table.Append(tr);
