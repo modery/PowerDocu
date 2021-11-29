@@ -296,7 +296,7 @@ namespace PowerDocu.FlowDocumenter
                         BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
                         para.Append(start, end);
                         ApplyStyleToParagraph("Heading3", para);
-                        Table table = CreateTable();
+                        Table table = CreateTable(BorderValues.Single, 0.8);
                         table.Append(CreateRow(new Text("Name"), new Text(vname)));
                         table.Append(CreateRow(new Text("Type"), new Text(vtype)));
                         table.Append(CreateRow(new Text("Initial Value"), (vval == null) ? new Text("") : vval));
