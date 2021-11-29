@@ -28,8 +28,9 @@ namespace PowerDocu.FlowDocumenter
         private const double EmuPerPixel = 9525;
         private readonly int maxImageWidth = PageWidth - PageMarginRight - PageMarginLeft;
         private readonly int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
-        private const string cellHeaderBackground = "#E5E5FF";
+        private const string cellHeaderBackground = "E5E5FF";
         private readonly FlowEntity flow;
+        private readonly Random random = new Random();
 
         private readonly string folderPath;
 
@@ -46,6 +47,7 @@ namespace PowerDocu.FlowDocumenter
             {
                 MainDocumentPart mainPart = wordDocument.MainDocumentPart;
                 Body body = mainPart.Document.Body;
+                AddNameSpaces(mainPart.Document);
                 if (!String.IsNullOrEmpty(template))
                 {
                     // Set Page Size and Page Margin so that we can place the image as desired.
@@ -118,9 +120,9 @@ namespace PowerDocu.FlowDocumenter
                 ApplyStyleToParagraph("Heading3", para);
 
                 var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + connectorUniqueName), true);
-                run = appendConnectorNameAndIcon(connectorUniqueName, mainPart, rel);
                 Table table = CreateTable();
-                table.Append(CreateRow(new Text("Connector"), run));
+                table.Append(CreateRow(new Text("Connector"),
+                                appendConnectorNameAndIcon(connectorUniqueName, mainPart, rel)));
                 table.Append(CreateRow(new Text("Connection Type"), new Text(cRef.Type.ToString())));
                 if (cRef.Type == ConnectionType.ConnectorReference)
                 {
@@ -146,7 +148,7 @@ namespace PowerDocu.FlowDocumenter
             run.AppendChild(new Break());
         }
 
-        private Run appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart, HyperlinkRelationship rel)
+        private OpenXmlElement appendConnectorNameAndIcon(string connectorUniqueName, MainDocumentPart mainPart, HyperlinkRelationship rel)
         {
             ConnectorIcon connectorIcon = ConnectorHelper.getConnectorIcon(connectorUniqueName);
             ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
@@ -165,17 +167,18 @@ namespace PowerDocu.FlowDocumenter
                 }
                 Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), 32, 32);
                 Run run = new Run(new RunProperties(
-                    new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
+                    new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "0563C1", ThemeColor = ThemeColorValues.Hyperlink }),
                                             new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName));
                 Table iconTable = CreateTable(BorderValues.None);
                 iconTable.Append(CreateRow(icon, new Hyperlink(run) { History = OnOffValue.FromBoolean(true), Id = rel.Id }));
-                return new Run(iconTable);
+                return iconTable;
             }
             else
             {
-                return new Run(new RunProperties(
-                    new DocumentFormat.OpenXml.Wordprocessing.Color { ThemeColor = ThemeColorValues.Hyperlink }),
-                                             new Hyperlink(new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)) { History = OnOffValue.FromBoolean(true), Id = rel.Id });
+                return new Hyperlink(new Run(new RunProperties(
+                    new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "0563C1", ThemeColor = ThemeColorValues.Hyperlink }),
+                                             new Text((connectorIcon != null) ? connectorIcon.Name : connectorUniqueName)))
+                { History = OnOffValue.FromBoolean(true), Id = rel.Id };
             }
         }
 
@@ -469,8 +472,8 @@ namespace PowerDocu.FlowDocumenter
                 if (!String.IsNullOrEmpty(action.Connection))
                 {
                     var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + action.Connection), true);
-                    run = appendConnectorNameAndIcon(action.Connection, mainPart, rel);
-                    actionDetailsTable.Append(CreateRow(new Text("Connection"), run));
+                    actionDetailsTable.Append(CreateRow(new Text("Connection"),
+                                                appendConnectorNameAndIcon(action.Connection, mainPart, rel)));
                 }
 
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
@@ -583,7 +586,8 @@ namespace PowerDocu.FlowDocumenter
             }
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
-
+            string randomHex = GetRandomHexNumber(8);
+            int randomId = (new Random()).Next(100000, 999999);
             return new Drawing(
                     new DW.Inline(
                         new DW.Extent() { Cx = width, Cy = height },
@@ -596,8 +600,8 @@ namespace PowerDocu.FlowDocumenter
                         },
                         new DW.DocProperties()
                         {
-                            Id = (UInt32Value)1U,
-                            Name = "Picture 1"
+                            Id = (uint)randomId,
+                            Name = "Picture " + randomId
                         },
                         new DW.NonVisualGraphicFrameDrawingProperties(
                             new A.GraphicFrameLocks() { NoChangeAspect = true }),
@@ -607,8 +611,8 @@ namespace PowerDocu.FlowDocumenter
                                     new PIC.NonVisualPictureProperties(
                                         new PIC.NonVisualDrawingProperties()
                                         {
-                                            Id = (UInt32Value)0U,
-                                            Name = "New Bitmap Image.png"
+                                            Id = (uint)randomId + 1,
+                                            Name = "New Bitmap Image" + (randomId + 1) + ".png"
                                         },
                                         new PIC.NonVisualPictureDrawingProperties()),
                                     new PIC.BlipFill(
@@ -643,7 +647,8 @@ namespace PowerDocu.FlowDocumenter
                         DistanceFromBottom = (UInt32Value)0U,
                         DistanceFromLeft = (UInt32Value)0U,
                         DistanceFromRight = (UInt32Value)0U,
-                        EditId = "50D07946"
+                        AnchorId = randomHex,
+                        EditId = randomHex
                     });
         }
 
@@ -699,6 +704,8 @@ namespace PowerDocu.FlowDocumenter
             }
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
+            string randomHex = GetRandomHexNumber(8);
+            int randomId = (new Random()).Next(100000, 999999);
 
             A.BlipExtension svgelement = new A.BlipExtension
             {
@@ -727,8 +734,8 @@ namespace PowerDocu.FlowDocumenter
                         },
                         new DW.DocProperties()
                         {
-                            Id = (UInt32Value)1U,
-                            Name = "Picture 1"
+                            Id = (uint)randomId,
+                            Name = "Picture " + randomId
                         },
                         new DW.NonVisualGraphicFrameDrawingProperties(
                             new A.GraphicFrameLocks() { NoChangeAspect = true }),
@@ -738,8 +745,8 @@ namespace PowerDocu.FlowDocumenter
                                     new PIC.NonVisualPictureProperties(
                                         new PIC.NonVisualDrawingProperties()
                                         {
-                                            Id = (UInt32Value)0U,
-                                            Name = "New Bitmap Image.png"
+                                            Id = (uint)randomId + 1,
+                                            Name = "New Bitmap Image" + (randomId + 1) + ".png"
                                         },
                                         new PIC.NonVisualPictureDrawingProperties()),
                                     new PIC.BlipFill(
@@ -772,7 +779,8 @@ namespace PowerDocu.FlowDocumenter
                         DistanceFromBottom = (UInt32Value)0U,
                         DistanceFromLeft = (UInt32Value)0U,
                         DistanceFromRight = (UInt32Value)0U,
-                        EditId = "50D07946"
+                        AnchorId = randomHex,
+                        EditId = randomHex
                     });
 
             return element;
@@ -832,6 +840,7 @@ namespace PowerDocu.FlowDocumenter
             border.Val = new EnumValue<BorderValues>(borderType);
             border.Size = 12;
             border.Color = "A6A6A6";
+            border.Space = 0;
             return border;
         }
 
@@ -915,7 +924,7 @@ namespace PowerDocu.FlowDocumenter
             tc.Append(new Paragraph(run));
             tc.TableCellProperties = new TableCellProperties
             {
-                HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Restart }
+                GridSpan = new GridSpan() { Val = colSpan }
             };
             var shading = new Shading()
             {
@@ -926,21 +935,54 @@ namespace PowerDocu.FlowDocumenter
 
             tc.TableCellProperties.Append(shading);
             tr.Append(tc);
-            if (colSpan > 1)
-            {
-                for (int i = 2; i <= colSpan; i++)
-                {
-                    var tc2 = new TableCell
-                    {
-                        TableCellProperties = new TableCellProperties()
-                    };
-                    tc2.TableCellProperties.HorizontalMerge = new HorizontalMerge { Val = MergedCellValues.Continue };
-                    tc2.Append(new Paragraph());
-                    tr.Append(tc2);
-                }
-            }
 
             return tr;
+        }
+
+        private void AddNameSpaces(Document document)
+        {
+            document.AddNamespaceDeclaration("wpc", "http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas");
+            document.AddNamespaceDeclaration("cx", "http://schemas.microsoft.com/office/drawing/2014/chartex");
+            document.AddNamespaceDeclaration("cx1", "http://schemas.microsoft.com/office/drawing/2015/9/8/chartex");
+            document.AddNamespaceDeclaration("cx2", "http://schemas.microsoft.com/office/drawing/2015/10/21/chartex");
+            document.AddNamespaceDeclaration("cx3", "http://schemas.microsoft.com/office/drawing/2016/5/9/chartex");
+            document.AddNamespaceDeclaration("cx4", "http://schemas.microsoft.com/office/drawing/2016/5/10/chartex");
+            document.AddNamespaceDeclaration("cx5", "http://schemas.microsoft.com/office/drawing/2016/5/11/chartex");
+            document.AddNamespaceDeclaration("cx6", "http://schemas.microsoft.com/office/drawing/2016/5/12/chartex");
+            document.AddNamespaceDeclaration("cx7", "http://schemas.microsoft.com/office/drawing/2016/5/13/chartex");
+            document.AddNamespaceDeclaration("cx8", "http://schemas.microsoft.com/office/drawing/2016/5/14/chartex");
+            document.AddNamespaceDeclaration("mc", "http://schemas.openxmlformats.org/markup-compatibility/2006");
+            document.AddNamespaceDeclaration("aink", "http://schemas.microsoft.com/office/drawing/2016/ink");
+            document.AddNamespaceDeclaration("am3d", "http://schemas.microsoft.com/office/drawing/2017/model3d");
+            document.AddNamespaceDeclaration("o", "urn:schemas-microsoft-com:office:office");
+            document.AddNamespaceDeclaration("r", "http://schemas.openxmlformats.org/officeDocument/2006/relationships");
+            document.AddNamespaceDeclaration("m", "http://schemas.openxmlformats.org/officeDocument/2006/math");
+            document.AddNamespaceDeclaration("v", "urn:schemas-microsoft-com:vml");
+            document.AddNamespaceDeclaration("wp14", "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing");
+            document.AddNamespaceDeclaration("wp", "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing");
+            document.AddNamespaceDeclaration("w10", "urn:schemas-microsoft-com:office:word");
+            //document.AddNamespaceDeclaration("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
+            document.AddNamespaceDeclaration("w14", "http://schemas.microsoft.com/office/word/2010/wordml");
+            document.AddNamespaceDeclaration("w15", "http://schemas.microsoft.com/office/word/2012/wordml");
+            document.AddNamespaceDeclaration("w16cex", "http://schemas.microsoft.com/office/word/2018/wordml/cex");
+            document.AddNamespaceDeclaration("w16cid", "http://schemas.microsoft.com/office/word/2016/wordml/cid");
+            document.AddNamespaceDeclaration("w16", "http://schemas.microsoft.com/office/word/2018/wordml");
+            document.AddNamespaceDeclaration("w16sdtdh", "http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash");
+            document.AddNamespaceDeclaration("w16se", "http://schemas.microsoft.com/office/word/2015/wordml/symex");
+            document.AddNamespaceDeclaration("wpg", "http://schemas.microsoft.com/office/word/2010/wordprocessingGroup");
+            document.AddNamespaceDeclaration("wpi", "http://schemas.microsoft.com/office/word/2010/wordprocessingInk");
+            document.AddNamespaceDeclaration("wne", "http://schemas.microsoft.com/office/word/2006/wordml");
+            document.AddNamespaceDeclaration("wps", "http://schemas.microsoft.com/office/word/2010/wordprocessingShape");
+        }
+
+        public string GetRandomHexNumber(int digits)
+        {
+            byte[] buffer = new byte[digits / 2];
+            random.NextBytes(buffer);
+            string result = String.Concat(buffer.Select(x => x.ToString("X2")).ToArray());
+            if (digits % 2 == 0)
+                return result;
+            return result + random.Next(16).ToString("X");
         }
     }
 }
