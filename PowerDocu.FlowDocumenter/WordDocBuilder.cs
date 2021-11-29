@@ -822,25 +822,22 @@ namespace PowerDocu.FlowDocumenter
             pPr.ParagraphStyleId = new ParagraphStyleId() { Val = styleid };
         }
 
-        private Table CreateTable(BorderValues borderType = BorderValues.Single)
+        private Table CreateTable(BorderValues borderType = BorderValues.Single, double factor = 1)
         {
             Table table = new Table();
-
             TableProperties props = new TableProperties(
-
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
                 new TableBorders(
                     SetDefaultTableBorderStyle(new TopBorder(), borderType),
-                    SetDefaultTableBorderStyle(new BottomBorder(), borderType),
                     SetDefaultTableBorderStyle(new LeftBorder(), borderType),
+                    SetDefaultTableBorderStyle(new BottomBorder(), borderType),
                     SetDefaultTableBorderStyle(new RightBorder(), borderType),
                     SetDefaultTableBorderStyle(new InsideHorizontalBorder(), borderType),
                     SetDefaultTableBorderStyle(new InsideVerticalBorder(), borderType)
-                ),
-                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
-                new TableStyle() { Val = "TableGridLight" }
-                );
-
+                )
+            );
             table.AppendChild<TableProperties>(props);
+            table.AppendChild(new TableGrid(new GridColumn() { Width = Math.Round(1822 * factor).ToString() }, new GridColumn() { Width = Math.Round(8300 * factor).ToString() }));
             return table;
         }
 
