@@ -502,7 +502,7 @@ namespace PowerDocu.FlowDocumenter
                             {
                                 if (actionInputOperand.GetType() == typeof(Expression))
                                 {
-                                    run2.Append(AddExpressionTable((Expression)actionInputOperand));
+                                    run2.Append(AddExpressionTable((Expression)actionInputOperand, 0.8));
                                 }
                                 else
                                 {
@@ -856,27 +856,53 @@ namespace PowerDocu.FlowDocumenter
             bool isFirstCell = true;
             foreach (var cellValue in cellValues)
             {
-                TableCell tc = CreateTableCell();
-                var run = new Run(cellValue);
-                if (isFirstCell)
+                if (cellValue.GetType() == typeof(TableCell))
                 {
-                    RunProperties runProperties = new RunProperties();
-                    runProperties.Append(new Bold());
-                    run.RunProperties = runProperties;
-                    isFirstCell = false;
-                    //if it's the first cell and the content is of type Drawing (an icon!), then we use a reduced width
-                    string cellWidth = (cellValue.GetType() == typeof(Drawing)) ? "100" : "900";
-                    tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = cellWidth };
+                    tr.Append(cellValue);
                 }
-                tc.Append(new Paragraph(run));
-                tr.Append(tc);
+                else
+                {
+                    TableCell tc = CreateTableCell();
+                    RunProperties runProperties = new RunProperties();
+                    if (isFirstCell)
+                    {
+                        runProperties.Append(new Bold());
+                        isFirstCell = false;
+                        //if it's the first cell and the content is of type Drawing (an icon!), then we use a reduced width
+                        string cellWidth = (cellValue.GetType() == typeof(Drawing)) ? "100" : "900";
+                        tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = cellWidth };
+                    }
+                    //if we are inserting a table, we do so directly, but also need to add an empty paragraph right after it
+                    if (cellValue.GetType() == typeof(Table))
+                    {
+                        tc.Append(cellValue);
+                        tc.Append(new Paragraph());
+                    }
+                    //hyperlinks get added within a paragraph
+                    else if (cellValue.GetType() == typeof(Hyperlink))
+                    {
+                        tc.Append(new Paragraph(cellValue));
+                    }
+                    //paragraphs get added directly
+                    else if (cellValue.GetType() == typeof(Paragraph))
+                    {
+                        tc.Append(cellValue);
+                    }
+                    else
+                    {
+                        var run = new Run(cellValue);
+                        run.RunProperties = runProperties;
+                        tc.Append(new Paragraph(run));
+                    }
+                    tr.Append(tc);
+                }
             }
             return tr;
         }
 
-        private Table AddExpressionTable(Expression expression)
+        private Table AddExpressionTable(Expression expression, double factor = 1)
         {
-            Table table = CreateTable();
+            Table table = CreateTable(BorderValues.Single, factor);
             if (expression?.expressionOperator != null)
             {
                 var tr = new TableRow();
@@ -900,7 +926,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else if (expressionOperand.GetType().Equals(typeof(Expression)))
                     {
-                        tc.Append(new Paragraph(new Run(AddExpressionTable((Expression)expressionOperand))));
+                        tc.Append(new Paragraph(new Run(AddExpressionTable((Expression)expressionOperand, factor))));
                     }
                     else
                     {
