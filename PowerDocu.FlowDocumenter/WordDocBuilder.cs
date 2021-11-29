@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -285,7 +287,7 @@ namespace PowerDocu.FlowDocumenter
                         run = para.AppendChild(new Run());
                         run.AppendChild(new Text(vname));
                         string bookmarkID = (new Random()).Next(100000, 999999).ToString();
-                        BookmarkStart start = new BookmarkStart() { Name = vname, Id = bookmarkID };
+                        BookmarkStart start = new BookmarkStart() { Name = CreateMD5Hash(vname), Id = bookmarkID };
                         BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
                         para.Append(start, end);
                         ApplyStyleToParagraph("Heading3", para);
@@ -465,7 +467,7 @@ namespace PowerDocu.FlowDocumenter
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(action.Name));
                 string bookmarkID = (new Random()).Next(100000, 999999).ToString();
-                BookmarkStart start = new BookmarkStart() { Name = action.Name, Id = bookmarkID };
+                BookmarkStart start = new BookmarkStart() { Name = CreateMD5Hash(action.Name), Id = bookmarkID };
                 BookmarkEnd end = new BookmarkEnd() { Id = bookmarkID };
                 para.Append(start, end);
                 ApplyStyleToParagraph("Heading3", para);
@@ -513,7 +515,6 @@ namespace PowerDocu.FlowDocumenter
                             else
                             {
                                 operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
-
                             }
                             actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), operandsCell));
                         }
@@ -888,9 +889,10 @@ namespace PowerDocu.FlowDocumenter
                     }
                     else
                     {
-                        var run = new Run(cellValue);
-                        run.RunProperties = runProperties;
-                        tc.Append(new Paragraph(run));
+                        tc.Append(new Paragraph(new Run(cellValue)
+                        {
+                            RunProperties = runProperties
+                        }));
                     }
                     tr.Append(tc);
                 }
@@ -938,9 +940,21 @@ namespace PowerDocu.FlowDocumenter
                     }
                     tc.Append(operandsTable, new Paragraph());
                 }
+                else if (expression.expressionOperands.Count == 0)
+                {
+                    tc.Append(new Paragraph(new Run(new Text(""))));
+                }
                 else
                 {
-                    tc.Append(new Paragraph(new Run(new Text((expression.expressionOperands.Count == 0) ? "" : expression.expressionOperands[0]?.ToString()))));
+                    object expo = expression.expressionOperands[0];
+                    if (expo.GetType().Equals(typeof(string)))
+                    {
+                        tc.Append(new Paragraph(new Run(new Text((expression.expressionOperands.Count == 0) ? "" : expression.expressionOperands[0]?.ToString()))));
+                    }
+                    else
+                    {
+                        tc.Append(AddExpressionTable((Expression)expo, null, factor * factor), new Paragraph());
+                    }
                 }
                 tr.Append(tc);
                 table.Append(tr);
@@ -1017,6 +1031,23 @@ namespace PowerDocu.FlowDocumenter
             if (digits % 2 == 0)
                 return result;
             return result + random.Next(16).ToString("X");
+        }
+
+
+        public string CreateMD5Hash(string input)
+        {
+            // Step 1, calculate MD5 hash from input
+            MD5 md5 = System.Security.Cryptography.MD5.Create();
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Step 2, convert byte array to hex string
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("X2"));
+            }
+            return sb.ToString();
         }
     }
 }
