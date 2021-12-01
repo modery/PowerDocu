@@ -251,8 +251,10 @@ namespace PowerDocu.FlowDocumenter
                                 }
                             }
                         }
-                        List<ActionNode> referencedInNodes = new List<ActionNode>();
-                        referencedInNodes.Add(node);
+                        List<ActionNode> referencedInNodes = new List<ActionNode>
+                        {
+                            node
+                        };
                         foreach (ActionNode actionNode in modifyVariablesNodes)
                         {
                             foreach (Expression expO in actionNode.actionInputs)
@@ -520,7 +522,14 @@ namespace PowerDocu.FlowDocumenter
                                 }
                                 else
                                 {
-                                    operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                    if (actionInput.expressionOperands[0]?.GetType() == typeof(Expression))
+                                    {
+                                        operandsCell.Append(AddExpressionTable((Expression)actionInput.expressionOperands[0]), new Paragraph());
+                                    }
+                                    else
+                                    {
+                                        operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                    }
                                 }
                             }
                             actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), operandsCell));
@@ -572,8 +581,7 @@ namespace PowerDocu.FlowDocumenter
                                     Anchor = subaction.Name,
                                     DocLocation = ""
                                 }));
-                                string switchValue = null;
-                                if (action.switchRelationship.TryGetValue(subaction, out switchValue))
+                                if (action.switchRelationship.TryGetValue(subaction, out string switchValue))
                                 {
                                     tc.Append(new Paragraph(new Run(new Text("Switch: " + switchValue))));
                                 }
@@ -1088,7 +1096,6 @@ namespace PowerDocu.FlowDocumenter
                 return result;
             return result + random.Next(16).ToString("X");
         }
-
 
         public string CreateMD5Hash(string input)
         {
