@@ -538,21 +538,46 @@ namespace PowerDocu.FlowDocumenter
                     {
                         var tr = new TableRow();
                         var tc = CreateTableCell();
-                        run = new Run(new Text("Subactions"));
+                        run = new Run(new Text(action.Type == "Switch" ? "Switch Actions" : "Subactions"));
                         RunProperties runProperties = new RunProperties();
                         runProperties.Append(new Bold());
                         run.RunProperties = runProperties;
                         tc.Append(new Paragraph(run));
                         tr.Append(tc);
                         tc = CreateTableCell();
-                        foreach (ActionNode subaction in action.Subactions)
+                        if (action.Type == "Switch")
                         {
-                            //adding a link to the subaction's section in the Word doc
-                            tc.Append(new Paragraph(new Hyperlink(new Run(new Text(subaction.Name)))
+                            Table switchTable = CreateTable();
+                            switchTable.Append(CreateHeaderRow(new Text("Case Values"), new Text("Action")));
+                            foreach (ActionNode subaction in action.Subactions)
                             {
-                                Anchor = subaction.Name,
-                                DocLocation = ""
-                            }));
+                                if (action.switchRelationship.TryGetValue(subaction, out string switchValue))
+                                {
+                                    switchTable.Append(CreateRow(new Text(switchValue), new Paragraph(new Hyperlink(new Run(new Text(subaction.Name)))
+                                    {
+                                        Anchor = subaction.Name,
+                                        DocLocation = ""
+                                    })));
+                                }
+                            }
+                            tc.Append(switchTable, new Paragraph());
+                        }
+                        else
+                        {
+                            foreach (ActionNode subaction in action.Subactions)
+                            {
+                                //adding a link to the subaction's section in the Word doc
+                                tc.Append(new Paragraph(new Hyperlink(new Run(new Text(subaction.Name)))
+                                {
+                                    Anchor = subaction.Name,
+                                    DocLocation = ""
+                                }));
+                                string switchValue = null;
+                                if (action.switchRelationship.TryGetValue(subaction, out switchValue))
+                                {
+                                    tc.Append(new Paragraph(new Run(new Text("Switch: " + switchValue))));
+                                }
+                            }
                         }
                         tr.Append(tc);
                         actionDetailsTable.Append(tr);

@@ -19,6 +19,7 @@ namespace PowerDocu.FlowDocumenter
         public List<ActionNode> Subactions = new List<ActionNode>();
         public List<ActionNode> Elseactions = new List<ActionNode>();
         public Dictionary<ActionNode, string[]> nodeRunAfterConditions = new Dictionary<ActionNode, string[]>();
+        public Dictionary<ActionNode, string> switchRelationship = new Dictionary<ActionNode, string>();
 
         public ActionNode(string name)
         {

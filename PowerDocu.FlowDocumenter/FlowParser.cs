@@ -182,8 +182,9 @@ namespace PowerDocu.FlowDocumenter
 		  * actions - list of JSON actions
 		  * parentAction - the parent action of the current list of actions
 		  * isElseActions - bool that defines if the set of actions is in a Else area (Or a "No" side of a Yes/No decision)
+          * switchValue - value of a Switch condition
 		  */
-        private void parseActions(FlowEntity flow, JEnumerable<JToken> actions, ActionNode parentAction, bool isElseActions = false)
+        private void parseActions(FlowEntity flow, JEnumerable<JToken> actions, ActionNode parentAction, bool isElseActions = false, string switchValue = null)
         {
             foreach (JProperty action in actions)
             {
@@ -233,6 +234,9 @@ namespace PowerDocu.FlowDocumenter
                     {
                         parentAction.AddSubaction(aNode);
                     }
+                    if(switchValue!=null) {
+                        parentAction.switchRelationship.Add(aNode, switchValue);
+                    }
                 }
                 //TODO: runfter can be based on different conditions, such as succeeded, failed?, others. Review if current effort is enough, or if more things need to be done
                 if (!runAfter.HasValues && parentAction == null && !flow.actions.hasRoot())
@@ -276,13 +280,13 @@ namespace PowerDocu.FlowDocumenter
                         //TODO special parsing required
                         foreach (JProperty switchCase in switchCases.Children())
                         {
-                            parseActions(flow, switchCase.Value["actions"].Children(), aNode);
+                            parseActions(flow, switchCase.Value["actions"].Children(), aNode, false, switchCase.Value["case"].ToString());
                         }
                     }
                     JObject defaultCase = (JObject)actionDetails["default"];
                     if (defaultCase != null)
                     {
-                        parseActions(flow, defaultCase["actions"].Children(), aNode);
+                        parseActions(flow, defaultCase["actions"].Children(), aNode, false, "default");
                     }
                 }
             }
