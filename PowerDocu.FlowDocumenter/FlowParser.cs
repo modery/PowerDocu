@@ -5,6 +5,7 @@ using System.IO.Compression;
 using PowerDocu.Common;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace PowerDocu.FlowDocumenter
 {
@@ -246,7 +247,9 @@ namespace PowerDocu.FlowDocumenter
                     foreach (JProperty raNode in runAfterNodes)
                     {
                         ActionNode runAfterNode = flow.actions.FindOrCreate(raNode.Name);
-                        flow.actions.AddEdge(runAfterNode, aNode);
+                        //array can contain Failed, Succeeded, Skipped, TimedOut
+                        string[] raConditionsArray = raNode.Children().FirstOrDefault()?.ToObject<string[]>();
+                        flow.actions.AddEdge(runAfterNode, aNode, raConditionsArray);
                     }
                 }
 

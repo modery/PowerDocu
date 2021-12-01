@@ -514,7 +514,14 @@ namespace PowerDocu.FlowDocumenter
                             }
                             else
                             {
-                                operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                if (actionInput.expressionOperands.Count == 0)
+                                {
+                                    operandsCell.Append(new Paragraph(new Run(new Text(""))));
+                                }
+                                else
+                                {
+                                    operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                }
                             }
                             actionDetailsTable.Append(CreateRow(new Text(actionInput.expressionOperator), operandsCell));
                         }
@@ -573,6 +580,30 @@ namespace PowerDocu.FlowDocumenter
                         tr.Append(tc);
                         actionDetailsTable.Append(tr);
                     }
+                }
+                if (action.Neighbours.Count > 0)
+                {
+                    var tr = new TableRow();
+                    var tc = CreateTableCell();
+                    run = new Run(new Text("Next Action(s) Conditions"));
+                    RunProperties runProperties = new RunProperties();
+                    runProperties.Append(new Bold());
+                    run.RunProperties = runProperties;
+                    tc.Append(new Paragraph(run));
+                    tr.Append(tc);
+                    tc = CreateTableCell();
+                    foreach (ActionNode nextAction in action.Neighbours)
+                    {
+                        string[] raConditions = action.nodeRunAfterConditions[nextAction];
+                        //adding a link to the next action's section in the Word doc
+                        tc.Append(new Paragraph(new Hyperlink(new Run(new Text(nextAction.Name)))
+                        {
+                            Anchor = nextAction.Name,
+                            DocLocation = ""
+                        }, new Run(new Text(" [" + string.Join(", ", raConditions) + "]") { Space = SpaceProcessingModeValues.Preserve })));
+                    }
+                    tr.Append(tc);
+                    actionDetailsTable.Append(tr);
                 }
                 body.Append(actionDetailsTable);
 

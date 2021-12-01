@@ -18,6 +18,7 @@ namespace PowerDocu.FlowDocumenter
         public List<ActionNode> Neighbours = new List<ActionNode>();
         public List<ActionNode> Subactions = new List<ActionNode>();
         public List<ActionNode> Elseactions = new List<ActionNode>();
+        public Dictionary<ActionNode, string[]> nodeRunAfterConditions = new Dictionary<ActionNode, string[]>();
 
         public ActionNode(string name)
         {
@@ -107,7 +108,7 @@ namespace PowerDocu.FlowDocumenter
             return rootNode != null;
         }
 
-        public bool AddEdge(ActionNode gn1, ActionNode gn2)
+        public bool AddEdge(ActionNode gn1, ActionNode gn2, string[] runAfterConditions)
         {
             if (gn1 == null && gn2 == null)
             {
@@ -120,6 +121,7 @@ namespace PowerDocu.FlowDocumenter
             else
             {
                 gn1.AddNeighbour(gn2);
+                gn1.nodeRunAfterConditions.Add(gn2, runAfterConditions);
                 return true;
             }
         }
