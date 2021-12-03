@@ -201,38 +201,89 @@ namespace PowerDocu.FlowDocumenter
             foreach (JProperty action in actions)
             {
                 JObject actionDetails = (JObject)action.Value;
-                JObject runAfter = (JObject)actionDetails["runAfter"];
                 ActionNode aNode = flow.actions.FindOrCreate(action.Name);
-                aNode.Type = actionDetails["type"].ToString();
-
-                if (actionDetails["expression"] != null)
+                foreach (JProperty property in actionDetails.Children())
                 {
-                    //NOTE: sometimes JObject, sometimes JValue
-                    if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+                    switch (property.Name)
                     {
-                        aNode.Expression = actionDetails["expression"]?.ToString();
-                    }
-                    else if (((JToken)actionDetails["expression"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
-                    {
-                        aNode.Expression = actionDetails["expression"]?.ToString();
-                        var expressionNodes = actionDetails["expression"].Children();
-                        foreach (JProperty inputNode in expressionNodes)
-                        {
-                            aNode.actionExpression = parseExpressions(inputNode);
-                        }
-                    }
-                }
-
-                if (actionDetails["inputs"] != null)
-                {
-                    if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
-                    {
-                        aNode.Inputs = actionDetails["inputs"]?.ToString();
-                    }
-                    else if (((JToken)actionDetails["inputs"]).GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
-                    {
-                        var inputNodes = actionDetails["inputs"].Children();
-                        parseInputObject(inputNodes, aNode.actionInputs, ref aNode.Connection);
+                        case "expression":
+                            //NOTE: sometimes JObject, sometimes JValue
+                            if (property.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+                            {
+                                aNode.Expression = property.Value?.ToString();
+                            }
+                            else if (property.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+                            {
+                                aNode.Expression = property.Value?.ToString();
+                                var expressionNodes = property.Value.Children();
+                                foreach (JProperty inputNode in expressionNodes)
+                                {
+                                    aNode.actionExpression = parseExpressions(inputNode);
+                                }
+                            }
+                            break;
+                        case "inputs":
+                            if (property.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
+                            {
+                                aNode.Inputs = property.Value?.ToString();
+                            }
+                            else if (property.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
+                            {
+                                var inputNodes = property.Value.Children();
+                                parseInputObject(inputNodes, aNode.actionInputs, ref aNode.Connection);
+                            }
+                            break;
+                        case "actions":
+                            parseActions(flow, property.Value.Children(), aNode);
+                            break;
+                        case "cases":
+                            //TODO special parsing required
+                            foreach (JProperty switchCase in property.Value.Children())
+                            {
+                                parseActions(flow, switchCase.Value["actions"].Children(), aNode, false, switchCase.Value["case"].ToString());
+                            }
+                            break;
+                        case "default":
+                            parseActions(flow, property.Value["actions"].Children(), aNode, false, "default");
+                            break;
+                        case "runAfter":
+                            //TODO: runfter can be based on different conditions, such as succeeded, failed?, others. Review if current effort is enough, or if more things need to be done
+                            if (!property.Value.HasValues && parentAction == null && !flow.actions.hasRoot())
+                            {
+                                //root node does not run after another node and is not inside
+                                flow.actions.setRootNode(aNode);
+                            }
+                            else
+                            {
+                                //not root, let's connect the runafter node and this one by adding an edge
+                                var runAfterNodes = property.Value.Children();
+                                foreach (JProperty raNode in runAfterNodes)
+                                {
+                                    ActionNode runAfterNode = flow.actions.FindOrCreate(raNode.Name);
+                                    //array can contain Failed, Succeeded, Skipped, TimedOut
+                                    string[] raConditionsArray = raNode.Children().FirstOrDefault()?.ToObject<string[]>();
+                                    flow.actions.AddEdge(runAfterNode, aNode, raConditionsArray);
+                                }
+                            }
+                            break;
+                        case "else":
+                            JObject elseActions = (JObject)property.Value["actions"];
+                            if (elseActions != null)
+                            {
+                                parseActions(flow, elseActions.Children(), aNode, true);
+                            }
+                            break;
+                        case "type":
+                            aNode.Type = property.Value.ToString();
+                            break;
+                        case "description":
+                            aNode.Description = property.Value.ToString();
+                            break;
+                        case "foreach":
+                            //TODO
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -249,57 +300,6 @@ namespace PowerDocu.FlowDocumenter
                     if (switchValue != null)
                     {
                         parentAction.switchRelationship.Add(aNode, switchValue);
-                    }
-                }
-                //TODO: runfter can be based on different conditions, such as succeeded, failed?, others. Review if current effort is enough, or if more things need to be done
-                if (!runAfter.HasValues && parentAction == null && !flow.actions.hasRoot())
-                {
-                    //root node does not run after another node and is not inside
-                    flow.actions.setRootNode(aNode);
-                }
-                else
-                {
-                    //not root, let's connect the runafter node and this one by adding an edge
-                    var runAfterNodes = runAfter.Children();
-                    foreach (JProperty raNode in runAfterNodes)
-                    {
-                        ActionNode runAfterNode = flow.actions.FindOrCreate(raNode.Name);
-                        //array can contain Failed, Succeeded, Skipped, TimedOut
-                        string[] raConditionsArray = raNode.Children().FirstOrDefault()?.ToObject<string[]>();
-                        flow.actions.AddEdge(runAfterNode, aNode, raConditionsArray);
-                    }
-                }
-
-                //subactions
-                JObject subSactions = (JObject)actionDetails["actions"];
-                if (subSactions != null)
-                {
-                    parseActions(flow, subSactions.Children(), aNode);
-                }
-
-                //elseactions
-                JObject elseActions = (JObject)((JObject)actionDetails["else"])?["actions"];
-                if (elseActions != null)
-                {
-                    parseActions(flow, elseActions.Children(), aNode, true);
-                }
-
-                //todo: currently switch actions are subactions, but we do not have any way of determining this afterwards
-                if (aNode.Type == "Switch")
-                {
-                    JObject switchCases = (JObject)actionDetails["cases"];
-                    if (switchCases != null)
-                    {
-                        //TODO special parsing required
-                        foreach (JProperty switchCase in switchCases.Children())
-                        {
-                            parseActions(flow, switchCase.Value["actions"].Children(), aNode, false, switchCase.Value["case"].ToString());
-                        }
-                    }
-                    JObject defaultCase = (JObject)actionDetails["default"];
-                    if (defaultCase != null)
-                    {
-                        parseActions(flow, defaultCase["actions"].Children(), aNode, false, "default");
                     }
                 }
             }
