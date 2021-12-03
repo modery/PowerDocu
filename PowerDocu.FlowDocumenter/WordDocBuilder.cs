@@ -185,9 +185,7 @@ namespace PowerDocu.FlowDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Flow Documentation"));
             ApplyStyleToParagraph("Heading1", para);
-
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
+            body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Flow Name"), new Text(flow.Name)));
             if (!String.IsNullOrEmpty(flow.ID))
@@ -364,8 +362,7 @@ namespace PowerDocu.FlowDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Trigger"));
             ApplyStyleToParagraph("Heading2", para);
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
+            body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
             table.Append(CreateRow(new Text("Name"), new Text(flow.trigger.Name)));
             table.Append(CreateRow(new Text("Type"), new Text(flow.trigger.Type)));
