@@ -8,6 +8,7 @@ namespace PowerDocu.FlowDocumenter
     public class ActionNode
     {
         public string Name;
+        public string Description;
         public string Expression;
         public Expression actionExpression;
         public Expression actionInput;
