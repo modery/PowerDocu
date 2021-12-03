@@ -24,11 +24,11 @@ namespace PowerDocu.FlowDocumenter
                     gbzip.buildDetailedGraph();
                     if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
                     {
-                        WordDocBuilder wordzip = new WordDocBuilder(flow, path, null);
+                        FlowWordDocBuilder wordzip = new FlowWordDocBuilder(flow, path, null);
                     }
                     else
                     {
-                        WordDocBuilder wordzip = new WordDocBuilder(flow, path, wordTemplate);
+                        FlowWordDocBuilder wordzip = new FlowWordDocBuilder(flow, path, wordTemplate);
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;

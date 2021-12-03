@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <!-- To generate Word document -->
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.13.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
     <!-- To create graphs of the Flows. Note that this package is not meant for .NET 5.0, which is why we manually include DLLs (see below) -->
     <PackageReference Include="Rubjerg.Graphviz" Version="1.0.8" />
     <!-- For some of the JSON parsing -->
