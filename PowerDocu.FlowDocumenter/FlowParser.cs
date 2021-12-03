@@ -108,7 +108,7 @@ namespace PowerDocu.FlowDocumenter
                         break;
 
                     case "recurrence":
-                        foreach (JProperty recurrenceitem in property.Children())
+                        foreach (JProperty recurrenceitem in property.Value.Children())
                         {
                             flow.trigger.Recurrence.Add(recurrenceitem.Name, recurrenceitem.Value.ToString());
                         }
