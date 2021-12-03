@@ -493,7 +493,10 @@ namespace PowerDocu.FlowDocumenter
                 Table actionDetailsTable = CreateTable();
                 actionDetailsTable.Append(CreateRow(new Text("Name"), new Text(action.Name)));
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
-
+                if (!String.IsNullOrEmpty(action.Description))
+                {
+                    actionDetailsTable.Append(CreateRow(new Text("Description"), new Text(action.Description)));
+                }
                 if (!String.IsNullOrEmpty(action.Connection))
                 {
                     var rel = mainPart.AddHyperlinkRelationship(new Uri("https://docs.microsoft.com/connectors/" + action.Connection), true);
