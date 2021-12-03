@@ -70,7 +70,7 @@ namespace PowerDocu.FlowDocumenter
 
     public class ActionGraph
     {
-        private List<ActionNode> myActionNodes = new List<ActionNode>();
+        private readonly List<ActionNode> myActionNodes = new List<ActionNode>();
         private ActionNode rootNode = null;
 
         public ActionGraph()

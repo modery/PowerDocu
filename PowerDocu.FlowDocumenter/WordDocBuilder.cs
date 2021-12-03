@@ -388,36 +388,52 @@ namespace PowerDocu.FlowDocumenter
             }
             if (flow.trigger.Inputs.Count > 0)
             {
-                table.Append(CreateMergedRow(new Text("Inputs Details"), 2, cellHeaderBackground));
-                foreach (Expression input in flow.trigger.Inputs)
-                {
-                    TableCell operandsCell = CreateTableCell();
+                AddExpressionDetails(table, flow.trigger.Inputs, "Inputs Details");
+            }
+            if (flow.trigger.TriggerProperties.Count > 0)
+            {
+                AddExpressionDetails(table, flow.trigger.TriggerProperties, "Other Trigger Properties");
+            }
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
+        }
 
-                    Table operandsTable = CreateTable(BorderValues.Single, 0.8);
-                    if (input.expressionOperands.Count > 1)
+        private void AddExpressionDetails(Table table, List<Expression> inputs, string header)
+        {
+            table.Append(CreateMergedRow(new Text(header), 2, cellHeaderBackground));
+            foreach (Expression input in inputs)
+            {
+                TableCell operandsCell = CreateTableCell();
+
+                Table operandsTable = CreateTable(BorderValues.Single, 0.8);
+                if (input.expressionOperands.Count > 1)
+                {
+                    foreach (object actionInputOperand in input.expressionOperands)
                     {
-                        foreach (object actionInputOperand in input.expressionOperands)
+                        if (actionInputOperand.GetType() == typeof(Expression))
                         {
-                            if (actionInputOperand.GetType() == typeof(Expression))
-                            {
-                                AddExpressionTable((Expression)actionInputOperand, operandsTable);
-                            }
-                            else
-                            {
-                                operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
-                            }
+                            AddExpressionTable((Expression)actionInputOperand, operandsTable);
                         }
-                        operandsCell.Append(operandsTable, new Paragraph());
+                        else
+                        {
+                            operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
+                        }
+                    }
+                    operandsCell.Append(operandsTable, new Paragraph());
+                }
+                else
+                {
+                    if (input.expressionOperands[0]?.GetType() == typeof(Expression))
+                    {
+                        operandsCell.Append(AddExpressionTable((Expression)input.expressionOperands[0]), new Paragraph());
                     }
                     else
                     {
                         operandsCell.Append(new Paragraph(new Run(new Text(input.expressionOperands[0]?.ToString()))));
                     }
-                    table.Append(CreateRow(new Text(input.expressionOperator), operandsCell));
                 }
+                table.Append(CreateRow(new Text(input.expressionOperator), operandsCell));
             }
-            body.Append(table);
-            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private void addFlowOverview(Body body, WordprocessingDocument wordDoc)

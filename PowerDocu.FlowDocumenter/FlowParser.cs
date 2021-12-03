@@ -18,7 +18,7 @@ namespace PowerDocu.FlowDocumenter
             SolutionPackage
         }
         private dynamic flowDefinition;
-        private List<FlowEntity> flows = new List<FlowEntity>();
+        private readonly List<FlowEntity> flows = new List<FlowEntity>();
         public PackageType packageType;
 
         public FlowParser(string filename)
@@ -95,21 +95,33 @@ namespace PowerDocu.FlowDocumenter
 
             flow.addTrigger(trigger.Name);
             JObject triggerDetails = (JObject)trigger.Value;
-            flow.trigger.Description = triggerDetails["description"]?.ToString();
-            flow.trigger.Type = triggerDetails["type"].ToString();
-
-            if (triggerDetails["recurrence"] != null)
+            foreach (JProperty property in triggerDetails.Children())
             {
-                JObject recurrence = (JObject)triggerDetails["recurrence"];
-                foreach (JProperty property in recurrence.Children())
+                switch (property.Name)
                 {
-                    flow.trigger.Recurrence.Add(property.Name, property.Value.ToString());
+                    case "description":
+                        flow.trigger.Description = property.Value.ToString();
+                        break;
+
+                    case "type":
+                        flow.trigger.Type = property.Value.ToString();
+                        break;
+
+                    case "recurrence":
+                        foreach (JProperty recurrenceitem in property.Children())
+                        {
+                            flow.trigger.Recurrence.Add(recurrenceitem.Name, recurrenceitem.Value.ToString());
+                        }
+                        break;
+
+                    case "inputs":
+                        JObject inputs = (JObject)property.Value;
+                        parseInputObject(inputs.Children(), flow.trigger.Inputs, ref flow.trigger.Connector);
+                        break;
+                    default:
+                        flow.trigger.TriggerProperties.Add(parseExpressions(property));
+                        break;
                 }
-            }
-            if (triggerDetails["inputs"] != null)
-            {
-                JObject inputs = (JObject)triggerDetails["inputs"];
-                parseInputObject(inputs.Children(), flow.trigger.Inputs, ref flow.trigger.Connector);
             }
         }
 
@@ -234,7 +246,8 @@ namespace PowerDocu.FlowDocumenter
                     {
                         parentAction.AddSubaction(aNode);
                     }
-                    if(switchValue!=null) {
+                    if (switchValue != null)
+                    {
                         parentAction.switchRelationship.Add(aNode, switchValue);
                     }
                 }

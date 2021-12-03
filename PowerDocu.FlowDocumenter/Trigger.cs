@@ -12,6 +12,7 @@ namespace PowerDocu.FlowDocumenter
         public string Description;
         public List<Expression> Inputs = new List<Expression>();
         public Dictionary<string, string> Recurrence = new Dictionary<string, string>();
+        public List<Expression> TriggerProperties = new List<Expression>();
 
         public Trigger(string name)
         {
