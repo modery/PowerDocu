@@ -25,5 +25,32 @@ namespace PowerDocu.Common
             }
             return entries;
         }
+
+        public static List<ZipArchiveEntry> getFilesInPathFromZip(string archiveFile, string path, string fileExtension)
+        {
+            ZipArchive archive = ZipFile.Open(archiveFile, ZipArchiveMode.Read);
+            List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (entry.FullName.StartsWith(path) && entry.Name.EndsWith(fileExtension))
+                {
+                    entries.Add(entry);
+                }
+            }
+            return entries;
+        }
+
+        public static ZipArchiveEntry getFileFromZip(string archiveFile, string fileName)
+        {
+            ZipArchive archive = ZipFile.Open(archiveFile, ZipArchiveMode.Read);
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (entry.FullName.Equals(fileName))
+                {
+                    return entry;
+                }
+            }
+            return null;
+        }
     }
 }
