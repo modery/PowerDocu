@@ -119,7 +119,7 @@ namespace PowerDocu.FlowDocumenter
                         parseInputObject(inputs.Children(), flow.trigger.Inputs, ref flow.trigger.Connector);
                         break;
                     default:
-                        flow.trigger.TriggerProperties.Add(parseExpressions(property));
+                        flow.trigger.TriggerProperties.Add(Expression.parseExpressions(property));
                         break;
                 }
             }
@@ -218,7 +218,7 @@ namespace PowerDocu.FlowDocumenter
                                 var expressionNodes = property.Value.Children();
                                 foreach (JProperty inputNode in expressionNodes)
                                 {
-                                    aNode.actionExpression = parseExpressions(inputNode);
+                                    aNode.actionExpression = Expression.parseExpressions(inputNode);
                                 }
                             }
                             break;
@@ -305,52 +305,11 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private Expression parseExpressions(JProperty jsonExpression)
-        {
-            Expression expression = new Expression
-            {
-                expressionOperator = jsonExpression.Name
-            };
-            if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JArray)))
-            {
-                JArray operands = (JArray)jsonExpression.Value;
-                foreach (JToken operandExpression in operands)
-                {
-                    if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
-                    {
-                        expression.expressionOperands.Add(operandExpression.ToString());
-                    }
-                    else if (operandExpression.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
-                    {
-                        var expressionNodes = operandExpression.Children();
-                        foreach (JProperty inputNode in expressionNodes)
-                        {
-                            expression.expressionOperands.Add(parseExpressions(inputNode));
-                        }
-                    }
-                }
-            }
-            else if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JObject)))
-            {
-                JObject expressionObject = (JObject)jsonExpression.Value;
-                var expressionNodes = expressionObject.Children();
-                foreach (JProperty inputNode in expressionNodes)
-                {
-                    expression.expressionOperands.Add(parseExpressions(inputNode));
-                }
-            }
-            else if (jsonExpression.Value.GetType().Equals(typeof(Newtonsoft.Json.Linq.JValue)))
-            {
-                expression.expressionOperands.Add(jsonExpression.Value.ToString());
-            }
-            return expression;
-        }
-
         private void parseInputObject(JEnumerable<JToken> inputNodes, List<Expression> inputList, ref string conn)
         {
             foreach (JProperty inputNode in inputNodes)
             {
-                inputList.Add(parseExpressions(inputNode));
+                inputList.Add(Expression.parseExpressions(inputNode));
                 //If the node's name = host then there are details about the connection used inside
                 if (inputNode.Name == "host")
                 {
