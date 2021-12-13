@@ -24,12 +24,4 @@ namespace PowerDocu.FlowDocumenter
             }
         }
     }
-
-    public class ConsoleNotificationReceiver : NotificationReceiverBase
-    {
-        public override void Notify(string notification)
-        {
-            Console.WriteLine(notification);
-        }
-    }
 }
