@@ -25,7 +25,7 @@ namespace PowerDocu.Common
     {
         public abstract void Notify(string notification);
     }
-    
+
     public class ConsoleNotificationReceiver : NotificationReceiverBase
     {
         public override void Notify(string notification)

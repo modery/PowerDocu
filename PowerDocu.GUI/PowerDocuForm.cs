@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using PowerDocu.AppDocumenter;
 using PowerDocu.FlowDocumenter;
 using PowerDocu.Common;
 
@@ -23,7 +24,12 @@ namespace PowerDocu.GUI
                 {
                     NotificationHelper.SendNotification("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                    //TODO this needs to be improved, as ZIP files can also contain apps.
+                    if(openFileToParseDialog.FileName.EndsWith(".zip")) {
+                        FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                    } else if(openFileToParseDialog.FileName.EndsWith(".msapp"))  {
+                        AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                    }
                     Cursor = Cursors.Arrow; // change cursor to normal type
                 }
                 catch (Exception ex)

@@ -42,9 +42,9 @@ namespace PowerDocu.GUI
             this.Text = "PowerDocu GUI";
             openFileToParseDialog = new OpenFileDialog()
             {
-                FileName = "*.zip",
-                Filter = "ZIP files (*.zip)|*.zip",
-                Title = "Open exported Flow ZIP file"
+                FileName = "*.zip;*.msapp",
+                Filter = "Parseable files (*.zip,*.msapp) |*.zip;*.msapp|Flow ZIP files (*.zip)|*.zip|Power Apps files (*.msapp)|*.msapp",
+                Title = "Open exported Flow ZIP or Power Apps MSAPP file"
             };
             openWordTemplateDialog = new OpenFileDialog()
             {
@@ -91,7 +91,7 @@ namespace PowerDocu.GUI
             fileToParseInfoLabel = new Label()
             {
                 Location = new Point(30 + selectFileToParseButton.Width, 25 + selectWordTemplateButton.Height),
-                Text = "Select Flow or Solution to document",
+                Text = "Select App, Flow, or Solution to document",
                 Width = convertToDPISpecific(300),
                 Height = convertToDPISpecific(30)
             };

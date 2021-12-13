@@ -7,6 +7,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\PowerDocu.FlowDocumenter\PowerDocu.FlowDocumenter.csproj" />
+    <ProjectReference Include="..\PowerDocu.AppDocumenter\PowerDocu.AppDocumenter.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -14,6 +15,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <UseWindowsForms>true</UseWindowsForms>
+    <CodeAnalysisRuleSet>C:\Users\rene\AppData\Local\JosefPihrt\Roslynator\VisualStudioCode\roslynator.ruleset</CodeAnalysisRuleSet>
+    
   </PropertyGroup>
 
 </Project>
