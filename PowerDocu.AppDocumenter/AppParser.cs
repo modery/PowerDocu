@@ -16,14 +16,14 @@ namespace PowerDocu.AppDocumenter
             AppPackage,
             SolutionPackage
         }
-        private dynamic appDefinition;
         private readonly List<AppEntity> apps = new List<AppEntity>();
+        private AppEntity currentApp;
         public PackageType packageType;
 
         public AppParser(string filename)
         {
             NotificationHelper.SendNotification("Processing " + filename);
-            if (filename.EndsWith("zip", StringComparison.OrdinalIgnoreCase))
+            if (filename.EndsWith("zip"))
             {
                 /*
                 List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(filename);
@@ -44,14 +44,15 @@ namespace PowerDocu.AppDocumenter
                 }
                 */
             }
-            else if (filename.EndsWith("msapp", StringComparison.OrdinalIgnoreCase))
+            else if (filename.EndsWith("msapp"))
             {
                 NotificationHelper.SendNotification("Processing app " + filename);
                 packageType = PackageType.AppPackage;
                 AppEntity app = new AppEntity();
-                parseAppProperties(filename, app);
-                parseAppControls(filename, app);
-                parseAppDataSources(filename, app);
+                currentApp = app;
+                parseAppProperties(filename);
+                parseAppControls(filename);
+                parseAppDataSources(filename);
                 apps.Add(app);
             }
             else
@@ -60,7 +61,7 @@ namespace PowerDocu.AppDocumenter
             }
         }
 
-        private void parseAppProperties(string appArchive, AppEntity app)
+        private void parseAppProperties(string appArchive)
         {
             string[] filesToParse = new string[] { "Resources\\PublishInfo.json", "Header.json", "Properties.json" };
             foreach (string fileToParse in filesToParse)
@@ -74,21 +75,21 @@ namespace PowerDocu.AppDocumenter
                     foreach (JToken property in propertiesDefinition.Children())
                     {
                         JProperty prop = (JProperty)property;
-                        app.properties.Add(Expression.parseExpressions(prop));
+                        currentApp.properties.Add(Expression.parseExpressions(prop));
                         if (prop.Name.Equals("AppName"))
                         {
-                            app.Name = prop.Value.ToString();
+                            currentApp.Name = prop.Value.ToString();
                         }
                         if (prop.Name.Equals("ID"))
                         {
-                            app.ID = prop.Value.ToString();
+                            currentApp.ID = prop.Value.ToString();
                         }
                     }
                 }
             }
         }
 
-        private void parseAppControls(string appArchive, AppEntity app)
+        private void parseAppControls(string appArchive)
         {
             List<ZipArchiveEntry> controlFiles = ZipHelper.getFilesInPathFromZip(appArchive, "Controls", ".json");
             foreach (ZipArchiveEntry controlEntry in controlFiles)
@@ -99,7 +100,7 @@ namespace PowerDocu.AppDocumenter
                     var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
                     var _jsonSerializer = JsonSerializer.Create(settings);
                     dynamic controlsDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                    app.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
+                    currentApp.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
                 }
             }
         }
@@ -141,6 +142,7 @@ namespace PowerDocu.AppDocumenter
                                         break;
                                     case "InvariantScript":
                                         rule.InvariantScript = ruleProp.Value.ToString();
+                                        CheckForVariables(ruleProp.Value.ToString());
                                         break;
                                 }
                             }
@@ -165,7 +167,45 @@ namespace PowerDocu.AppDocumenter
             return controlEntity;
         }
 
-        private void parseAppDataSources(string appArchive, AppEntity app)
+        private void CheckForVariables(string code)
+        {
+            //Reference: https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/working-with-variables#types-of-variables
+            //check for Global Variables
+            if (code.Contains("Set("))
+            {
+                string sub1 = code.Substring(code.IndexOf("Set(") + 4);
+                string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                currentApp.GlobalVariables.Add(var);
+            }
+            //check for Context Variables
+            if (code.Contains("UpdateContext("))
+            {
+                string sub1 = code.Substring(code.IndexOf("UpdateContext(") + 14);
+                string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                currentApp.ContextVariables.Add(var);
+            }
+            if (code.Contains("Navigate("))
+            {
+                //string sub1 = code.Substring(code.IndexOf("Navigate(") + 9);
+                //string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                //NotificationHelper.SendNotification("Navigate: " + var);
+            }
+            //check for Collections
+            if (code.Contains("Collect("))
+            {
+                string sub1 = code.Substring(code.IndexOf("Collect(") + 8);
+                string coll = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                currentApp.Collections.Add(coll);
+            }
+            if (code.Contains("ClearCollect("))
+            {
+                string sub1 = code.Substring(code.IndexOf("ClearCollect(") + 13);
+                string coll = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                currentApp.Collections.Add(coll);
+            }
+        }
+
+        private void parseAppDataSources(string appArchive)
         {
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\DataSources.json");
             using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
@@ -176,7 +216,6 @@ namespace PowerDocu.AppDocumenter
                 dynamic datasourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
                 foreach (JToken datasource in datasourceDefinition.DataSources.Children())
                 {
-                    //app.DataSources.Add();
                     DataSource ds = new DataSource();
                     foreach (JProperty prop in datasource.Children())
                     {
@@ -190,10 +229,10 @@ namespace PowerDocu.AppDocumenter
                                 break;
                             default:
                                 ds.Properties.Add(Expression.parseExpressions(prop));
-                            break;
+                                break;
                         }
                     }
-                    app.DataSources.Add(ds);
+                    currentApp.DataSources.Add(ds);
                 }
             }
         }

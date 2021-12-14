@@ -35,6 +35,7 @@ namespace PowerDocu.AppDocumenter
                 Body body = mainPart.Document.Body;
                 PrepareDocument(mainPart, !String.IsNullOrEmpty(template));
                 addAppProperties(body);
+                addAppGeneralInfo(body);
                 addAppDataSources(body);
                 addAppControls(body);
             }
@@ -58,6 +59,40 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
+        private void addAppGeneralInfo(Body body)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Variables & Collections"));
+            ApplyStyleToParagraph("Heading1", para);
+            body.AppendChild(new Paragraph(new Run()));
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Variables"));
+            ApplyStyleToParagraph("Heading2", para);
+            Table table = CreateTable();
+            foreach (string var in app.GlobalVariables)
+            {
+                table.Append(CreateRow(new Text(var), new Text("Global Variable")));
+            }
+            foreach (string var in app.ContextVariables)
+            {
+                table.Append(CreateRow(new Text(var), new Text("Context Variable")));
+            }
+            body.Append(table);
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Collections"));
+            ApplyStyleToParagraph("Heading2", para);
+            table = CreateTable();
+            foreach (string coll in app.Collections)
+            {
+                table.Append(CreateRow(new Text(coll), new Text("Collection")));
+            }
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
+        }
+
         private void addAppControls(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -73,7 +108,7 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading2", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
-                //this should be in its own recursive method
+                //TODO this should be in its own recursive method
                 table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Rule rule in control.Rules)
                 {
@@ -102,7 +137,6 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-
         private void addAppDataSources(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -118,7 +152,6 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading2", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
-                //this should be in its own recursive method
                 table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
                 table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
                 table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));

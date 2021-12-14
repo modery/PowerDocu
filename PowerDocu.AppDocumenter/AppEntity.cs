@@ -13,6 +13,9 @@ namespace PowerDocu.AppDocumenter
         public List<ControlEntity> Controls = new List<ControlEntity>();
         public List<Expression> properties = new List<Expression>();
         public List<DataSource> DataSources = new List<DataSource>();
+        public HashSet<string> GlobalVariables = new HashSet<string>();
+        public HashSet<string> ContextVariables = new HashSet<string>();
+        public HashSet<string> Collections = new HashSet<string>();
         public AppEntity()
         {
         }
