@@ -19,9 +19,6 @@ namespace PowerDocu.AppDocumenter
                 }
                 foreach (AppEntity app in appParserFromZip.getApps())
                 {
-                    /*GraphBuilder gbzip = new GraphBuilder(flow, path);
-                    gbzip.buildTopLevelGraph();
-                    gbzip.buildDetailedGraph();*/
                     if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
                     {
                         AppWordDocBuilder wordzip = new AppWordDocBuilder(app, path, null);

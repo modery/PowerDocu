@@ -12,8 +12,8 @@ namespace PowerDocu.AppDocumenter
             if (args.Length == 0 || args.Length > 2)
             {
                 NotificationHelper.SendNotification("Please provide an exported Power App package as parameter (mandatory), and optionally a Word document to use as template. For example:");
-                NotificationHelper.SendNotification("  powerdocu.appdocumenter.exe ExportedApp.zip");
-                NotificationHelper.SendNotification("  powerdocu.appdocumenter.exe ExportedApp.zip WordTemplate.docx");
+                NotificationHelper.SendNotification("  powerdocu.appdocumenter.exe ExportedApp.msapp");
+                NotificationHelper.SendNotification("  powerdocu.appdocumenter.exe ExportedApp.msapp WordTemplate.docx");
             }
             else
             {

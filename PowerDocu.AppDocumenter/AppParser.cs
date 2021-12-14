@@ -51,6 +51,7 @@ namespace PowerDocu.AppDocumenter
                 AppEntity app = new AppEntity();
                 parseAppProperties(filename, app);
                 parseAppControls(filename, app);
+                parseAppDataSources(filename, app);
                 apps.Add(app);
             }
             else
@@ -69,8 +70,8 @@ namespace PowerDocu.AppDocumenter
                     string appJSON = reader.ReadToEnd();
                     var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
                     var _jsonSerializer = JsonSerializer.Create(settings);
-                    appDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                    foreach (JToken property in appDefinition.Children())
+                    dynamic propertiesDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                    foreach (JToken property in propertiesDefinition.Children())
                     {
                         JProperty prop = (JProperty)property;
                         app.properties.Add(Expression.parseExpressions(prop));
@@ -97,8 +98,8 @@ namespace PowerDocu.AppDocumenter
                     string appJSON = reader.ReadToEnd();
                     var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
                     var _jsonSerializer = JsonSerializer.Create(settings);
-                    appDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                    app.controls.Add(parseControl(((JObject)appDefinition.TopParent).Children().ToList()));
+                    dynamic controlsDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                    app.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
                 }
             }
         }
@@ -160,10 +161,41 @@ namespace PowerDocu.AppDocumenter
                     controlEntity.Children.Add(parseControl(((JObject)property).Children().ToList()));
                 }
             }
-            //TODO delete the following line later
-            if (controlEntity.Properties.Count > 0)
-                controlEntity.Type = controlEntity.Properties.Where(e => e.expressionOperator == "Template")?.First().expressionOperands.Cast<Expression>().First(eo => eo.expressionOperator == "Name").expressionOperands[0].ToString();
+            controlEntity.Type = controlEntity.Properties.Where(e => e.expressionOperator == "Template")?.First().expressionOperands.Cast<Expression>().First(eo => eo.expressionOperator == "Name").expressionOperands[0].ToString();
             return controlEntity;
+        }
+
+        private void parseAppDataSources(string appArchive, AppEntity app)
+        {
+            ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\DataSources.json");
+            using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
+            {
+                string appJSON = reader.ReadToEnd();
+                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+                var _jsonSerializer = JsonSerializer.Create(settings);
+                dynamic datasourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                foreach (JToken datasource in datasourceDefinition.DataSources.Children())
+                {
+                    //app.DataSources.Add();
+                    DataSource ds = new DataSource();
+                    foreach (JProperty prop in datasource.Children())
+                    {
+                        switch (prop.Name)
+                        {
+                            case "Name":
+                                ds.Name = prop.Value.ToString();
+                                break;
+                            case "Type":
+                                ds.Type = prop.Value.ToString();
+                                break;
+                            default:
+                                ds.Properties.Add(Expression.parseExpressions(prop));
+                            break;
+                        }
+                    }
+                    app.DataSources.Add(ds);
+                }
+            }
         }
 
         public List<AppEntity> getApps()

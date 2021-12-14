@@ -35,6 +35,7 @@ namespace PowerDocu.AppDocumenter
                 Body body = mainPart.Document.Body;
                 PrepareDocument(mainPart, !String.IsNullOrEmpty(template));
                 addAppProperties(body);
+                addAppDataSources(body);
                 addAppControls(body);
             }
             NotificationHelper.SendNotification("Created Word documentation for " + app.Name);
@@ -53,7 +54,6 @@ namespace PowerDocu.AppDocumenter
             {
                 AddExpressionTable(property, table);
             }
-
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
@@ -65,7 +65,7 @@ namespace PowerDocu.AppDocumenter
             run.AppendChild(new Text("Controls"));
             ApplyStyleToParagraph("Heading1", para);
             body.AppendChild(new Paragraph(new Run()));
-            foreach (ControlEntity control in app.controls)
+            foreach (ControlEntity control in app.Controls)
             {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
@@ -74,7 +74,7 @@ namespace PowerDocu.AppDocumenter
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
                 //this should be in its own recursive method
-                table.Append(CreateHeaderRow(new Text("Control Rules"), new Text("")));
+                table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Rule rule in control.Rules)
                 {
                     table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
@@ -82,19 +82,50 @@ namespace PowerDocu.AppDocumenter
                 foreach (ControlEntity childControl in control.Children)
                 {
                     Table childtable = CreateTable();
-                    childtable.Append(CreateHeaderRow(new Text("Child Controls"), new Text("")));
+                    childtable.Append(CreateMergedRow(new Text("Child Controls"), 2, WordDocBuilder.cellHeaderBackground));
                     foreach (Expression expression in childControl.Properties)
                     {
                         AddExpressionTable(expression, childtable);
                     }
                     table.Append(CreateRow(new Text("childcontrol"), childtable));
                 }
-                /* //Other properties are likely not needed for documentation
-                table.Append(CreateHeaderRow(new Text("Properties")));
+                /* //Other properties are likely not needed for documentation, still keeping this code in case we want to show them at some point
+                table.Append(CreateMergedRow(new Text("Properties"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Expression expression in control.Properties)
                 {
                     AddExpressionTable(expression, table);
                 }*/
+
+                body.Append(table);
+                body.AppendChild(new Paragraph(new Run(new Break())));
+            }
+            body.AppendChild(new Paragraph(new Run(new Break())));
+        }
+
+
+        private void addAppDataSources(Body body)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("DataSources"));
+            ApplyStyleToParagraph("Heading1", para);
+            body.AppendChild(new Paragraph(new Run()));
+            foreach (DataSource datasource in app.DataSources)
+            {
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text(datasource.Name));
+                ApplyStyleToParagraph("Heading2", para);
+                body.AppendChild(new Paragraph(new Run()));
+                Table table = CreateTable();
+                //this should be in its own recursive method
+                table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
+                table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
+                table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                foreach (Expression expression in datasource.Properties)
+                {
+                    AddExpressionTable(expression, table);
+                }
 
                 body.Append(table);
                 body.AppendChild(new Paragraph(new Run(new Break())));
