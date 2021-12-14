@@ -37,6 +37,7 @@ namespace PowerDocu.AppDocumenter
                 addAppProperties(body);
                 addAppGeneralInfo(body);
                 addAppDataSources(body);
+                addAppResources(body);
                 addAppControls(body);
             }
             NotificationHelper.SendNotification("Created Word documentation for " + app.Name);
@@ -50,8 +51,17 @@ namespace PowerDocu.AppDocumenter
             ApplyStyleToParagraph("Heading1", para);
             body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
+            table.Append(CreateRow(new Text("App Name"), new Text(app.Name)));
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
-            foreach (Expression property in app.properties)
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
+
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("App Properties"));
+            ApplyStyleToParagraph("Heading2", para);
+            body.AppendChild(new Paragraph(new Run()));
+            table = CreateTable();
+            foreach (Expression property in app.Properties)
             {
                 AddExpressionTable(property, table);
             }
@@ -64,12 +74,12 @@ namespace PowerDocu.AppDocumenter
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Variables & Collections"));
-            ApplyStyleToParagraph("Heading1", para);
+            ApplyStyleToParagraph("Heading2", para);
             body.AppendChild(new Paragraph(new Run()));
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("Variables"));
-            ApplyStyleToParagraph("Heading2", para);
+            ApplyStyleToParagraph("Heading3", para);
             Table table = CreateTable();
             foreach (string var in app.GlobalVariables)
             {
@@ -80,10 +90,11 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text(var), new Text("Context Variable")));
             }
             body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("Collections"));
-            ApplyStyleToParagraph("Heading2", para);
+            ApplyStyleToParagraph("Heading3", para);
             table = CreateTable();
             foreach (string coll in app.Collections)
             {
@@ -98,14 +109,20 @@ namespace PowerDocu.AppDocumenter
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Controls"));
-            ApplyStyleToParagraph("Heading1", para);
-            body.AppendChild(new Paragraph(new Run()));
+            ApplyStyleToParagraph("Heading2", para);
+            
+            List<ControlEntity> allControls = new List<ControlEntity>();
             foreach (ControlEntity control in app.Controls)
+            {
+                allControls.AddRange(getAllChildControls(control));
+            }
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {allControls.Count} Controls are located in the app:"))));
+            foreach (ControlEntity control in allControls.OrderBy(o => o.Name).ToList())
             {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(control.Name));
-                ApplyStyleToParagraph("Heading2", para);
+                ApplyStyleToParagraph("Heading3", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
                 //TODO this should be in its own recursive method
@@ -116,13 +133,14 @@ namespace PowerDocu.AppDocumenter
                 }
                 foreach (ControlEntity childControl in control.Children)
                 {
-                    Table childtable = CreateTable();
+                    /*Table childtable = CreateTable();
                     childtable.Append(CreateMergedRow(new Text("Child Controls"), 2, WordDocBuilder.cellHeaderBackground));
                     foreach (Expression expression in childControl.Properties)
                     {
                         AddExpressionTable(expression, childtable);
                     }
                     table.Append(CreateRow(new Text("childcontrol"), childtable));
+                    */
                 }
                 /* //Other properties are likely not needed for documentation, still keeping this code in case we want to show them at some point
                 table.Append(CreateMergedRow(new Text("Properties"), 2, WordDocBuilder.cellHeaderBackground));
@@ -137,25 +155,66 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
+        private List<ControlEntity> getAllChildControls(ControlEntity control)
+        {
+            List<ControlEntity> childControls = new List<ControlEntity>();
+            foreach (ControlEntity childControl in control.Children)
+            {
+                childControls.Add(childControl);
+                childControls.AddRange(getAllChildControls(childControl));
+            }
+            return childControls;
+        }
+
         private void addAppDataSources(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("DataSources"));
-            ApplyStyleToParagraph("Heading1", para);
-            body.AppendChild(new Paragraph(new Run()));
+            ApplyStyleToParagraph("Heading2", para);
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.DataSources.Count} DataSources are located in the app:"))));
             foreach (DataSource datasource in app.DataSources)
             {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(datasource.Name));
-                ApplyStyleToParagraph("Heading2", para);
+                ApplyStyleToParagraph("Heading3", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
                 table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
                 table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
                 table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Expression expression in datasource.Properties)
+                {
+                    AddExpressionTable(expression, table);
+                }
+
+                body.Append(table);
+                body.AppendChild(new Paragraph(new Run(new Break())));
+            }
+            body.AppendChild(new Paragraph(new Run(new Break())));
+        }
+
+        private void addAppResources(Body body)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Resources"));
+            ApplyStyleToParagraph("Heading2", para);
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.Resources.Count} Resources are located in the app:"))));
+            foreach (Resource resource in app.Resources)
+            {
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text(resource.Name));
+                ApplyStyleToParagraph("Heading3", para);
+                body.AppendChild(new Paragraph(new Run()));
+                Table table = CreateTable();
+                table.Append(CreateRow(new Text("Name"), new Text(resource.Name)));
+                table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
+                table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
+                table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                foreach (Expression expression in resource.Properties)
                 {
                     AddExpressionTable(expression, table);
                 }

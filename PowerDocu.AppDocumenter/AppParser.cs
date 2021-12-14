@@ -6,6 +6,7 @@ using PowerDocu.Common;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PowerDocu.AppDocumenter
 {
@@ -53,6 +54,7 @@ namespace PowerDocu.AppDocumenter
                 parseAppProperties(filename);
                 parseAppControls(filename);
                 parseAppDataSources(filename);
+                parseAppResources(filename);
                 apps.Add(app);
             }
             else
@@ -75,7 +77,7 @@ namespace PowerDocu.AppDocumenter
                     foreach (JToken property in propertiesDefinition.Children())
                     {
                         JProperty prop = (JProperty)property;
-                        currentApp.properties.Add(Expression.parseExpressions(prop));
+                        currentApp.Properties.Add(Expression.parseExpressions(prop));
                         if (prop.Name.Equals("AppName"))
                         {
                             currentApp.Name = prop.Value.ToString();
@@ -169,26 +171,44 @@ namespace PowerDocu.AppDocumenter
 
         private void CheckForVariables(string code)
         {
+            //TODO: only checks for a variable, but doesn't cater for scenarios where there are multiple Set/UpdateContext/etc. calls.
             //Reference: https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/working-with-variables#types-of-variables
             //check for Global Variables
-            if (code.Contains("Set("))
+            Match match;
+
+            // variable assignment: Set( <ident>, <expr> )
+            if ((match = Regex.Match(code, @"\s*Set\(\s*(?<ident>\w+)\s*,\s*(?<expr>.*)\)\s*")).Success)
             {
-                string sub1 = code.Substring(code.IndexOf("Set(") + 4);
-                string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
-                currentApp.GlobalVariables.Add(var);
+                currentApp.GlobalVariables.Add(match.Groups["ident"].Value);
             }
             //check for Context Variables
             if (code.Contains("UpdateContext("))
             {
+                //will not yet work for all examples
                 string sub1 = code.Substring(code.IndexOf("UpdateContext(") + 14);
                 string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
                 currentApp.ContextVariables.Add(var);
             }
             if (code.Contains("Navigate("))
             {
-                //string sub1 = code.Substring(code.IndexOf("Navigate(") + 9);
-                //string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
+                // As an optional third argument, pass a record that contains the context-variable name as a column name and the new value for the context variable.
+                /*
+                string sub1 = code.Substring(code.IndexOf("Navigate(") + 9);
+                string navigateString = sub1.Substring(0, sub1.IndexOf(")")).Trim();
+                if (navigateString.IndexOf("(") == navigateString.LastIndexOf("("))
+                {
+                    //TODO this won't work for:
+                    // Navigate(Screen2,ScreenTransition.Fade,{ ID: 12 , Shade: Color.Blue } )
+                    string sub2 = navigateString.Substring(navigateString.LastIndexOf(","));
+                    string ContextDetailsString = sub2.Substring(0, sub2.LastIndexOf(")"));
+                    //currentApp.ContextVariables.Add(var);
+                }
+                else
+                {
+                    //TODO: need to think about how to properly parse this. If we reach this area, the manual parsing above didn't work, and we don't have the full Navigate(x,x,y) function
+                }
                 //NotificationHelper.SendNotification("Navigate: " + var);
+                */
             }
             //check for Collections
             if (code.Contains("Collect("))
@@ -233,6 +253,41 @@ namespace PowerDocu.AppDocumenter
                         }
                     }
                     currentApp.DataSources.Add(ds);
+                }
+            }
+        }
+
+        private void parseAppResources(string appArchive)
+        {
+            ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\Resources.json");
+            using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
+            {
+                string appJSON = reader.ReadToEnd();
+                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+                var _jsonSerializer = JsonSerializer.Create(settings);
+                dynamic resourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                foreach (JToken resource in resourceDefinition.Resources.Children())
+                {
+                    Resource res = new Resource();
+                    foreach (JProperty prop in resource.Children())
+                    {
+                        switch (prop.Name)
+                        {
+                            case "Name":
+                                res.Name = prop.Value.ToString();
+                                break;
+                            case "Content":
+                                res.Content = prop.Value.ToString();
+                                break;
+                            case "ResourceKind":
+                                res.ResourceKind = prop.Value.ToString();
+                                break;
+                            default:
+                                res.Properties.Add(Expression.parseExpressions(prop));
+                                break;
+                        }
+                    }
+                    currentApp.Resources.Add(res);
                 }
             }
         }
