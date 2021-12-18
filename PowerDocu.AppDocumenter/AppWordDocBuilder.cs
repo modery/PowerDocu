@@ -38,7 +38,8 @@ namespace PowerDocu.AppDocumenter
                 addAppGeneralInfo(body);
                 addAppDataSources(body);
                 addAppResources(body);
-                addAppControls(body);
+                addAppControlsOverview(body);
+                addDetailedAppControls(body);
             }
             NotificationHelper.SendNotification("Created Word documentation for " + app.Name);
         }
@@ -75,13 +76,13 @@ namespace PowerDocu.AppDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Variables & Collections"));
             ApplyStyleToParagraph("Heading2", para);
-            body.AppendChild(new Paragraph(new Run()));
+            body.AppendChild(new Paragraph(new Run(new Text($"There are {app.GlobalVariables.Count} Variables and {app.Collections.Count} Collections."))));
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("Variables"));
             ApplyStyleToParagraph("Heading3", para);
             Table table = CreateTable();
-            foreach (string var in app.GlobalVariables)
+            foreach (string var in app.GlobalVariables.OrderBy(o => o).ToHashSet())
             {
                 table.Append(CreateRow(new Text(var), new Text("Global Variable")));
             }
@@ -96,7 +97,7 @@ namespace PowerDocu.AppDocumenter
             run.AppendChild(new Text("Collections"));
             ApplyStyleToParagraph("Heading3", para);
             table = CreateTable();
-            foreach (string coll in app.Collections)
+            foreach (string coll in app.Collections.OrderBy(o => o).ToHashSet())
             {
                 table.Append(CreateRow(new Text(coll), new Text("Collection")));
             }
@@ -104,13 +105,33 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addAppControls(Body body)
+        private void addAppControlsOverview(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Controls"));
+            run.AppendChild(new Text("Controls Overview"));
             ApplyStyleToParagraph("Heading2", para);
-            
+
+            List<ControlEntity> allControls = new List<ControlEntity>();
+            foreach (ControlEntity control in app.Controls)
+            {
+                allControls.AddRange(getAllChildControls(control));
+            }
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {allControls.Count} Controls are located in the app:"))));
+            foreach (ControlEntity control in allControls.OrderBy(o => o.Name).ToList())
+            {
+                //TODO
+            }
+            body.AppendChild(new Paragraph(new Run(new Break())));
+        }
+
+        private void addDetailedAppControls(Body body)
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Detailed Controls"));
+            ApplyStyleToParagraph("Heading2", para);
+
             List<ControlEntity> allControls = new List<ControlEntity>();
             foreach (ControlEntity control in app.Controls)
             {
@@ -125,7 +146,7 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading3", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
-                //TODO this should be in its own recursive method
+                table.Append(CreateRow(new Text("Type"), new Text(control.Type)));
                 table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Rule rule in control.Rules)
                 {
