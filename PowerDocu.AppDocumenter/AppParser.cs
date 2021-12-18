@@ -169,59 +169,66 @@ namespace PowerDocu.AppDocumenter
             return controlEntity;
         }
 
-        private void CheckForVariables(string code)
+        private void CheckForVariables(string input)
         {
-            //TODO: only checks for a variable, but doesn't cater for scenarios where there are multiple Set/UpdateContext/etc. calls.
             //Reference: https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/working-with-variables#types-of-variables
-            //check for Global Variables
-            Match match;
 
-            // variable assignment: Set( <ident>, <expr> )
-            if ((match = Regex.Match(code, @"\s*Set\(\s*(?<ident>\w+)\s*,\s*(?<expr>.*)\)\s*")).Success)
+            string code = input.Replace("\n", "").Replace("\r", "");
+            MatchCollection matches;
+            //check for Global Variables            
+            if ((matches = Regex.Matches(code, @"\s*Set\(\s*(?<ident>\w+)\s*,")).Count > 0)
             {
-                currentApp.GlobalVariables.Add(match.Groups["ident"].Value);
+                foreach (Match match in matches)
+                {
+                    currentApp.GlobalVariables.Add(match.Groups["ident"].Value);
+                }
             }
             //check for Context Variables
+
+            //Note: this is way more complex than the others. Not in use for the moment until an acceptable solution has been found
             if (code.Contains("UpdateContext("))
             {
-                //will not yet work for all examples
-                string sub1 = code.Substring(code.IndexOf("UpdateContext(") + 14);
-                string var = sub1.Substring(0, sub1.IndexOf(",")).Trim();
-                currentApp.ContextVariables.Add(var);
+                // Using http://regex.inginf.units.it/ , which helped to generate some of the more complex regexes. Partial success so far
+                //This captures the first instance
+                //(?<=UpdateContext\(\{)\w+
+
+                // (?<=UpdateContext\(\{)\w+|(?<=\d[^_]\w[^_],)\w+|[r-t]\w\d\w\d\w+|(?<=,)\w\w[A-Za-z]\w+(?=:\w+,)
+
+                // 37 samples. 33 correct, 4 incomplete, 0 wrong
+                // (?<=UpdateContext\(\{)\w+|(?<=[^a-i]\w[^_][^k-p][^r-v],)(?<=[^a-i][^_],)\w\w\w\w+|(?<=,)([UpdateContext]?\w[UpdateContext])+(?=:)
+
+                //46 samples. 32 correct, 12 incomplete, 2 wrong
+                // (?<=UpdateContext\(\{)\w+|(?<=\d[^}][^}][^_],)\w+|(?<=,)\w\w\w\w+(?=:\w+,)|(?<=,)(?:\w(?:\w\w)+(?=:))+(?=:"[A-Za-z])
+
+                /* if ((matches = Regex.Matches(code.Replace(" ", ""), @"(?<=UpdateContext\(\{)\w+|(?<=,)[A-Za-z]+\w+|(?<=,)\w+(?=:\d+}\))|(?<=[^a-e][^}]\d[^_],)[A-Za-z]+(?=:)")).Count > 0)
+                 {
+                     foreach (Match match in matches)
+                     {
+                         NotificationHelper.SendNotification("UC2 :" + match.Groups[0].Value);
+                         currentApp.ContextVariables.Add(match.Groups[0].Value);
+                     }
+                 }*/
             }
             if (code.Contains("Navigate("))
             {
                 // As an optional third argument, pass a record that contains the context-variable name as a column name and the new value for the context variable.
-                /*
-                string sub1 = code.Substring(code.IndexOf("Navigate(") + 9);
-                string navigateString = sub1.Substring(0, sub1.IndexOf(")")).Trim();
-                if (navigateString.IndexOf("(") == navigateString.LastIndexOf("("))
-                {
-                    //TODO this won't work for:
-                    // Navigate(Screen2,ScreenTransition.Fade,{ ID: 12 , Shade: Color.Blue } )
-                    string sub2 = navigateString.Substring(navigateString.LastIndexOf(","));
-                    string ContextDetailsString = sub2.Substring(0, sub2.LastIndexOf(")"));
-                    //currentApp.ContextVariables.Add(var);
-                }
-                else
-                {
-                    //TODO: need to think about how to properly parse this. If we reach this area, the manual parsing above didn't work, and we don't have the full Navigate(x,x,y) function
-                }
-                //NotificationHelper.SendNotification("Navigate: " + var);
-                */
+                // more complex to parse, to be implemented later
             }
             //check for Collections
-            if (code.Contains("Collect("))
+            if ((matches = Regex.Matches(code, @"\s*Collect\(\s*(?<ident>\w+)\s*,\s*")).Count > 0)
             {
-                string sub1 = code.Substring(code.IndexOf("Collect(") + 8);
-                string coll = sub1.Substring(0, sub1.IndexOf(",")).Trim();
-                currentApp.Collections.Add(coll);
+                foreach (Match match in matches)
+                {
+                    currentApp.Collections.Add(match.Groups["ident"].Value);
+                }
             }
-            if (code.Contains("ClearCollect("))
+
+            if ((matches = Regex.Matches(code, @"\s*ClearCollect\(\s*(?<ident>\w+)\s*,\s*")).Count > 0)
             {
-                string sub1 = code.Substring(code.IndexOf("ClearCollect(") + 13);
-                string coll = sub1.Substring(0, sub1.IndexOf(",")).Trim();
-                currentApp.Collections.Add(coll);
+                foreach (Match match in matches)
+                {
+                    currentApp.Collections.Add(match.Groups["ident"].Value);
+                }
             }
         }
 
