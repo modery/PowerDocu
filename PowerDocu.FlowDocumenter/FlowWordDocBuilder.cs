@@ -31,22 +31,22 @@ namespace PowerDocu.FlowDocumenter
             InitializeWordDocument(filename, template);
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
             {
-                MainDocumentPart mainPart = wordDocument.MainDocumentPart;
-                Body body = mainPart.Document.Body;
-                PrepareDocument(mainPart, !String.IsNullOrEmpty(template));
+                mainPart = wordDocument.MainDocumentPart;
+                body = mainPart.Document.Body;
+                PrepareDocument(!String.IsNullOrEmpty(template));
                 //add all the relevant content
-                addFlowMetadata(body);
-                addFlowOverview(body, wordDocument);
-                addConnectionReferenceInfo(mainPart, body);
-                addVariablesInfo(body);
-                addTriggerInfo(body);
-                addActionInfo(body, mainPart);
-                addFlowDetails(body, wordDocument);
+                addFlowMetadata();
+                addFlowOverview(wordDocument);
+                addConnectionReferenceInfo();
+                addVariablesInfo();
+                addTriggerInfo();
+                addActionInfo();
+                addFlowDetails(wordDocument);
             }
             NotificationHelper.SendNotification("Created Word documentation for " + flow.Name);
         }
 
-        private void addConnectionReferenceInfo(MainDocumentPart mainPart, Body body)
+        private void addConnectionReferenceInfo()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -122,7 +122,7 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private void addFlowMetadata(Body body)
+        private void addFlowMetadata()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -140,7 +140,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addVariablesInfo(Body body)
+        private void addVariablesInfo()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -265,7 +265,7 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private void addTriggerInfo(Body body)
+        private void addTriggerInfo()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -304,7 +304,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addFlowOverview(Body body, WordprocessingDocument wordDoc)
+        private void addFlowOverview(WordprocessingDocument wordDoc)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -337,7 +337,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addActionInfo(Body body, MainDocumentPart mainPart)
+        private void addActionInfo()
         {
             List<ActionNode> actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
             Paragraph para = body.AppendChild(new Paragraph());
@@ -532,7 +532,7 @@ namespace PowerDocu.FlowDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addFlowDetails(Body body, WordprocessingDocument wordDoc)
+        private void addFlowDetails(WordprocessingDocument wordDoc)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());

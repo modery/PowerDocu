@@ -33,6 +33,9 @@ namespace PowerDocu.Common
         protected const string cellHeaderBackground = "E5E5FF";
         protected readonly Random random = new Random();
         protected string folderPath;
+        
+        protected MainDocumentPart mainPart;
+        protected Body body;
 
         public HashSet<int> UsedRandomNumbers = new HashSet<int>();
 
@@ -535,7 +538,7 @@ namespace PowerDocu.Common
             return tr;
         }
 
-        protected void PrepareDocument(MainDocumentPart mainPart, bool templateUsed)
+        protected void PrepareDocument(bool templateUsed)
         {
             AddNameSpaces(mainPart.Document);
             if (templateUsed)

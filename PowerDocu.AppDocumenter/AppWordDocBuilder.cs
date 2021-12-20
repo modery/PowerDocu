@@ -31,20 +31,20 @@ namespace PowerDocu.AppDocumenter
             InitializeWordDocument(filename, template);
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
             {
-                MainDocumentPart mainPart = wordDocument.MainDocumentPart;
-                Body body = mainPart.Document.Body;
-                PrepareDocument(mainPart, !String.IsNullOrEmpty(template));
-                addAppProperties(body);
-                addAppGeneralInfo(body);
-                addAppDataSources(body);
-                addAppResources(body);
-                addAppControlsOverview(body);
-                addDetailedAppControls(body);
+                mainPart = wordDocument.MainDocumentPart;
+                body = mainPart.Document.Body;
+                PrepareDocument(!String.IsNullOrEmpty(template));
+                addAppProperties();
+                addAppGeneralInfo();
+                addAppDataSources();
+                addAppResources();
+                addAppControlsOverview();
+                addDetailedAppControls();
             }
             NotificationHelper.SendNotification("Created Word documentation for " + app.Name);
         }
 
-        private void addAppProperties(Body body)
+        private void addAppProperties()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -70,7 +70,7 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addAppGeneralInfo(Body body)
+        private void addAppGeneralInfo()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -105,7 +105,7 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addAppControlsOverview(Body body)
+        private void addAppControlsOverview()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -113,11 +113,17 @@ namespace PowerDocu.AppDocumenter
             ApplyStyleToParagraph("Heading2", para);
 
             List<ControlEntity> allControls = new List<ControlEntity>();
-            foreach (ControlEntity control in app.Controls)
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.Controls.Count} Screens are located in the app:"))));
+            foreach (ControlEntity control in app.Controls.OrderBy(o => o.Name).ToList())
             {
-                allControls.AddRange(getAllChildControls(control));
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text("Screen: " + control.Name));
+                ApplyStyleToParagraph("Heading3", para);
+                body.AppendChild(CreateControlTable(control));
+                body.AppendChild(new Paragraph(new Run(new Break())));
             }
-            body.AppendChild(new Paragraph(new Run(new Text($"A total of {allControls.Count} Controls are located in the app:"))));
+
             foreach (ControlEntity control in allControls.OrderBy(o => o.Name).ToList())
             {
                 //TODO
@@ -125,7 +131,26 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addDetailedAppControls(Body body)
+        private Table CreateControlTable(ControlEntity control, BorderValues borderType = BorderValues.Single)
+        {
+            Table table = CreateTable();
+            table.GetFirstChild<TableProperties>().TableBorders = new TableBorders(
+                    SetDefaultTableBorderStyle(new TopBorder(), borderType),
+                    SetDefaultTableBorderStyle(new LeftBorder(), borderType),
+                    SetDefaultTableBorderStyle(new BottomBorder(), borderType),
+                    SetDefaultTableBorderStyle(new RightBorder(), borderType),
+                    SetDefaultTableBorderStyle(new InsideHorizontalBorder(), BorderValues.None),
+                    SetDefaultTableBorderStyle(new InsideVerticalBorder(), BorderValues.None)
+                );
+            table.Append(CreateRow(InsertSvgImage(mainPart, AppControlIcons.GetControlIcon(control.Type), 32, 32), new Text(control.Name + " [" + control.Type + "]")));
+            foreach (ControlEntity child in control.Children.OrderBy(o => o.Name).ToList())
+            {
+                table.Append(CreateRow(new Text(""), CreateControlTable(child, BorderValues.None)));
+            }
+            return table;
+        }
+
+        private void addDetailedAppControls()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -187,7 +212,7 @@ namespace PowerDocu.AppDocumenter
             return childControls;
         }
 
-        private void addAppDataSources(Body body)
+        private void addAppDataSources()
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -216,7 +241,6 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addAppResources(Body body)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
