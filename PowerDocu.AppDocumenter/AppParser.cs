@@ -162,7 +162,9 @@ namespace PowerDocu.AppDocumenter
                 }
                 else
                 {
-                    controlEntity.Children.Add(parseControl(((JObject)property).Children().ToList()));
+                    ControlEntity child = parseControl(((JObject)property).Children().ToList());
+                    controlEntity.Children.Add(child);
+                    child.Parent = controlEntity;
                 }
             }
             controlEntity.Type = controlEntity.Properties.Where(e => e.expressionOperator == "Template")?.First().expressionOperands.Cast<Expression>().First(eo => eo.expressionOperator == "Name").expressionOperands[0].ToString();
