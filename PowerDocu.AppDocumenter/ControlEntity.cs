@@ -12,6 +12,7 @@ namespace PowerDocu.AppDocumenter
         public List<Expression> Properties = new List<Expression>();
         public List<ControlEntity> Children = new List<ControlEntity>();
         public List<Rule> Rules = new List<Rule>();
+        public ControlEntity Parent;
         public ControlEntity()
         {
         }
