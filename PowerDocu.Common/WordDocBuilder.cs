@@ -33,9 +33,9 @@ namespace PowerDocu.Common
         protected const string cellHeaderBackground = "E5E5FF";
         protected readonly Random random = new Random();
         protected string folderPath;
-        
         protected MainDocumentPart mainPart;
         protected Body body;
+        protected Dictionary<string, string> SVGImages = new Dictionary<string, string>();
 
         public HashSet<int> UsedRandomNumbers = new HashSet<int>();
 
@@ -323,21 +323,32 @@ namespace PowerDocu.Common
 
         protected Drawing InsertSvgImage(MainDocumentPart mainDocumentPart, string svgcontent, int imageWidth, int imageHeight)
         {
-            ImagePart svgPart = mainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (GetRandomNumber()));
-            using (MemoryStream stream = new MemoryStream())
+            string partId;
+            string contenthash = CreateMD5Hash(svgcontent);
+            if (SVGImages.ContainsKey(contenthash))
             {
-                StreamWriter writer = new StreamWriter(stream);
-                writer.Write(svgcontent);
-                writer.Flush();
-                stream.Position = 0;
-                svgPart.FeedData(stream);
+                partId = SVGImages[contenthash];
             }
-            return InsertSvgImage(mainDocumentPart.GetIdOfPart(svgPart), "", imageWidth, imageHeight);
+            else
+            {
+                ImagePart svgPart = mainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (GetRandomNumber()));
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    StreamWriter writer = new StreamWriter(stream);
+                    writer.Write(svgcontent);
+                    writer.Flush();
+                    stream.Position = 0;
+                    svgPart.FeedData(stream);
+                }
+                partId = mainDocumentPart.GetIdOfPart(svgPart);
+                SVGImages.Add(contenthash, partId);
+            }
+            return InsertSvgImage(partId, "", imageWidth, imageHeight);
         }
 
         private int GetRandomNumber()
         {
-            int r = 0;
+            int r;
             do
             {
                 r = random.Next(100000, 999999);
