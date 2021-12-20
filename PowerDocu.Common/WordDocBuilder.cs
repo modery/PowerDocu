@@ -34,6 +34,8 @@ namespace PowerDocu.Common
         protected readonly Random random = new Random();
         protected string folderPath;
 
+        public HashSet<int> UsedRandomNumbers = new HashSet<int>();
+
         protected void InitializeWordDocument(string filename, string template)
         {
             //create a new document if no template is provided
@@ -153,7 +155,7 @@ namespace PowerDocu.Common
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
             string randomHex = GetRandomHexNumber(8);
-            int randomId = (new Random()).Next(100000, 999999);
+            int randomId = GetRandomNumber();
             return new Drawing(
                     new DW.Inline(
                         new DW.Extent() { Cx = width, Cy = height },
@@ -235,7 +237,7 @@ namespace PowerDocu.Common
             Int64Value width = imageWidth * 9525;
             Int64Value height = imageHeight * 9525;
             string randomHex = GetRandomHexNumber(8);
-            int randomId = (new Random()).Next(100000, 999999);
+            int randomId = GetRandomNumber();
 
             A.BlipExtension svgelement = new A.BlipExtension
             {
@@ -314,6 +316,31 @@ namespace PowerDocu.Common
                     });
 
             return element;
+        }
+
+        protected Drawing InsertSvgImage(MainDocumentPart mainDocumentPart, string svgcontent, int imageWidth, int imageHeight)
+        {
+            ImagePart svgPart = mainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (GetRandomNumber()));
+            using (MemoryStream stream = new MemoryStream())
+            {
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write(svgcontent);
+                writer.Flush();
+                stream.Position = 0;
+                svgPart.FeedData(stream);
+            }
+            return InsertSvgImage(mainDocumentPart.GetIdOfPart(svgPart), "", imageWidth, imageHeight);
+        }
+
+        private int GetRandomNumber()
+        {
+            int r = 0;
+            do
+            {
+                r = random.Next(100000, 999999);
+            } while (UsedRandomNumbers.Contains(r));
+            UsedRandomNumbers.Add(r);
+            return r;
         }
 
         /* used to add the styles (mainly heading1, heading2, etc.) from styles.xml to the document */
