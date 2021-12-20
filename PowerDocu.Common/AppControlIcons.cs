@@ -10,26 +10,58 @@ namespace PowerDocu.Common
         {
             return controlname switch
             {
+                "addMedia" => UnknownControlIcon,
                 "appinfo" => UnknownControlIcon,
+                "audioPlayback" => UnknownControlIcon,
+                "barChart" => UnknownControlIcon,
+                "barcodeScanner" => UnknownControlIcon,
                 "button" => ButtonIcon,
+                "camera" => UnknownControlIcon,
+                "checkbox" => UnknownControlIcon,
                 "combobox" => ComboBoxIcon,
+                "dataTable" => UnknownControlIcon,
                 "datepicker" => DatePickerIcon,
                 "dropdown" => DropDownIcon,
+                "export" => UnknownControlIcon,
                 "form" => FormIcon,
+                "formspro" => UnknownControlIcon,
+                "formViewer" => UnknownControlIcon,
                 "gallery" => GalleryIcon,
                 "galleryTemplate" => UnknownControlIcon,
                 "group" => GroupIcon,
+                "htmlViewer" => UnknownControlIcon,
                 "icon" => UnknownControlIcon,
                 "image" => ImageIcon,
+                "import" => UnknownControlIcon,
+                "inkControl" => UnknownControlIcon,
                 "label" => LabelIcon,
+                "legend" => UnknownControlIcon,
+                "lineChart" => UnknownControlIcon,
+                "listbox" => UnknownControlIcon,
+                "microphone" => UnknownControlIcon,
+                "microsoftStreamPlayback" => UnknownControlIcon,
+                "pdfViewer" => UnknownControlIcon,
+                "pieChart" => UnknownControlIcon,
+                "powerbi" => UnknownControlIcon,
+                "radio" => UnknownControlIcon,
+                "rating" => UnknownControlIcon,
                 "rectangle" => RectangleIcon,
                 "richTextEditor" => RichTextEditorIcon,
                 "screen" => ScreenIcon,
+                "slider" => UnknownControlIcon,
                 "text" => TextIcon,
                 "timer" => TimerIcon,
+                "toggleSwitch" => UnknownControlIcon,
                 "typedDataCard" => UnknownControlIcon,
+                "videoPlayback" => UnknownControlIcon,
+                "ViewIn3D" => UnknownControlIcon,
                 _ => UnknownControlIcon,
             };
+
+            //TODO Maps
+            //TODO AI Builder
+            //TODO Mixed REality
+
         }
         public static string IconHeader
         {
