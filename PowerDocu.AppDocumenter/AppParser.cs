@@ -24,38 +24,47 @@ namespace PowerDocu.AppDocumenter
         public AppParser(string filename)
         {
             NotificationHelper.SendNotification("Processing " + filename);
-            if (filename.EndsWith("zip"))
+            if (filename.EndsWith(".zip"))
             {
-                /*
-                List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(filename);
-                packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
-                foreach (ZipArchiveEntry definition in definitions)
+                using (FileStream stream = new FileStream(filename, FileMode.Open))
                 {
-                    using (StreamReader reader = new StreamReader(definition.Open()))
+                    List<ZipArchiveEntry> definitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
+                    packageType = PackageType.SolutionPackage;
+                    foreach (ZipArchiveEntry definition in definitions)
                     {
+                        string tempFile = Path.GetDirectoryName(filename) + @"\" + definition.Name;
+                        definition.ExtractToFile(tempFile);
                         NotificationHelper.SendNotification("Processing app " + definition.FullName);
-                        string definitionContent = reader.ReadToEnd();
-                        AppEntity flow = parseApp(definitionContent);
-                        if (String.IsNullOrEmpty(flow.Name))
+                        using (FileStream appDefinition = new FileStream(tempFile, FileMode.Open))
                         {
-                            flow.Name = definition.Name.Replace(".json", "");
+                            {
+                                AppEntity app = new AppEntity();
+                                currentApp = app;
+                                parseAppProperties(appDefinition);
+                                parseAppControls(appDefinition);
+                                parseAppDataSources(appDefinition);
+                                parseAppResources(appDefinition);
+                                apps.Add(app);
+                            }
                         }
-                        flows.Add(flow);
+                        File.Delete(tempFile);
                     }
                 }
-                */
             }
-            else if (filename.EndsWith("msapp"))
+            else if (filename.EndsWith(".msapp"))
             {
                 NotificationHelper.SendNotification("Processing app " + filename);
                 packageType = PackageType.AppPackage;
                 AppEntity app = new AppEntity();
                 currentApp = app;
-                parseAppProperties(filename);
-                parseAppControls(filename);
-                parseAppDataSources(filename);
-                parseAppResources(filename);
-                apps.Add(app);
+                using (FileStream stream = new FileStream(filename, FileMode.Open))
+                {
+                    parseAppProperties(stream);
+                    parseAppControls(stream);
+                    parseAppDataSources(stream);
+                    parseAppResources(stream);
+                    apps.Add(app);
+                }
             }
             else
             {
@@ -63,7 +72,7 @@ namespace PowerDocu.AppDocumenter
             }
         }
 
-        private void parseAppProperties(string appArchive)
+        private void parseAppProperties(Stream appArchive)
         {
             string[] filesToParse = new string[] { "Resources\\PublishInfo.json", "Header.json", "Properties.json" };
             foreach (string fileToParse in filesToParse)
@@ -91,9 +100,10 @@ namespace PowerDocu.AppDocumenter
             }
         }
 
-        private void parseAppControls(string appArchive)
+        private void parseAppControls(Stream appArchive)
         {
             List<ZipArchiveEntry> controlFiles = ZipHelper.getFilesInPathFromZip(appArchive, "Controls", ".json");
+            //parse the controls
             foreach (ZipArchiveEntry controlEntry in controlFiles)
             {
                 using (StreamReader reader = new StreamReader(controlEntry.Open()))
@@ -104,6 +114,10 @@ namespace PowerDocu.AppDocumenter
                     dynamic controlsDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
                     currentApp.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
                 }
+            }
+            foreach (ControlEntity control in currentApp.Controls)
+            {
+                CheckVariableUsage(control);
             }
         }
 
@@ -171,6 +185,46 @@ namespace PowerDocu.AppDocumenter
             return controlEntity;
         }
 
+        private void CheckVariableUsage(ControlEntity control)
+        {
+            foreach (Rule rule in control.Rules)
+            {
+                foreach (var globalVar in currentApp.GlobalVariables)
+                {
+                    if (rule.InvariantScript.Contains(globalVar))
+                    {
+                        addVariableControlMapping(globalVar, control, rule.Property);
+                    }
+                }
+                 foreach (var collection in currentApp.Collections)
+                {
+                    if (rule.InvariantScript.Contains(collection))
+                    {
+                        addVariableControlMapping(collection, control, rule.Property);
+                    }
+                }
+            }
+            foreach (ControlEntity child in control.Children)
+            {
+                CheckVariableUsage(child);
+            }
+            // TODO also check  Properties ?
+        }
+
+        private void addVariableControlMapping(string globalVar, ControlEntity control, string property)
+        {
+            if (currentApp.VariableCollectionControlReferences.ContainsKey(globalVar))
+            {
+                currentApp.VariableCollectionControlReferences[globalVar].Add(new ControlPropertyReference(){Control=control,RuleProperty=property});
+            }
+            else
+            {
+                List<ControlPropertyReference> list = new List<ControlPropertyReference>();
+                list.Add(new ControlPropertyReference(){Control=control,RuleProperty=property});
+                currentApp.VariableCollectionControlReferences.Add(globalVar, list);
+            }
+        }
+
         private void CheckForVariables(string input)
         {
             //Reference: https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/working-with-variables#types-of-variables
@@ -234,7 +288,7 @@ namespace PowerDocu.AppDocumenter
             }
         }
 
-        private void parseAppDataSources(string appArchive)
+        private void parseAppDataSources(Stream appArchive)
         {
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\DataSources.json");
             using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
@@ -266,7 +320,7 @@ namespace PowerDocu.AppDocumenter
             }
         }
 
-        private void parseAppResources(string appArchive)
+        private void parseAppResources(Stream appArchive)
         {
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\Resources.json");
             using (StreamReader reader = new StreamReader(dataSourceFile.Open()))

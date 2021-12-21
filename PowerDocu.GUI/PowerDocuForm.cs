@@ -26,7 +26,10 @@ namespace PowerDocu.GUI
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
                     //TODO this needs to be improved, as ZIP files can also contain apps.
                     if(openFileToParseDialog.FileName.EndsWith(".zip")) {
+                        NotificationHelper.SendNotification("Trying to process Power Automate Flows");
                         FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                        NotificationHelper.SendNotification("Trying to process Power Apps");
+                        AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
                     } else if(openFileToParseDialog.FileName.EndsWith(".msapp"))  {
                         AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
                     }

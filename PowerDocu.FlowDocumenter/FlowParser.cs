@@ -26,20 +26,23 @@ namespace PowerDocu.FlowDocumenter
             NotificationHelper.SendNotification("Processing " + filename);
             if (filename.EndsWith("zip", StringComparison.OrdinalIgnoreCase))
             {
-                List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(filename);
-                packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
-                foreach (ZipArchiveEntry definition in definitions)
+                using (FileStream stream = new FileStream(filename, FileMode.Open))
                 {
-                    using (StreamReader reader = new StreamReader(definition.Open()))
+                    List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(stream);
+                    packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
+                    foreach (ZipArchiveEntry definition in definitions)
                     {
-                        NotificationHelper.SendNotification("Processing workflow definition " + definition.FullName);
-                        string definitionContent = reader.ReadToEnd();
-                        FlowEntity flow = parseFlow(definitionContent);
-                        if (String.IsNullOrEmpty(flow.Name))
+                        using (StreamReader reader = new StreamReader(definition.Open()))
                         {
-                            flow.Name = definition.Name.Replace(".json", "");
+                            NotificationHelper.SendNotification("Processing workflow definition " + definition.FullName);
+                            string definitionContent = reader.ReadToEnd();
+                            FlowEntity flow = parseFlow(definitionContent);
+                            if (String.IsNullOrEmpty(flow.Name))
+                            {
+                                flow.Name = definition.Name.Replace(".json", "");
+                            }
+                            flows.Add(flow);
                         }
-                        flows.Add(flow);
                     }
                 }
             }

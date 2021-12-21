@@ -14,7 +14,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <UseWindowsForms>true</UseWindowsForms>    
+    <UseWindowsForms>true</UseWindowsForms>
+    <CodeAnalysisRuleSet>C:\Users\rene\AppData\Local\JosefPihrt\Roslynator\VisualStudioCode\roslynator.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
 </Project>

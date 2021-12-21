@@ -82,9 +82,20 @@ namespace PowerDocu.AppDocumenter
             run.AppendChild(new Text("Variables"));
             ApplyStyleToParagraph("Heading3", para);
             Table table = CreateTable();
+            table.Append(CreateHeaderRow(new Text("Variable Name"), new Text("Used In")));
             foreach (string var in app.GlobalVariables.OrderBy(o => o).ToHashSet())
             {
-                table.Append(CreateRow(new Text(var), new Text("Global Variable")));
+                Table varReferenceTable = CreateTable();
+                List<ControlPropertyReference> references = app.VariableCollectionControlReferences[var];
+                if (references != null)
+                {
+                    varReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
+                    foreach (ControlPropertyReference reference in references)
+                    {
+                        varReferenceTable.Append(CreateRow(new Text(reference.Control.Name), new Text(reference.RuleProperty)));
+                    }
+                }
+                table.Append(CreateRow(new Text(var), varReferenceTable));
             }
             foreach (string var in app.ContextVariables)
             {
@@ -97,9 +108,20 @@ namespace PowerDocu.AppDocumenter
             run.AppendChild(new Text("Collections"));
             ApplyStyleToParagraph("Heading3", para);
             table = CreateTable();
+            table.Append(CreateHeaderRow(new Text("Collection Name"), new Text("Used In")));
             foreach (string coll in app.Collections.OrderBy(o => o).ToHashSet())
             {
-                table.Append(CreateRow(new Text(coll), new Text("Collection")));
+                Table collReferenceTable = CreateTable();
+                List<ControlPropertyReference> references = app.VariableCollectionControlReferences[coll];
+                if (references != null)
+                {
+                    collReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
+                    foreach (ControlPropertyReference reference in references)
+                    {
+                        collReferenceTable.Append(CreateRow(new Text(reference.Control.Name), new Text(reference.RuleProperty)));
+                    }
+                }
+                table.Append(CreateRow(new Text(coll), collReferenceTable));
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
@@ -116,12 +138,15 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.Controls.Count} Screens are located in the app:"))));
             foreach (ControlEntity control in app.Controls.OrderBy(o => o.Name).ToList())
             {
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Text("Screen: " + control.Name));
-                ApplyStyleToParagraph("Heading3", para);
-                body.AppendChild(CreateControlTable(control));
-                body.AppendChild(new Paragraph(new Run(new Break())));
+                if (control.Type != "appinfo")
+                {
+                    para = body.AppendChild(new Paragraph());
+                    run = para.AppendChild(new Run());
+                    run.AppendChild(new Text("Screen: " + control.Name));
+                    ApplyStyleToParagraph("Heading3", para);
+                    body.AppendChild(CreateControlTable(control));
+                    body.AppendChild(new Paragraph(new Run(new Break())));
+                }
             }
 
             foreach (ControlEntity control in allControls.OrderBy(o => o.Name).ToList())
@@ -171,9 +196,11 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading3", para);
                 body.AppendChild(new Paragraph(new Run()));
                 Table table = CreateTable();
-                table.Append(CreateRow(new Text("Type"), new Text(control.Type)));
+                Table typeTable = CreateTable(BorderValues.None);
+                typeTable.Append(CreateRow(InsertSvgImage(mainPart, AppControlIcons.GetControlIcon(control.Type), 16, 16), new Text(control.Type)));
+                table.Append(CreateRow(new Text("Type"), typeTable));
                 table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Rule rule in control.Rules)
+                foreach (Rule rule in control.Rules.OrderBy(o => o.Property).ToList())
                 {
                     table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
                 }

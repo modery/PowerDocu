@@ -10,9 +10,9 @@ namespace PowerDocu.Common
         public const string FlowDefinitionFile = "definition.json";
         public const string SolutionPackageWorkflowsPath = "Workflows/";
 
-        public static List<ZipArchiveEntry> getWorkflowFilesFromZip(string archiveFile)
+        public static List<ZipArchiveEntry> getWorkflowFilesFromZip(Stream archiveFileStream)
         {
-            ZipArchive archive = ZipFile.Open(archiveFile, ZipArchiveMode.Read);
+            ZipArchive archive = new ZipArchive(archiveFileStream,ZipArchiveMode.Read);
             List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
@@ -26,9 +26,9 @@ namespace PowerDocu.Common
             return entries;
         }
 
-        public static List<ZipArchiveEntry> getFilesInPathFromZip(string archiveFile, string path, string fileExtension)
+        public static List<ZipArchiveEntry> getFilesInPathFromZip(Stream archiveFileStream, string path, string fileExtension)
         {
-            ZipArchive archive = ZipFile.Open(archiveFile, ZipArchiveMode.Read);
+            ZipArchive archive = new ZipArchive(archiveFileStream,ZipArchiveMode.Read);
             List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
@@ -40,9 +40,9 @@ namespace PowerDocu.Common
             return entries;
         }
 
-        public static ZipArchiveEntry getFileFromZip(string archiveFile, string fileName)
+        public static ZipArchiveEntry getFileFromZip(Stream archiveFileStream, string fileName)
         {
-            ZipArchive archive = ZipFile.Open(archiveFile, ZipArchiveMode.Read);
+            ZipArchive archive = new ZipArchive(archiveFileStream,ZipArchiveMode.Read);
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 if (entry.FullName.Equals(fileName))
@@ -51,6 +51,22 @@ namespace PowerDocu.Common
                 }
             }
             return null;
+        }
+
+        public static void test()
+        {
+            Stream data = new MemoryStream(); // The original data
+            Stream unzippedEntryStream; // Unzipped data from a file in the archive
+
+            ZipArchive archive = new ZipArchive(data);
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    unzippedEntryStream = entry.Open(); // .Open will return a stream
+                                                        // Process entry data here
+                }
+            }
         }
     }
 }

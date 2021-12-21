@@ -16,6 +16,7 @@ namespace PowerDocu.AppDocumenter
         public HashSet<string> GlobalVariables = new HashSet<string>();
         public HashSet<string> ContextVariables = new HashSet<string>();
         public HashSet<string> Collections = new HashSet<string>();
+        public Dictionary<string,List<ControlPropertyReference>> VariableCollectionControlReferences = new Dictionary<string, List<ControlPropertyReference>>();
         public AppEntity()
         {
         }
@@ -34,5 +35,10 @@ namespace PowerDocu.AppDocumenter
         public string Content;
         public string ResourceKind;
         public List<Expression> Properties = new List<Expression>();
+    }
+
+    public class ControlPropertyReference {
+        public ControlEntity Control;
+        public string RuleProperty;
     }
 }
