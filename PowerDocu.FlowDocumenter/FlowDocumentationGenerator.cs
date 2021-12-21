@@ -32,7 +32,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;
-                NotificationHelper.SendNotification("Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
+                NotificationHelper.SendNotification("FlowDocumenter: Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
             }
             else
             {

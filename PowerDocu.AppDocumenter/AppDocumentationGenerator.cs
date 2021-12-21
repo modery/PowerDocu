@@ -29,7 +29,7 @@ namespace PowerDocu.AppDocumenter
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;
-                NotificationHelper.SendNotification("Created Word documentation for " + filePath + ". A total of " + appParserFromZip.getApps().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
+                NotificationHelper.SendNotification("AppDocumenter: Created Word documentation for " + filePath + ". A total of " + appParserFromZip.getApps().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
             }
             else
             {
