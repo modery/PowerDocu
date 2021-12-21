@@ -3,13 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <CodeAnalysisRuleSet>C:\Users\rene\AppData\Local\JosefPihrt\Roslynator\VisualStudioCode\roslynator.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-
 
     <Content Include="Resources\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
