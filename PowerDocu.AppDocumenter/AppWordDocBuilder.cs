@@ -48,7 +48,7 @@ namespace PowerDocu.AppDocumenter
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Power App Documentation"));
+            run.AppendChild(new Text("Power App Documentation - " + app.Name));
             ApplyStyleToParagraph("Heading1", para);
             body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
@@ -56,13 +56,13 @@ namespace PowerDocu.AppDocumenter
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
-
+            para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("App Properties"));
             ApplyStyleToParagraph("Heading2", para);
             body.AppendChild(new Paragraph(new Run()));
             table = CreateTable();
-            foreach (Expression property in app.Properties)
+            foreach (Expression property in app.Properties.OrderBy(o => o.expressionOperator).ToList())
             {
                 AddExpressionTable(property, table);
             }
@@ -97,7 +97,7 @@ namespace PowerDocu.AppDocumenter
                 }
                 table.Append(CreateRow(new Text(var), varReferenceTable));
             }
-            foreach (string var in app.ContextVariables)
+            foreach (string var in app.ContextVariables.OrderBy(o => o).ToHashSet())
             {
                 table.Append(CreateRow(new Text(var), new Text("Context Variable")));
             }
@@ -133,9 +133,7 @@ namespace PowerDocu.AppDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Controls Overview"));
             ApplyStyleToParagraph("Heading2", para);
-
-            List<ControlEntity> allControls = new List<ControlEntity>();
-            body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.Controls.Count} Screens are located in the app:"))));
+            body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.Controls.Where(o => o.Type == "screen").ToList().Count} Screens are located in the app:"))));
             foreach (ControlEntity control in app.Controls.OrderBy(o => o.Name).ToList())
             {
                 if (control.Type != "appinfo")
@@ -147,11 +145,6 @@ namespace PowerDocu.AppDocumenter
                     body.AppendChild(CreateControlTable(control));
                     body.AppendChild(new Paragraph(new Run(new Break())));
                 }
-            }
-
-            foreach (ControlEntity control in allControls.OrderBy(o => o.Name).ToList())
-            {
-                //TODO
             }
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
