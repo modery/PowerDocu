@@ -90,7 +90,7 @@ namespace PowerDocu.AppDocumenter
                 if (references != null)
                 {
                     varReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
-                    foreach (ControlPropertyReference reference in references)
+                    foreach (ControlPropertyReference reference in references.OrderBy(o => o.Control.Name).ThenBy(o => o.RuleProperty))
                     {
                         varReferenceTable.Append(CreateRow(new Text(reference.Control.Name), new Text(reference.RuleProperty)));
                     }
@@ -116,7 +116,7 @@ namespace PowerDocu.AppDocumenter
                 if (references != null)
                 {
                     collReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
-                    foreach (ControlPropertyReference reference in references)
+                    foreach (ControlPropertyReference reference in references.OrderBy(o => o.Control.Name).ThenBy(o => o.RuleProperty))
                     {
                         collReferenceTable.Append(CreateRow(new Text(reference.Control.Name), new Text(reference.RuleProperty)));
                     }
@@ -239,7 +239,7 @@ namespace PowerDocu.AppDocumenter
             run.AppendChild(new Text("DataSources"));
             ApplyStyleToParagraph("Heading2", para);
             body.AppendChild(new Paragraph(new Run(new Text($"A total of {app.DataSources.Count} DataSources are located in the app:"))));
-            foreach (DataSource datasource in app.DataSources)
+            foreach (DataSource datasource in app.DataSources.OrderBy(o => o.Name))
             {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
@@ -250,7 +250,7 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
                 table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
                 table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Expression expression in datasource.Properties)
+                foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
                 {
                     AddExpressionTable(expression, table);
                 }
@@ -280,7 +280,7 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
                 table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
                 table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Expression expression in resource.Properties)
+                foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
                 {
                     AddExpressionTable(expression, table);
                 }
