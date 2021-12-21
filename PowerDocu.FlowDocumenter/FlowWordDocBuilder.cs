@@ -126,7 +126,7 @@ namespace PowerDocu.FlowDocumenter
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Flow Documentation"));
+            run.AppendChild(new Text("Flow Documentation - " + flow.Name));
             ApplyStyleToParagraph("Heading1", para);
             body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
