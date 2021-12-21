@@ -485,7 +485,7 @@ namespace PowerDocu.Common
                 if (expression.expressionOperands.Count > 1)
                 {
                     Table operandsTable = CreateTable(BorderValues.Single, factor * factor);
-                    foreach (var expressionOperand in expression.expressionOperands)
+                    foreach (var expressionOperand in expression.expressionOperands.OrderBy(o => o.ToString()).ToList())
                     {
                         if (expressionOperand.GetType().Equals(typeof(string)))
                         {
