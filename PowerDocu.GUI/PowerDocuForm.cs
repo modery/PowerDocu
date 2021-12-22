@@ -24,7 +24,6 @@ namespace PowerDocu.GUI
                 {
                     NotificationHelper.SendNotification("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    //TODO this needs to be improved, as ZIP files can also contain apps.
                     if(openFileToParseDialog.FileName.EndsWith(".zip")) {
                         NotificationHelper.SendNotification("Trying to process Power Automate Flows");
                         FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
