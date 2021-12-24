@@ -24,20 +24,26 @@ namespace PowerDocu.GUI
                 {
                     NotificationHelper.SendNotification("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    if(openFileToParseDialog.FileName.EndsWith(".zip")) {
+                    if (openFileToParseDialog.FileName.EndsWith(".zip"))
+                    {
                         NotificationHelper.SendNotification("Trying to process Power Automate Flows");
                         FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
                         NotificationHelper.SendNotification("Trying to process Power Apps");
                         AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
-                    } else if(openFileToParseDialog.FileName.EndsWith(".msapp"))  {
+                    }
+                    else if (openFileToParseDialog.FileName.EndsWith(".msapp"))
+                    {
                         AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
                     }
-                    Cursor = Cursors.Arrow; // change cursor to normal type
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
                     $"Details:\n\n{ex.StackTrace}");
+                }
+                finally
+                {
+                    Cursor = Cursors.Arrow; // change cursor to normal type
                 }
             }
         }
