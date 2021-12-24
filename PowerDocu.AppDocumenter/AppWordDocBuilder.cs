@@ -178,6 +178,7 @@ namespace PowerDocu.AppDocumenter
             List<ControlEntity> allControls = new List<ControlEntity>();
             foreach (ControlEntity control in app.Controls)
             {
+                allControls.Add(control);
                 allControls.AddRange(getAllChildControls(control));
             }
             body.AppendChild(new Paragraph(new Run(new Text($"A total of {allControls.Count} Controls are located in the app:"))));
