@@ -8,7 +8,6 @@ namespace PowerDocu.Common
     {
         public static string GetControlIcon(string controlname)
         {
-            NotificationHelper.SendNotification(controlname);
             return controlname switch
             {
                 "addMedia" => AddMediaIcon,
