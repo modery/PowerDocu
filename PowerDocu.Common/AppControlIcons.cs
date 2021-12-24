@@ -8,6 +8,7 @@ namespace PowerDocu.Common
     {
         public static string GetControlIcon(string controlname)
         {
+            NotificationHelper.SendNotification(controlname);
             return controlname switch
             {
                 "addMedia" => AddMediaIcon,
@@ -18,6 +19,7 @@ namespace PowerDocu.Common
                 "button" => ButtonIcon,
                 "camera" => CameraIcon,
                 "checkbox" => CheckboxIcon,
+                "circle" => ShapesIcon,
                 "combobox" => ComboBoxIcon,
                 "dataTable" => DataGridIcon,
                 "datepicker" => DatePickerIcon,
@@ -29,6 +31,7 @@ namespace PowerDocu.Common
                 "gallery" => GalleryIcon,
                 "galleryTemplate" => UnknownControlIcon,
                 "group" => GroupIcon,
+                "hexagon" => ShapesIcon,
                 "htmlViewer" => HtmlViewerIcon,
                 "icon" => IconsIcon,
                 "image" => ImageIcon,
@@ -40,18 +43,23 @@ namespace PowerDocu.Common
                 "listbox" => ListboxIcon,
                 "microphone" => MicIcon,
                 "microsoftStreamPlayback" => MicrosoftStreamIcon,
+                "octagon" => ShapesIcon,
+                "partialCircle" => ShapesIcon,
                 "pdfViewer" => PdfViewerIcon,
+                "pentagon" => ShapesIcon,
                 "pieChart" => PieChartIcon,
                 "powerbi" => PowerBiIcon,
                 "radio" => RadioButtonIcon,
                 "rating" => RatingIcon,
-                "rectangle" => RectangleIcon,
+                "rectangle" => ShapesIcon,
                 "richTextEditor" => RichTextEditorIcon,
                 "screen" => ScreenIcon,
                 "slider" => SliderIcon,
+                "star" => ShapesIcon,
                 "text" => TextIcon,
                 "timer" => TimerIcon,
                 "toggleSwitch" => ToggleSwitchIcon,
+                "triangle" => ShapesIcon,
                 "typedDataCard" => UnknownControlIcon,
                 "videoPlayback" => VideoIcon,
                 "ViewIn3D" => ViewIn3DIcon,
@@ -192,17 +200,6 @@ namespace PowerDocu.Common
                         @"<path fill=""#FFF"" d=""M3.831 8.543l.197-.196L9.38 3H3v8.878l.831-3.335zM7.652 11.973l-.196.196L4.123 13H13V6.623l-5.348 5.35zM13.438 2a.537.537 0 00-.391.164L5.641 9.57l-.266 1.055 1.055-.266 7.406-7.406a.533.533 0 00.164-.39.539.539 0 00-.168-.398.545.545 0 00-.394-.165z"" />
                         <path fill=""#444"" d=""M13 6.623V13H3V3h6.379l1-1H2v12h12V5.623l-1 1z"" />
                         <path fill=""#01918D"" d=""M6.945 11.266L4 12l.734-2.945s7.309-7.302 7.426-7.422c.117-.119.238-.227.363-.32s.26-.169.406-.227c.146-.057.315-.086.509-.086.213 0 .414.042.602.125a1.61 1.61 0 01.828.832 1.5 1.5 0 01.125.605 1.47 1.47 0 01-.305.922 2.972 2.972 0 01-.32.359c-.121.116-7.423 7.423-7.423 7.423zM13.438 2a.537.537 0 00-.391.164L5.641 9.57l-.266 1.055 1.055-.266 7.406-7.406a.533.533 0 00.164-.39.539.539 0 00-.168-.398.545.545 0 00-.394-.165z"" />" +
-                        IconFooter;
-            }
-        }
-
-        public static string RectangleIcon
-        {
-            get
-            {
-                return IconHeader +
-                        @"<path fill=""#444"" d=""M16 3v10H0V3h16zm-1 1H1v8h14V4z"" />
-                        <path fill=""#FFF"" d=""M15 4H1v8h14V4z"" />" +
                         IconFooter;
             }
         }
@@ -510,6 +507,19 @@ namespace PowerDocu.Common
                         IconFooter;
             }
         }
-
+        public static string ShapesIcon
+        {
+            get
+            {
+                return IconHeader +
+                        @"<path fill=""#01918D"" d=""M15 2v7H8V2h7m1-1H7v9h9V1z"" />
+                        <path fill=""#FFF"" d=""M15 2v7H8V2h7"" />
+                        <path fill=""#F9B23F"" d=""M4.5 4C6.43 4 8 5.57 8 7.5S6.43 11 4.5 11 1 9.43 1 7.5 2.57 4 4.5 4m0-1a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"" />
+                        <path fill=""#FFF"" d=""M4.5 4C6.43 4 8 5.57 8 7.5S6.43 11 4.5 11 1 9.43 1 7.5 2.57 4 4.5 4"" />
+                        <path fill=""#444"" d=""M13.883 14c-.631-1.089-3.12-5.411-3.75-6.5-.63 1.089-3.12 5.411-3.75 6.5h7.5zm1.735 1H4.648l5.485-9.5 5.485 9.5z"" />
+                        <path fill=""#FFF"" d=""M13.883 14c-.631-1.089-3.12-5.411-3.75-6.5-.63 1.089-3.12 5.411-3.75 6.5h7.5z"" />" +
+                        IconFooter;
+            }
+        }
     }
 }
