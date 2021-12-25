@@ -462,7 +462,7 @@ namespace PowerDocu.Common
             return tr;
         }
 
-        protected Table AddExpressionTable(Expression expression, Table table = null, double factor = 1)
+        protected Table AddExpressionTable(Expression expression, Table table = null, double factor = 1, bool showShading = true)
         {
             if (table == null)
                 table = CreateTable(BorderValues.Single, factor);
@@ -470,14 +470,17 @@ namespace PowerDocu.Common
             {
                 var tr = new TableRow();
                 var tc = CreateTableCell();
-                var shading = new Shading()
+                if (showShading)
                 {
-                    Color = "auto",
-                    Fill = "E5FFE5",
-                    Val = ShadingPatternValues.Clear
-                };
+                    var shading = new Shading()
+                    {
+                        Color = "auto",
+                        Fill = "E5FFE5",
+                        Val = ShadingPatternValues.Clear
+                    };
 
-                tc.TableCellProperties.Append(shading);
+                    tc.TableCellProperties.Append(shading);
+                }
                 tc.TableCellProperties.TableCellWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "700" };
                 tc.Append(new Paragraph(new Run(new Text(expression.expressionOperator))));
                 tr.Append(tc);

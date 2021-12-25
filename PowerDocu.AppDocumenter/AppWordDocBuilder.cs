@@ -46,6 +46,7 @@ namespace PowerDocu.AppDocumenter
 
         private void addAppProperties()
         {
+            string[] propertiesToSkip = new string[] { "AppPreviewFlagsMap", "ControlCount" };
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Power App Documentation - " + app.Name));
@@ -64,7 +65,23 @@ namespace PowerDocu.AppDocumenter
             table = CreateTable();
             foreach (Expression property in app.Properties.OrderBy(o => o.expressionOperator).ToList())
             {
-                AddExpressionTable(property, table);
+                if (!propertiesToSkip.Contains(property.expressionOperator))
+                {
+                    AddExpressionTable(property, table, 1, false);
+                }
+            }
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("App Preview Flags"));
+            ApplyStyleToParagraph("Heading2", para);
+            body.AppendChild(new Paragraph(new Run()));
+            table = CreateTable();
+            Expression appPreviewsFlagProperty = app.Properties.First(o => o.expressionOperator == "AppPreviewFlagsMap");
+            if (appPreviewsFlagProperty != null)
+            {
+                AddExpressionTable(appPreviewsFlagProperty, table, 1, false);
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
