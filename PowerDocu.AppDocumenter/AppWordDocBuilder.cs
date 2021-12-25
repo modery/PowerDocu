@@ -196,7 +196,18 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Rule rule in control.Rules.OrderBy(o => o.Property).ToList())
                 {
-                    table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                    if (rule.InvariantScript.StartsWith("RGBA("))
+                    {
+                        Table colorTable = CreateTable(BorderValues.None);
+                        colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+                        string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
+                        colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                        table.Append(CreateRow(new Text(rule.Property), colorTable));
+                    }
+                    else
+                    {
+                        table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                    }
                 }
                 foreach (ControlEntity childControl in control.Children)
                 {
