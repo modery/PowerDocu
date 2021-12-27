@@ -67,7 +67,7 @@ namespace PowerDocu.AppDocumenter
             {
                 if (!propertiesToSkip.Contains(property.expressionOperator))
                 {
-                    AddExpressionTable(property, table, 1, false);
+                    AddExpressionTable(property, table, 1, false, true);
                 }
             }
             body.Append(table);
@@ -81,7 +81,10 @@ namespace PowerDocu.AppDocumenter
             Expression appPreviewsFlagProperty = app.Properties.First(o => o.expressionOperator == "AppPreviewFlagsMap");
             if (appPreviewsFlagProperty != null)
             {
-                AddExpressionTable(appPreviewsFlagProperty, table, 1, false);
+                foreach (Expression flagProp in appPreviewsFlagProperty.expressionOperands)
+                {
+                    AddExpressionTable(flagProp, table, 1, false, true);
+                }
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
