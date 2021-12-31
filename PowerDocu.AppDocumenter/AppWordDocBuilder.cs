@@ -19,28 +19,33 @@ namespace PowerDocu.AppDocumenter
     class AppWordDocBuilder : WordDocBuilder
     {
         private readonly AppEntity app;
+        private bool DetailedDocumentation = false;
 
         public AppWordDocBuilder(AppEntity appToDocument, string path, string template)
         {
             this.app = appToDocument;
             folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc - " + app.Name + @"\");
             Directory.CreateDirectory(folderPath);
-            string filename = CharsetHelper.GetSafeName(app.Name) + ((app.ID != null) ? ("(" + app.ID + ")") : "") + ".docx";
-            filename = filename.Replace(":", "-");
-            filename = folderPath + filename;
-            InitializeWordDocument(filename, template);
-            using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
+            do
             {
-                mainPart = wordDocument.MainDocumentPart;
-                body = mainPart.Document.Body;
-                PrepareDocument(!String.IsNullOrEmpty(template));
-                addAppProperties();
-                addAppGeneralInfo();
-                addAppDataSources();
-                addAppResources();
-                addAppControlsOverview();
-                addDetailedAppControls();
-            }
+                string filename = CharsetHelper.GetSafeName(app.Name) + ((app.ID != null) ? ("(" + app.ID + ")") : "") + (DetailedDocumentation ? " detailed" : "") + ".docx";
+                filename = filename.Replace(":", "-");
+                filename = folderPath + filename;
+                InitializeWordDocument(filename, template);
+                using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
+                {
+                    mainPart = wordDocument.MainDocumentPart;
+                    body = mainPart.Document.Body;
+                    PrepareDocument(!String.IsNullOrEmpty(template));
+                    addAppProperties();
+                    addAppGeneralInfo();
+                    addAppDataSources();
+                    addAppResources();
+                    addAppControlsOverview();
+                    if (DetailedDocumentation) addDetailedAppControls();
+                }
+                DetailedDocumentation = !DetailedDocumentation;
+            } while (DetailedDocumentation);
             NotificationHelper.SendNotification("Created Word documentation for " + app.Name);
         }
 
@@ -72,22 +77,25 @@ namespace PowerDocu.AppDocumenter
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
-            para = body.AppendChild(new Paragraph());
-            run = para.AppendChild(new Run());
-            run.AppendChild(new Text("App Preview Flags"));
-            ApplyStyleToParagraph("Heading2", para);
-            body.AppendChild(new Paragraph(new Run()));
-            table = CreateTable();
-            Expression appPreviewsFlagProperty = app.Properties.First(o => o.expressionOperator == "AppPreviewFlagsMap");
-            if (appPreviewsFlagProperty != null)
+            if (DetailedDocumentation)
             {
-                foreach (Expression flagProp in appPreviewsFlagProperty.expressionOperands)
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text("App Preview Flags"));
+                ApplyStyleToParagraph("Heading2", para);
+                body.AppendChild(new Paragraph(new Run()));
+                table = CreateTable();
+                Expression appPreviewsFlagProperty = app.Properties.First(o => o.expressionOperator == "AppPreviewFlagsMap");
+                if (appPreviewsFlagProperty != null)
                 {
-                    AddExpressionTable(flagProp, table, 1, false, true);
+                    foreach (Expression flagProp in appPreviewsFlagProperty.expressionOperands)
+                    {
+                        AddExpressionTable(flagProp, table, 1, false, true);
+                    }
                 }
+                body.Append(table);
+                body.AppendChild(new Paragraph(new Run(new Break())));
             }
-            body.Append(table);
-            body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
         private void addAppGeneralInfo()
@@ -281,12 +289,14 @@ namespace PowerDocu.AppDocumenter
                 Table table = CreateTable();
                 table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
                 table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
-                table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
+                if (DetailedDocumentation)
                 {
-                    AddExpressionTable(expression, table);
+                    table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                    foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
+                    {
+                        AddExpressionTable(expression, table);
+                    }
                 }
-
                 body.Append(table);
                 body.AppendChild(new Paragraph(new Run(new Break())));
             }
@@ -311,12 +321,14 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text("Name"), new Text(resource.Name)));
                 table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
                 table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
-                table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
+                if (DetailedDocumentation)
                 {
-                    AddExpressionTable(expression, table);
+                    table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                    foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
+                    {
+                        AddExpressionTable(expression, table);
+                    }
                 }
-
                 body.Append(table);
                 body.AppendChild(new Paragraph(new Run(new Break())));
             }
