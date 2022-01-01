@@ -198,6 +198,9 @@ namespace PowerDocu.AppDocumenter
 
         private void addDetailedAppControls()
         {
+            string[] ColourProperties = new string[] { "BorderColor", "Color", "DisabledBorderColor", "DisabledColor", "DisabledFill", "DisabledSectionColor",
+                    "DisabledSelectionFill", "Fill", "HoverColor", "HoverFill", "PressedColor", "PressedFill", "SelectionColor", "SelectionFill" };
+
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Detailed Controls"));
@@ -224,17 +227,40 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (Rule rule in control.Rules.OrderBy(o => o.Property).ToList())
                 {
-                    if (rule.InvariantScript.StartsWith("RGBA("))
+                    if (!ColourProperties.Contains(rule.Property))
                     {
-                        Table colorTable = CreateTable(BorderValues.None);
-                        colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                        string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
-                        colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                        table.Append(CreateRow(new Text(rule.Property), colorTable));
+                        if (rule.InvariantScript.StartsWith("RGBA("))
+                        {
+                            Table colorTable = CreateTable(BorderValues.None);
+                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+                            string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
+                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                        }
+                        else
+                        {
+                            table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                        }
                     }
-                    else
+                }
+                table.Append(CreateMergedRow(new Text("Color Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                foreach (string property in ColourProperties)
+                {
+                    Rule rule = control.Rules.FirstOrDefault(o => o.Property == property);
+                    if (rule != null)
                     {
-                        table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                        if (rule.InvariantScript.StartsWith("RGBA("))
+                        {
+                            Table colorTable = CreateTable(BorderValues.None);
+                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+                            string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
+                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                        }
+                        else
+                        {
+                            table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                        }
                     }
                 }
                 foreach (ControlEntity childControl in control.Children)
