@@ -35,12 +35,13 @@ namespace PowerDocu.Common
         protected string folderPath;
         protected MainDocumentPart mainPart;
         protected Body body;
-        protected Dictionary<string, string> SVGImages = new Dictionary<string, string>();
+        protected Dictionary<string, string> SVGImages;
 
         public HashSet<int> UsedRandomNumbers = new HashSet<int>();
 
         protected void InitializeWordDocument(string filename, string template)
         {
+            SVGImages = new Dictionary<string, string>();
             //create a new document if no template is provided
             if (String.IsNullOrEmpty(template))
             {
