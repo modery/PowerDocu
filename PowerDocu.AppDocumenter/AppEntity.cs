@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using PowerDocu.Common;
 
 namespace PowerDocu.AppDocumenter
@@ -17,6 +18,7 @@ namespace PowerDocu.AppDocumenter
         public HashSet<string> ContextVariables = new HashSet<string>();
         public HashSet<string> Collections = new HashSet<string>();
         public Dictionary<string,List<ControlPropertyReference>> VariableCollectionControlReferences = new Dictionary<string, List<ControlPropertyReference>>();
+        public Dictionary<string, MemoryStream> ResourceStreams = new Dictionary<string, MemoryStream>();
         public AppEntity()
         {
         }
