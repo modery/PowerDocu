@@ -196,7 +196,7 @@ namespace PowerDocu.AppDocumenter
                         addVariableControlMapping(globalVar, control, rule.Property);
                     }
                 }
-                 foreach (var collection in currentApp.Collections)
+                foreach (var collection in currentApp.Collections)
                 {
                     if (rule.InvariantScript.Contains(collection))
                     {
@@ -215,12 +215,12 @@ namespace PowerDocu.AppDocumenter
         {
             if (currentApp.VariableCollectionControlReferences.ContainsKey(globalVar))
             {
-                currentApp.VariableCollectionControlReferences[globalVar].Add(new ControlPropertyReference(){Control=control,RuleProperty=property});
+                currentApp.VariableCollectionControlReferences[globalVar].Add(new ControlPropertyReference() { Control = control, RuleProperty = property });
             }
             else
             {
                 List<ControlPropertyReference> list = new List<ControlPropertyReference>();
-                list.Add(new ControlPropertyReference(){Control=control,RuleProperty=property});
+                list.Add(new ControlPropertyReference() { Control = control, RuleProperty = property });
                 currentApp.VariableCollectionControlReferences.Add(globalVar, list);
             }
         }
@@ -322,6 +322,7 @@ namespace PowerDocu.AppDocumenter
 
         private void parseAppResources(Stream appArchive)
         {
+            string[] ResourceExtensions = new string[] { "jpg", "jpeg", "gif", "png", "bmp", "tif", "tiff", "svg" };
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\Resources.json");
             using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
             {
@@ -332,6 +333,7 @@ namespace PowerDocu.AppDocumenter
                 foreach (JToken resource in resourceDefinition.Resources.Children())
                 {
                     Resource res = new Resource();
+                    string pathToResource = "";
                     foreach (JProperty prop in resource.Children())
                     {
                         switch (prop.Name)
@@ -345,12 +347,26 @@ namespace PowerDocu.AppDocumenter
                             case "ResourceKind":
                                 res.ResourceKind = prop.Value.ToString();
                                 break;
+                            case "Path":
+                                pathToResource = prop.Value.ToString();
+                                break;
                             default:
                                 res.Properties.Add(Expression.parseExpressions(prop));
                                 break;
                         }
                     }
                     currentApp.Resources.Add(res);
+                    if (res.ResourceKind == "LocalFile")
+                    {
+                        string extension = pathToResource.Substring(pathToResource.LastIndexOf('.') + 1).ToLower();
+                        if (ResourceExtensions.Contains(extension))
+                        {
+                            ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, pathToResource);
+                            MemoryStream ms = new MemoryStream();
+                            resourceFile.Open().CopyTo(ms);
+                            currentApp.ResourceStreams.Add(res.Name, ms);
+                        }
+                    }
                 }
             }
         }
