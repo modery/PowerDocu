@@ -199,7 +199,8 @@ namespace PowerDocu.AppDocumenter
         private void addDetailedAppControls()
         {
             string[] ColourProperties = new string[] { "BorderColor", "Color", "DisabledBorderColor", "DisabledColor", "DisabledFill", "DisabledSectionColor",
-                    "DisabledSelectionFill", "Fill", "HoverColor", "HoverFill", "PressedColor", "PressedFill", "SelectionColor", "SelectionFill" };
+                    "DisabledSelectionFill", "Fill", "FocusedBorderColor", "HoverBorderColor", "HoverColor", "HoverFill", "PressedBorderColor","PressedColor",
+                    "PressedFill", "SelectionColor", "SelectionFill" };
 
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -224,11 +225,16 @@ namespace PowerDocu.AppDocumenter
                 Table typeTable = CreateTable(BorderValues.None);
                 typeTable.Append(CreateRow(InsertSvgImage(mainPart, AppControlIcons.GetControlIcon(control.Type), 16, 16), new Text(control.Type)));
                 table.Append(CreateRow(new Text("Type"), typeTable));
-                table.Append(CreateMergedRow(new Text("Control Rules"), 2, WordDocBuilder.cellHeaderBackground));
-                foreach (Rule rule in control.Rules.OrderBy(o => o.Property).ToList())
+                string category = "";
+                foreach (Rule rule in control.Rules.OrderBy(o => o.Category).ThenBy(o => o.Property).ToList())
                 {
                     if (!ColourProperties.Contains(rule.Property))
                     {
+                        if (rule.Category != category)
+                        {
+                            category = rule.Category;
+                            table.Append(CreateMergedRow(new Text(category), 2, WordDocBuilder.cellHeaderBackground));
+                        }
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
                             Table colorTable = CreateTable(BorderValues.None);
@@ -242,6 +248,7 @@ namespace PowerDocu.AppDocumenter
                             table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
                         }
                     }
+                    NotificationHelper.SendNotification(rule.Category);
                 }
                 table.Append(CreateMergedRow(new Text("Color Properties"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (string property in ColourProperties)
