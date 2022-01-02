@@ -52,6 +52,8 @@ namespace PowerDocu.AppDocumenter
         private void addAppProperties()
         {
             string[] propertiesToSkip = new string[] { "AppPreviewFlagsMap", "ControlCount" };
+            string[] OverviewProperties = new string[] {"AppCreationSource", "AppDescription", "AppName", "BackgroundColor", "DocumentAppType", "DocumentLayoutHeight", "DocumentLayoutOrientation",
+                    "DocumentLayoutWidth", "IconColor", "IconName", "Id", "LastSavedDateTimeUTC", "LogoFileName", "Name"};
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Power App Documentation - " + app.Name));
@@ -70,7 +72,7 @@ namespace PowerDocu.AppDocumenter
             table = CreateTable();
             foreach (Expression property in app.Properties.OrderBy(o => o.expressionOperator).ToList())
             {
-                if (!propertiesToSkip.Contains(property.expressionOperator))
+                if (!propertiesToSkip.Contains(property.expressionOperator) && (OverviewProperties.Contains(property.expressionOperator) || DetailedDocumentation))
                 {
                     AddExpressionTable(property, table, 1, false, true);
                 }
