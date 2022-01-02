@@ -366,18 +366,27 @@ namespace PowerDocu.AppDocumenter
                     MemoryStream resourceStream;
                     if (app.ResourceStreams.TryGetValue(resource.Name, out resourceStream))
                     {
-                        //TODO handle SVG files
-                        ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
-                        int imageWidth, imageHeight;
-                        using (var image = Image.FromStream(resourceStream, false, false))
+                        Drawing icon = null;
+                        Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
+                        if (fileName.expressionOperands.First().ToString().ToLower().EndsWith("svg"))
                         {
-                            imageWidth = image.Width;
-                            imageHeight = image.Height;
+                            string svg = Encoding.Default.GetString(resourceStream.ToArray());
+                            icon = InsertSvgImage(mainPart, svg, 400, 400);
                         }
-                        resourceStream.Position = 0;
-                        imagePart.FeedData(resourceStream);
-                        int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
-                        Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                        else
+                        {
+                            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+                            int imageWidth, imageHeight;
+                            using (var image = Image.FromStream(resourceStream, false, false))
+                            {
+                                imageWidth = image.Width;
+                                imageHeight = image.Height;
+                            }
+                            resourceStream.Position = 0;
+                            imagePart.FeedData(resourceStream);
+                            int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
+                            icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                        }
                         table.Append(CreateRow(new Text("Resource Preview"), icon));
                     }
                 }
