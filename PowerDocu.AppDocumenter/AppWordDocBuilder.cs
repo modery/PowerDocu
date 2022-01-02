@@ -248,7 +248,6 @@ namespace PowerDocu.AppDocumenter
                             table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
                         }
                     }
-                    NotificationHelper.SendNotification(rule.Category);
                 }
                 table.Append(CreateMergedRow(new Text("Color Properties"), 2, WordDocBuilder.cellHeaderBackground));
                 foreach (string property in ColourProperties)
