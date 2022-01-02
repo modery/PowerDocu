@@ -61,6 +61,12 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
             table.Append(CreateRow(new Text("App Name"), new Text(app.Name)));
+            Expression appLogo = app.Properties.FirstOrDefault(o => o.expressionOperator == "LogoFileName");
+            if (appLogo != null)
+            {
+                //TODO display logo here
+                //table.Append(CreateRow(new Text("App Logo"), ));
+            }
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
@@ -355,6 +361,26 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text("Name"), new Text(resource.Name)));
                 table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
                 table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
+                if (resource.ResourceKind == "LocalFile")
+                {
+                    MemoryStream resourceStream;
+                    if (app.ResourceStreams.TryGetValue(resource.Name, out resourceStream))
+                    {
+                        //TODO handle SVG files
+                        ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+                        int imageWidth, imageHeight;
+                        using (var image = Image.FromStream(resourceStream, false, false))
+                        {
+                            imageWidth = image.Width;
+                            imageHeight = image.Height;
+                        }
+                        resourceStream.Position = 0;
+                        imagePart.FeedData(resourceStream);
+                        int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
+                        Drawing icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                        table.Append(CreateRow(new Text("Resource Preview"), icon));
+                    }
+                }
                 if (DetailedDocumentation)
                 {
                     table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
