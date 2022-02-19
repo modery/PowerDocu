@@ -26,26 +26,33 @@ namespace PowerDocu.Common
                 string[] parts = noBrackets.Split(',');
                 if (parts.Length >= 3)
                 {
-                    int r = int.Parse(parts[0], CultureInfo.InvariantCulture);
-                    int g = int.Parse(parts[1], CultureInfo.InvariantCulture);
-                    int b = int.Parse(parts[2], CultureInfo.InvariantCulture);
+                    try
+                    {
+                        int r = int.Parse(parts[0], CultureInfo.InvariantCulture);
+                        int g = int.Parse(parts[1], CultureInfo.InvariantCulture);
+                        int b = int.Parse(parts[2], CultureInfo.InvariantCulture);
 
-                    if (parts.Length == 3)
-                    {
-                        return ColorToHex(Color.FromArgb(r, g, b));
+                        if (parts.Length == 3)
+                        {
+                            return ColorToHex(Color.FromArgb(r, g, b));
+                        }
+                        else if (parts.Length == 4)
+                        {
+                            float a;
+                            if (parts[3].Contains("%"))
+                            {
+                                a = float.Parse(parts[3].Replace("%", ""), CultureInfo.InvariantCulture) / 100;
+                            }
+                            else
+                            {
+                                a = float.Parse(parts[3], CultureInfo.InvariantCulture);
+                            }
+                            return ColorToHex(Color.FromArgb((int)(a * 255), r, g, b));
+                        }
                     }
-                    else if (parts.Length == 4)
+                    catch (Exception e)
                     {
-                        float a;
-                        if (parts[3].Contains("%"))
-                        {
-                            a = float.Parse(parts[3].Replace("%", ""), CultureInfo.InvariantCulture) / 100;
-                        }
-                        else
-                        {
-                            a = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                        }
-                        return ColorToHex(Color.FromArgb((int)(a * 255), r, g, b));
+                        return null;
                     }
                 }
             }
