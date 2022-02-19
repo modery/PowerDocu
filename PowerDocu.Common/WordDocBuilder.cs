@@ -129,13 +129,20 @@ namespace PowerDocu.Common
                 }
                 else
                 {
-                    if (input.expressionOperands[0]?.GetType() == typeof(Expression))
+                    if (input.expressionOperands.Count > 0)
                     {
-                        operandsCell.Append(AddExpressionTable((Expression)input.expressionOperands[0]), new Paragraph());
+                        if (input.expressionOperands[0]?.GetType() == typeof(Expression))
+                        {
+                            operandsCell.Append(AddExpressionTable((Expression)input.expressionOperands[0]), new Paragraph());
+                        }
+                        else
+                        {
+                            operandsCell.Append(new Paragraph(new Run(new Text(input.expressionOperands[0]?.ToString()))));
+                        }
                     }
                     else
                     {
-                        operandsCell.Append(new Paragraph(new Run(new Text(input.expressionOperands[0]?.ToString()))));
+                        operandsCell.Append(new Paragraph(new Run(new Text(""))));
                     }
                 }
                 table.Append(CreateRow(new Text(input.expressionOperator), operandsCell));
