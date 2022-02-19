@@ -247,9 +247,12 @@ namespace PowerDocu.AppDocumenter
                         {
                             Table colorTable = CreateTable(BorderValues.None);
                             colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                            string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
-                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1));
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                                table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            }
                         }
                         else
                         {
@@ -267,9 +270,12 @@ namespace PowerDocu.AppDocumenter
                         {
                             Table colorTable = CreateTable(BorderValues.None);
                             colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                            string colour = ColourHelper.ColorToHex(ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1)));
-                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript.Substring(0, rule.InvariantScript.IndexOf(')') + 1));
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                                table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            }
                         }
                         else
                         {
