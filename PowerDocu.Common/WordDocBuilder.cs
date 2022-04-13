@@ -570,6 +570,7 @@ namespace PowerDocu.Common
 
         protected void PrepareDocument(bool templateUsed)
         {
+            AddSettingsToMainDocumentPart();
             AddNameSpaces(mainPart.Document);
             if (templateUsed)
             {
@@ -583,6 +584,24 @@ namespace PowerDocu.Common
                 maxImageHeight = (int)(pageSize.Height.Value - pageMargin.Top.Value - pageMargin.Bottom.Value);
             }
         }
+
+        private void AddSettingsToMainDocumentPart()
+        {
+            DocumentSettingsPart settingsPart = mainPart.AddNewPart<DocumentSettingsPart>();
+            settingsPart.Settings = new Settings(
+               new Compatibility(
+                   //Compatibility for Office 2013 onwards, which helps with processing larger documents
+                   new CompatibilitySetting()
+                   {
+                       Name = CompatSettingNameValues.CompatibilityMode,
+                       Val = new StringValue("15"),
+                       Uri = new StringValue("http://schemas.microsoft.com/office/word")
+                   }
+               )
+            );
+            settingsPart.Settings.Save();
+        }
+
         protected void AddNameSpaces(Document document)
         {
             SafeAddNameSpaceDeclaration(document, "wpc", "http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas");
