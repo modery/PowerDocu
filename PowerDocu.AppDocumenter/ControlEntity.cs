@@ -16,6 +16,13 @@ namespace PowerDocu.AppDocumenter
         public ControlEntity()
         {
         }
+
+        public ControlEntity Screen()
+        {
+            if (this.Type == "screen") return this;
+            if (Parent != null) return Parent.Screen();
+            return null;
+        }
     }
 
     public class Rule

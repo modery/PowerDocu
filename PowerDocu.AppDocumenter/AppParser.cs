@@ -103,7 +103,7 @@ namespace PowerDocu.AppDocumenter
         private void parseAppControls(Stream appArchive)
         {
             List<ZipArchiveEntry> controlFiles = ZipHelper.getFilesInPathFromZip(appArchive, "Controls", ".json");
-            //parse the controls
+            //parse the controls. each controlFile represents a screen
             foreach (ZipArchiveEntry controlEntry in controlFiles)
             {
                 using (StreamReader reader = new StreamReader(controlEntry.Open()))
@@ -134,7 +134,9 @@ namespace PowerDocu.AppDocumenter
                         JEnumerable<JToken> children = ((JArray)prop.Value).Children();
                         foreach (JToken child in children)
                         {
-                            controlEntity.Children.Add(parseControl(child.Children().ToList()));
+                            ControlEntity childControLEntity = parseControl(child.Children().ToList());
+                            controlEntity.Children.Add(childControLEntity);
+                            childControLEntity.Parent = controlEntity;
                         }
                     }
                     else if (prop.Name.Equals("Rules"))
