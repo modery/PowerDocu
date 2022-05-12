@@ -68,6 +68,20 @@ namespace PowerDocu.AppDocumenter
                 //table.Append(CreateRow(new Text("App Logo"), ));
             }
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
+            Table statisticsTable = CreateTable();
+            statisticsTable.Append(CreateRow(new Text("Screens"), new Text("" + app.Controls.Where(o => o.Type == "screen").ToList().Count)));
+            List<ControlEntity> allControls = new List<ControlEntity>();
+            foreach (ControlEntity control in app.Controls)
+            {
+                allControls.Add(control);
+                allControls.AddRange(getAllChildControls(control));
+            }
+            statisticsTable.Append(CreateRow(new Text("Controls (excluding Screens)"), new Text("" + (allControls.Count - app.Controls.Where(o => o.Type == "screen").ToList().Count))));
+            statisticsTable.Append(CreateRow(new Text("Variables"), new Text("" + app.GlobalVariables.Count)));
+            statisticsTable.Append(CreateRow(new Text("Collections"), new Text("" + app.Collections.Count)));
+            statisticsTable.Append(CreateRow(new Text("Data Sources"), new Text("" + app.DataSources.Count)));
+            statisticsTable.Append(CreateRow(new Text("Resources"), new Text("" + app.Resources.Count)));
+            table.Append(CreateRow(new Text("App Statistics"), statisticsTable));
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
             para = body.AppendChild(new Paragraph());
