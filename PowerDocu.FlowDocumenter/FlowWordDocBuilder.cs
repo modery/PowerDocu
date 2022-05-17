@@ -136,6 +136,8 @@ namespace PowerDocu.FlowDocumenter
                 table.Append(CreateRow(new Text("Flow ID"), new Text(flow.ID)));
             }
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
+            table.Append(CreateRow(new Text("Number of Variables"), new Text("" + flow.actions.ActionNodes.Count(o => o.Type == "InitializeVariable"))));
+            table.Append(CreateRow(new Text("Number of Actions"), new Text("" + flow.actions.ActionNodes.Count)));
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
