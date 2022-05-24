@@ -39,7 +39,7 @@ namespace PowerDocu.Common
                         else if (parts.Length == 4)
                         {
                             float a;
-                            if (parts[3].Contains("%"))
+                            if (parts[3].Contains("%") || float.Parse(parts[3], CultureInfo.InvariantCulture) > 1)
                             {
                                 a = float.Parse(parts[3].Replace("%", ""), CultureInfo.InvariantCulture) / 100;
                             }
