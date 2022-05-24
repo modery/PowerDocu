@@ -61,11 +61,41 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run()));
             Table table = CreateTable();
             table.Append(CreateRow(new Text("App Name"), new Text(app.Name)));
+            //if there is a custom logo we add it to the documentation as well. Icon based logos currently not supported
             Expression appLogo = app.Properties.FirstOrDefault(o => o.expressionOperator == "LogoFileName");
             if (appLogo != null)
             {
-                //TODO display logo here
-                //table.Append(CreateRow(new Text("App Logo"), ));
+                MemoryStream resourceStream;
+                if (app.ResourceStreams.TryGetValue(appLogo.expressionOperands[0].ToString(), out resourceStream))
+                {
+                    Drawing icon = null;
+
+                    ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+                    int imageWidth, imageHeight;
+                    using (var image = Image.FromStream(resourceStream, false, false))
+                    {
+                        imageWidth = image.Width;
+                        imageHeight = image.Height;
+                    }
+                    resourceStream.Position = 0;
+                    imagePart.FeedData(resourceStream);
+                    int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
+                    icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                    TableRow tr = CreateRow(new Text("App Logo"), icon);
+                    Expression bgColour = app.Properties.FirstOrDefault(o => o.expressionOperator == "BackgroundColor");
+                    if (bgColour != null)
+                    {
+                        TableCell tc = (TableCell)tr.LastChild;
+                        var shading = new Shading()
+                        {
+                            Color = "auto",
+                            Fill = ColourHelper.ParseColor(bgColour.expressionOperands[0].ToString()),
+                            Val = ShadingPatternValues.Clear
+                        };
+                        tc.TableCellProperties.Append(shading);
+                    }
+                    table.Append(tr);
+                }
             }
             table.Append(CreateRow(new Text("Documentation generated at"), new Text(DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString())));
             Table statisticsTable = CreateTable();
@@ -107,7 +137,7 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading2", para);
                 body.AppendChild(new Paragraph(new Run()));
                 table = CreateTable();
-                Expression appPreviewsFlagProperty = app.Properties.First(o => o.expressionOperator == "AppPreviewFlagsMap");
+                Expression appPreviewsFlagProperty = app.Properties.Find(o => o.expressionOperator == "AppPreviewFlagsMap");
                 if (appPreviewsFlagProperty != null)
                 {
                     foreach (Expression flagProp in appPreviewsFlagProperty.expressionOperands)

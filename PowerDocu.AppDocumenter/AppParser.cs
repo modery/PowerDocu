@@ -95,6 +95,13 @@ namespace PowerDocu.AppDocumenter
                         {
                             currentApp.ID = prop.Value.ToString();
                         }
+                        if (prop.Name.Equals("LogoFileName") && !String.IsNullOrEmpty(prop.Value.ToString()))
+                        {
+                            ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, "Resources\\"+prop.Value.ToString());
+                            MemoryStream ms = new MemoryStream();
+                            resourceFile.Open().CopyTo(ms);
+                            currentApp.ResourceStreams.Add(prop.Value.ToString(), ms);
+                        }
                     }
                 }
             }
