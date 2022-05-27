@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using PowerDocu.Common;
 
-namespace PowerDocu.AppDocumenter
+namespace PowerDocu.Common
 {
     public class ControlEntity
     {

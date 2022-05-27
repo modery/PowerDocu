@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using PowerDocu.Common;
 
-namespace PowerDocu.FlowDocumenter
+namespace PowerDocu.Common
 {
     public class Trigger
     {

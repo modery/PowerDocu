@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PowerDocu.FlowDocumenter
+namespace PowerDocu.Common
 {
     public class FlowEntity
     {

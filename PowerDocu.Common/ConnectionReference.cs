@@ -1,7 +1,7 @@
 using System;
 using PowerDocu.Common;
 
-namespace PowerDocu.FlowDocumenter
+namespace PowerDocu.Common
 {
     public class ConnectionReference
     {

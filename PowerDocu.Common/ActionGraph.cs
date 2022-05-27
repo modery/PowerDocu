@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using PowerDocu.Common;
 
-namespace PowerDocu.FlowDocumenter
+namespace PowerDocu.Common
 {
     public class ActionNode
     {
