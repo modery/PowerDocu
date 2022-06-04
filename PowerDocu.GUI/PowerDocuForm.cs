@@ -14,6 +14,10 @@ namespace PowerDocu.GUI
         {
             InitializeComponent();
             NotificationHelper.AddNotificationReceiver(new PowerDocuFormNotificationReceiver(appStatusTextBox));
+            using (var stream = File.OpenRead("Icons\\PowerDocu.ico"))
+            {
+                this.Icon = new Icon(stream);
+            }
         }
 
         private void selectZIPFileButton_Click(object sender, EventArgs e)

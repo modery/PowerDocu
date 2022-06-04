@@ -15,6 +15,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Icons\PowerDocu.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>
