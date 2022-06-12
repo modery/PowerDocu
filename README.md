@@ -1,11 +1,16 @@
 # PowerDocu
+![PowerDocu](Images/PowerDocu%20-%20Info%20Header.png)
 After you have built a Flow in Power Automate or a canvas app in Power Apps, you may consider documenting it as to allow others to get a better understanding of how it works, to ensure that any specific configuration in it is kept somewhere else as well, or for other reasons. However, manually documenting the technical implementation can be quite time consuming.
 
 This is where **PowerDocu** can help!
 
-PowerDocu contains two console applications called **FlowDocumenter** and **AppDocumenter**, as well as a graphical user interface to easily perform documentations. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package or an exported Solution package, and AppDocumenter does the same for exported Power Apps canvas app. The GUI application handles both types.
+PowerDocu contains two console applications called **FlowDocumenter** and **AppDocumenter**, as well as a **Windows GUI executable** to easily perform documentations. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package or an exported Solution package, and AppDocumenter does the same for exported Power Apps canvas app. The GUI application handles both types and is the most convenient option to use generally.
 
 ![PowerDocu.GUI](Images/PowerDocu.GUI.png)
+
+**Watch an introduction and demo of PowerDocu**
+As part of a Microsoft 365 Community call, an overview and a demo of PowerDocu were given. Want to see the tool in action? Check out this recording on YouTube:
+[![PowerDocu demo as part of the Microsoft 365 Community call](Images/youtube-microsoft365community-powerdocu.jpg)](https://www.youtube.com/watch?v=2-mH8vdVlaM)
 
 **Example of a documented Flow:**
 
@@ -47,9 +52,9 @@ The documentation for a solution includes
 2. Generated Word documents for each Flow inside the solution
 
 
-> **_NOTE:_** AppDocumenter is currently in a **very early development stage**! It offers basic functionality, but has a lot of room for improvement. FlowDocumenter is considered to be mostly stable. If you find any bugs or other issues, please log an **[Issue](https://github.com/modery/PowerDocu/issues)** in this GitHub project. For any improvement recommendations and suggestions, please open a **[Discussion](https://github.com/modery/PowerDocu/discussions)**. Most importantly, if you want to contribute to this project's code, please fork this repository and submit appropriate Pull Requests. **Any kind of contribution is more than welcome!**
+> **_NOTE:_** PowerDocu is currently in a relatively stable state. However, if you find any bugs or other issues, please log an **[Issue](https://github.com/modery/PowerDocu/issues)** in this GitHub project. For any improvement recommendations and suggestions, please open a **[Discussion](https://github.com/modery/PowerDocu/discussions)**. Most importantly, if you want to contribute to this project's code, please fork this repository and submit appropriate Pull Requests. **Any kind of contribution is more than welcome!**
 
-## How to use FlowDocumenter
+## How to use PowerDocu
 
 Please refer to [Installation & Usage](installation.md) for information on how to install PowerDocu and how to use it to generate documentation.
 
