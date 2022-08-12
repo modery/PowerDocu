@@ -188,7 +188,8 @@ namespace PowerDocu.FlowDocumenter
                                         }
                                         else
                                         {
-                                            vval.Append(CreateRow(new Text(((Expression)eop).expressionOperator), new Text(((Expression)eop).expressionOperands[0].ToString())));
+                                            vval.Append(CreateRow(new Text(((Expression)eop).expressionOperator),
+                                                                    new Text((((Expression)eop).expressionOperands.Count>0) ? ((Expression)eop).expressionOperands[0].ToString() :"")));
                                         }
                                     }
                                 }
