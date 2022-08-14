@@ -10,16 +10,21 @@
     <ProjectReference Include="..\PowerDocu.AppDocumenter\PowerDocu.AppDocumenter.csproj" />
     <Content Include="Icons\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
 
   <PropertyGroup>
+    <Version>0.9.0</Version>
+    <Copyright>Rene Modery</Copyright>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Icons\PowerDocu.ico</ApplicationIcon>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
 </Project>
