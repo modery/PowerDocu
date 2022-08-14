@@ -17,7 +17,7 @@ namespace PowerDocu.Common
             else if (cssColor.StartsWith("rgb")) //rgb or argb
             {
                 int left = cssColor.IndexOf('(');
-                int right = cssColor.IndexOf(')');
+                int right = cssColor.LastIndexOf(')');
 
                 if (left < 0 || right < 0)
                     return null;
