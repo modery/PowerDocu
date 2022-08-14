@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/PowerDocu.FlowDocumenter/bin/Debug/netcoreapp3.1/PowerDocu.FlowDocumenter.dll",
+            "program": "${workspaceFolder}/PowerDocu.FlowDocumenter/bin/Debug/netcoreapp3.1/win-x64/PowerDocu.FlowDocumenter.dll",
             "args": [],
             "cwd": "${workspaceFolder}/PowerDocu.FlowDocumenter",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -26,7 +26,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/PowerDocu.GUI/bin/Debug/netcoreapp3.1/PowerDocu.GUI.exe",
+            "program": "${workspaceFolder}/PowerDocu.GUI/bin/Debug/netcoreapp3.1/win-x64/PowerDocu.GUI.exe",
             "args": [],
             "cwd": "${workspaceFolder}/PowerDocu.GUI",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
