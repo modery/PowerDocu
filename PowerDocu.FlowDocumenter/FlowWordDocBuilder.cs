@@ -282,9 +282,10 @@ namespace PowerDocu.FlowDocumenter
             {
                 table.Append(CreateRow(new Text("Connector"), new Text(flow.trigger.Connector)));
             }
+            //Description = a Note added
             if (!String.IsNullOrEmpty(flow.trigger.Description))
             {
-                table.Append(CreateRow(new Text("Description"), new Text(flow.trigger.Description)));
+                table.Append(CreateRow(new Text("Description / Note"), new Text(flow.trigger.Description)));
             }
             if (flow.trigger.Recurrence.Count > 0)
             {
@@ -366,7 +367,7 @@ namespace PowerDocu.FlowDocumenter
                 actionDetailsTable.Append(CreateRow(new Text("Type"), new Text(action.Type)));
                 if (!String.IsNullOrEmpty(action.Description))
                 {
-                    actionDetailsTable.Append(CreateRow(new Text("Description"), new Text(action.Description)));
+                    actionDetailsTable.Append(CreateRow(new Text("Description / Note"), new Text(action.Description)));
                 }
                 if (!String.IsNullOrEmpty(action.Connection))
                 {
