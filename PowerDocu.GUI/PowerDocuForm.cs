@@ -13,10 +13,24 @@ namespace PowerDocu.GUI
         public PowerDocuForm()
         {
             InitializeComponent();
-            NotificationHelper.AddNotificationReceiver(new PowerDocuFormNotificationReceiver(appStatusTextBox));
+            NotificationHelper.AddNotificationReceiver(
+                new PowerDocuFormNotificationReceiver(appStatusTextBox)
+            );
             using (var stream = File.OpenRead("Icons\\PowerDocu.ico"))
             {
                 this.Icon = new Icon(stream);
+            }
+            CheckForNewerRelease();
+        }
+
+        private async void CheckForNewerRelease()
+        {
+            if (await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
+            {
+                newReleaseButton.Visible = true;
+                NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
+                NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " to download it");
+                NotificationHelper.SendNotification("");
             }
         }
 
@@ -26,24 +40,47 @@ namespace PowerDocu.GUI
             {
                 try
                 {
-                    NotificationHelper.SendNotification("Preparing to parse file " + openFileToParseDialog.FileName + ", please wait.");
+                    NotificationHelper.SendNotification(
+                        "Preparing to parse file "
+                            + openFileToParseDialog.FileName
+                            + ", please wait."
+                    );
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
                     if (openFileToParseDialog.FileName.EndsWith(".zip"))
                     {
-                        NotificationHelper.SendNotification("Trying to process Power Automate Flows");
-                        FlowDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                        NotificationHelper.SendNotification(
+                            "Trying to process Power Automate Flows"
+                        );
+                        FlowDocumentationGenerator.GenerateWordDocumentation(
+                            openFileToParseDialog.FileName,
+                            (openWordTemplateDialog.FileName != "")
+                                ? openWordTemplateDialog.FileName
+                                : null
+                        );
                         NotificationHelper.SendNotification("Trying to process Power Apps");
-                        AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                        AppDocumentationGenerator.GenerateWordDocumentation(
+                            openFileToParseDialog.FileName,
+                            (openWordTemplateDialog.FileName != "")
+                                ? openWordTemplateDialog.FileName
+                                : null
+                        );
                     }
                     else if (openFileToParseDialog.FileName.EndsWith(".msapp"))
                     {
-                        AppDocumentationGenerator.GenerateWordDocumentation(openFileToParseDialog.FileName, (openWordTemplateDialog.FileName != "") ? openWordTemplateDialog.FileName : null);
+                        AppDocumentationGenerator.GenerateWordDocumentation(
+                            openFileToParseDialog.FileName,
+                            (openWordTemplateDialog.FileName != "")
+                                ? openWordTemplateDialog.FileName
+                                : null
+                        );
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
-                    $"Details:\n\n{ex.StackTrace}");
+                    MessageBox.Show(
+                        $"Security error.\n\nError message: {ex.Message}\n\n"
+                            + $"Details:\n\n{ex.StackTrace}"
+                    );
                 }
                 finally
                 {
@@ -58,8 +95,11 @@ namespace PowerDocu.GUI
             {
                 try
                 {
-                    wordTemplateInfoLabel.Text = "Template: " + Path.GetFileName(openWordTemplateDialog.FileName);
-                    NotificationHelper.SendNotification("Selected Word template " + openWordTemplateDialog.FileName);
+                    wordTemplateInfoLabel.Text =
+                        "Template: " + Path.GetFileName(openWordTemplateDialog.FileName);
+                    NotificationHelper.SendNotification(
+                        "Selected Word template " + openWordTemplateDialog.FileName
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -73,15 +113,32 @@ namespace PowerDocu.GUI
             }
         }
 
+        private void newReleaseButton_Click(object sender, EventArgs e)
+        {
+            var sInfo = new System.Diagnostics.ProcessStartInfo(PowerDocuReleaseHelper.latestVersionUrl)
+            {
+                UseShellExecute = true,
+            };
+            System.Diagnostics.Process.Start(sInfo);
+        }
+
         private void sizeChanged(object sender, EventArgs e)
         {
-            appStatusTextBox.Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40);
+            appStatusTextBox.Size = new Size(
+                ClientSize.Width - 30,
+                ClientSize.Height
+                    - selectFileToParseButton.Height
+                    - selectWordTemplateButton.Height
+                    - 40
+            );
+            newReleaseButton.Location = new Point(ClientSize.Width - 80, 15);
         }
     }
 
     public class PowerDocuFormNotificationReceiver : NotificationReceiverBase
     {
         private readonly TextBox notificationTextBox;
+
         public PowerDocuFormNotificationReceiver(TextBox textBox)
         {
             notificationTextBox = textBox;

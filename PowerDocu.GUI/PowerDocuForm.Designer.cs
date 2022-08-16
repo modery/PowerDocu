@@ -105,6 +105,19 @@ namespace PowerDocu.GUI
                 ReadOnly = true
             };
             Controls.Add(appStatusTextBox);
+
+            newReleaseButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(82)),
+                Location = new Point(ClientSize.Width - 80, 15),
+                IconChar = IconChar.InfoCircle,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                Visible = false
+            };
+            newReleaseButton.Click += new EventHandler(newReleaseButton_Click);
+            Controls.Add(newReleaseButton);
         }
 
         private int convertToDPISpecific(int number)
@@ -114,11 +127,14 @@ namespace PowerDocu.GUI
         }
         private IconButton selectFileToParseButton;
         private IconButton selectWordTemplateButton;
+        private IconButton newReleaseButton;
         private OpenFileDialog openFileToParseDialog;
         private OpenFileDialog openWordTemplateDialog;
         private TextBox appStatusTextBox;
         private Label wordTemplateInfoLabel;
         private Label fileToParseInfoLabel;
+        private Label newReleaseInfoLabel;
+
 
         #endregion
     }
