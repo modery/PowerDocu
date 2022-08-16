@@ -12,7 +12,7 @@ namespace PowerDocu.Common
     };
     public static class ConnectorHelper
     {
-        private static readonly string folderPath = AssemblyHelper.AssemblyDirectory + @"\Resources\ConnectorIcons\";
+        private static readonly string folderPath = AssemblyHelper.GetExecutablePath() + @"\Resources\ConnectorIcons\";
         public static List<ConnectorIcon> connectorIcons;
 
         public static string getConnectorIconFile(string connectorName)
