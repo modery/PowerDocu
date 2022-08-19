@@ -70,7 +70,7 @@ namespace PowerDocu.FlowDocumenter
             addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
             rootGraph.ComputeLayout();
 
-            NotificationHelper.SendNotification("Created Graph " + folderPath + generateImageFiles(rootGraph, showSubactions) + ".png");
+            NotificationHelper.SendNotification("  - Created Graph " + folderPath + generateImageFiles(rootGraph, showSubactions) + ".png");
         }
 
         private string generateImageFiles(RootGraph rootGraph, bool showSubactions)

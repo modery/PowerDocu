@@ -23,7 +23,7 @@ namespace PowerDocu.FlowDocumenter
 
         public FlowParser(string filename)
         {
-            NotificationHelper.SendNotification("Processing " + filename);
+            NotificationHelper.SendNotification(" - Processing " + filename);
             if (filename.EndsWith("zip", StringComparison.OrdinalIgnoreCase))
             {
                 using (FileStream stream = new FileStream(filename, FileMode.Open))
@@ -34,7 +34,7 @@ namespace PowerDocu.FlowDocumenter
                     {
                         using (StreamReader reader = new StreamReader(definition.Open()))
                         {
-                            NotificationHelper.SendNotification("Processing workflow definition " + definition.FullName);
+                            NotificationHelper.SendNotification("  - Processing workflow definition " + definition.FullName);
                             string definitionContent = reader.ReadToEnd();
                             FlowEntity flow = parseFlow(definitionContent);
                             if (String.IsNullOrEmpty(flow.Name))

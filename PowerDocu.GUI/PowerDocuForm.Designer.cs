@@ -44,7 +44,8 @@ namespace PowerDocu.GUI
             {
                 FileName = "*.zip;*.msapp",
                 Filter = "Parseable files (*.zip,*.msapp) |*.zip;*.msapp|Flow ZIP files (*.zip)|*.zip|Power Apps files (*.msapp)|*.msapp",
-                Title = "Open exported Flow ZIP or Power Apps MSAPP file"
+                Title = "Open exported Flow ZIP or Power Apps MSAPP file",
+                Multiselect = true
             };
             openWordTemplateDialog = new OpenFileDialog()
             {

@@ -30,7 +30,7 @@ namespace PowerDocu.GUI
                 newReleaseButton.Visible = true;
                 NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
                 NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " to download it");
-                NotificationHelper.SendNotification("");
+                NotificationHelper.SendNotification(Environment.NewLine);
             }
         }
 
@@ -38,53 +38,57 @@ namespace PowerDocu.GUI
         {
             if (openFileToParseDialog.ShowDialog() == DialogResult.OK)
             {
-                try
+                foreach (string fileName in openFileToParseDialog.FileNames)
                 {
-                    NotificationHelper.SendNotification(
-                        "Preparing to parse file "
-                            + openFileToParseDialog.FileName
-                            + ", please wait."
-                    );
-                    Cursor = Cursors.WaitCursor; // change cursor to hourglass type
-                    if (openFileToParseDialog.FileName.EndsWith(".zip"))
+                    try
                     {
                         NotificationHelper.SendNotification(
-                            "Trying to process Power Automate Flows"
+                            "Preparing to parse file " +
+                                fileName
+                                + ", please wait."
                         );
-                        FlowDocumentationGenerator.GenerateWordDocumentation(
-                            openFileToParseDialog.FileName,
-                            (openWordTemplateDialog.FileName != "")
-                                ? openWordTemplateDialog.FileName
-                                : null
-                        );
-                        NotificationHelper.SendNotification("Trying to process Power Apps");
-                        AppDocumentationGenerator.GenerateWordDocumentation(
-                            openFileToParseDialog.FileName,
-                            (openWordTemplateDialog.FileName != "")
-                                ? openWordTemplateDialog.FileName
-                                : null
-                        );
+                        Cursor = Cursors.WaitCursor; // change cursor to hourglass type
+                        if (fileName.EndsWith(".zip"))
+                        {
+                            NotificationHelper.SendNotification(
+                                "Trying to process Power Automate Flows"
+                            );
+                            FlowDocumentationGenerator.GenerateWordDocumentation(
+                                fileName,
+                                (openWordTemplateDialog.FileName != "")
+                                    ? openWordTemplateDialog.FileName
+                                    : null
+                            );
+                            NotificationHelper.SendNotification("Trying to process Power Apps");
+                            AppDocumentationGenerator.GenerateWordDocumentation(
+                                fileName,
+                                (openWordTemplateDialog.FileName != "")
+                                    ? openWordTemplateDialog.FileName
+                                    : null
+                            );
+                        }
+                        else if (fileName.EndsWith(".msapp"))
+                        {
+                            AppDocumentationGenerator.GenerateWordDocumentation(
+                                fileName,
+                                (openWordTemplateDialog.FileName != "")
+                                    ? openWordTemplateDialog.FileName
+                                    : null
+                            );
+                        }
                     }
-                    else if (openFileToParseDialog.FileName.EndsWith(".msapp"))
+                    catch (Exception ex)
                     {
-                        AppDocumentationGenerator.GenerateWordDocumentation(
-                            openFileToParseDialog.FileName,
-                            (openWordTemplateDialog.FileName != "")
-                                ? openWordTemplateDialog.FileName
-                                : null
+                        MessageBox.Show(
+                            $"Security error.\n\nError message: {ex.Message}\n\n"
+                                + $"Details:\n\n{ex.StackTrace}"
                         );
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        $"Security error.\n\nError message: {ex.Message}\n\n"
-                            + $"Details:\n\n{ex.StackTrace}"
-                    );
-                }
-                finally
-                {
-                    Cursor = Cursors.Arrow; // change cursor to normal type
+                    finally
+                    {
+                        NotificationHelper.SendNotification(Environment.NewLine);
+                        Cursor = Cursors.Arrow; // change cursor to normal type
+                    }
                 }
             }
         }
