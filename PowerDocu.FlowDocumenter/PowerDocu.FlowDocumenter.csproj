@@ -5,19 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <DebugType>embedded</DebugType>
+    <DebugType>embedded</DebugType>     
   </PropertyGroup>
-
-  <ItemGroup>
-    <!-- To generate Word document -->
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
-    <!-- To create graphs -->
-    <PackageReference Include="Rubjerg.Graphviz" Version="1.1.0" />
-    <!-- For some of the JSON parsing -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <!-- to convert the SVG into a PNG -->
-    <PackageReference Include="Svg" Version="3.3.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PowerDocu.Common\PowerDocu.Common.csproj" />
