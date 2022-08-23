@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using FontAwesome.Sharp;
+using PowerDocu.Common;
 
 namespace PowerDocu.GUI
 {
@@ -39,7 +40,7 @@ namespace PowerDocu.GUI
             this.ClientSize = new System.Drawing.Size(1000, 600);
             this.MinimumSize = new Size(convertToDPISpecific(500), convertToDPISpecific(250));
             this.SizeChanged += new EventHandler(sizeChanged);
-            this.Text = "PowerDocu GUI";
+            this.Text = "PowerDocu GUI ("+PowerDocuReleaseHelper.currentVersion.ToString()+")";
             openFileToParseDialog = new OpenFileDialog()
             {
                 FileName = "*.zip;*.msapp",
@@ -135,7 +136,6 @@ namespace PowerDocu.GUI
         private Label wordTemplateInfoLabel;
         private Label fileToParseInfoLabel;
         private Label newReleaseInfoLabel;
-
 
         #endregion
     }
