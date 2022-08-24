@@ -9,8 +9,8 @@ namespace PowerDocu.Common
 {
     public static class PowerDocuReleaseHelper
     {
-        public static string currentVersion = "0.9.1";
-        public static string latestVersionTag = currentVersion;
+        public static Version currentVersion = new Version(0, 9, 1);
+        public static string latestVersionTag = currentVersion.ToString();
         public static string latestVersionUrl;
         private static bool hasReleaseBeenChecked = false;
 
@@ -20,7 +20,7 @@ namespace PowerDocu.Common
             {
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                    "Mozilla/5.0 (compatible; PowerDocu " + currentVersion + ")"
+                    "Mozilla/5.0 (compatible; PowerDocu " + currentVersion.ToString() + ")"
                 );
                 var result = await client.GetAsync(
                     "https://api.github.com/repos/modery/powerdocu/releases/latest"
@@ -51,7 +51,7 @@ namespace PowerDocu.Common
         public static async Task<bool> HasNewerPowerDocuRelease()
         {
             if (!hasReleaseBeenChecked) await GetLatestPowerDocuRelease();
-            return !latestVersionTag.Contains(currentVersion);
+            return !latestVersionTag.Contains(currentVersion.ToString());
         }
     }
 }
