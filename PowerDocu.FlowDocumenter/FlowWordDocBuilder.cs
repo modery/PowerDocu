@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -26,7 +24,6 @@ namespace PowerDocu.FlowDocumenter
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
             Directory.CreateDirectory(folderPath);
             string filename = CharsetHelper.GetSafeName(flow.Name) + ((flow.ID != null) ? ("(" + flow.ID + ")") : "") + ".docx";
-            filename = filename.Replace(":", "-");
             filename = folderPath + filename;
             InitializeWordDocument(filename, template);
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
