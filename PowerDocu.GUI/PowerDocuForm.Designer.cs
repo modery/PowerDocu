@@ -40,7 +40,7 @@ namespace PowerDocu.GUI
             this.ClientSize = new System.Drawing.Size(1000, 600);
             this.MinimumSize = new Size(convertToDPISpecific(500), convertToDPISpecific(250));
             this.SizeChanged += new EventHandler(sizeChanged);
-            this.Text = "PowerDocu GUI ("+PowerDocuReleaseHelper.currentVersion.ToString()+")";
+            this.Text = "PowerDocu GUI (" + PowerDocuReleaseHelper.currentVersion.ToString() + ")";
             openFileToParseDialog = new OpenFileDialog()
             {
                 FileName = "*.zip;*.msapp",
@@ -110,9 +110,9 @@ namespace PowerDocu.GUI
 
             newReleaseButton = new IconButton()
             {
-                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(82)),
-                Location = new Point(ClientSize.Width - 80, 15),
-                IconChar = IconChar.InfoCircle,
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(ClientSize.Width - 80, 60),
+                IconChar = IconChar.PlusCircle,
                 IconColor = Color.Green,
                 IconSize = convertToDPISpecific(32),
                 IconFont = IconFont.Auto,
@@ -120,6 +120,19 @@ namespace PowerDocu.GUI
             };
             newReleaseButton.Click += new EventHandler(newReleaseButton_Click);
             Controls.Add(newReleaseButton);
+
+            updateConnectorIconsButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(ClientSize.Width - 80, 15),
+                IconChar = IconChar.CloudDownloadAlt,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                Visible = true
+            };
+            updateConnectorIconsButton.Click += new EventHandler(updateConnectorIconsButton_Click);
+            Controls.Add(updateConnectorIconsButton);
         }
 
         private int convertToDPISpecific(int number)
@@ -130,12 +143,12 @@ namespace PowerDocu.GUI
         private IconButton selectFileToParseButton;
         private IconButton selectWordTemplateButton;
         private IconButton newReleaseButton;
+        private IconButton updateConnectorIconsButton;
         private OpenFileDialog openFileToParseDialog;
         private OpenFileDialog openWordTemplateDialog;
         private TextBox appStatusTextBox;
         private Label wordTemplateInfoLabel;
         private Label fileToParseInfoLabel;
-        private Label newReleaseInfoLabel;
 
         #endregion
     }

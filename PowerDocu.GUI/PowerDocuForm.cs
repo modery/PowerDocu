@@ -20,17 +20,24 @@ namespace PowerDocu.GUI
             {
                 this.Icon = new Icon(stream);
             }
-            CheckForNewerRelease();
+            InitialChecks();
         }
 
-        private async void CheckForNewerRelease()
+        private async void InitialChecks()
         {
+            //check for newer release
             if (await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
             {
                 newReleaseButton.Visible = true;
                 NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
-                NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " to download it");
+                NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " or press the Update button to download it");
                 NotificationHelper.SendNotification(Environment.NewLine);
+            }
+            //check for number of files
+            int connectorIcons = ConnectorHelper.numberOfConnectorIcons();
+            if (connectorIcons < 100)
+            {
+                NotificationHelper.SendNotification($"Only {connectorIcons} connector icons were found. Please update the Connectors list (press the Green Cloud Download icon)");
             }
         }
 
@@ -126,6 +133,11 @@ namespace PowerDocu.GUI
             System.Diagnostics.Process.Start(sInfo);
         }
 
+        private void updateConnectorIconsButton_Click(object sender, EventArgs e)
+        {
+            ConnectorHelper.UpdateConnectorIcons();
+        }
+
         private void sizeChanged(object sender, EventArgs e)
         {
             appStatusTextBox.Size = new Size(
@@ -135,7 +147,8 @@ namespace PowerDocu.GUI
                     - selectWordTemplateButton.Height
                     - 40
             );
-            newReleaseButton.Location = new Point(ClientSize.Width - 80, 15);
+            updateConnectorIconsButton.Location = new Point(ClientSize.Width - 80, 15);
+            newReleaseButton.Location = new Point(ClientSize.Width - 80, 60);
         }
     }
 
