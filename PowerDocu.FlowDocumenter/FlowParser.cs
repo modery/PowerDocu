@@ -28,9 +28,11 @@ namespace PowerDocu.FlowDocumenter
             {
                 using (FileStream stream = new FileStream(filename, FileMode.Open))
                 {
-                    List<ZipArchiveEntry> definitions = ZipHelper.getWorkflowFilesFromZip(stream);
-                    packageType = (definitions.Count == 1) ? PackageType.FlowPackage : PackageType.SolutionPackage;
-                    foreach (ZipArchiveEntry definition in definitions)
+                    List<ZipArchiveEntry> flowDefinitions = ZipHelper.getWorkflowFilesFromZip(stream);
+                    //Getting any potential app definitions as well, so that we can define if the package is a simple Flow (only 1 FLow inside) or a Solution
+                    List<ZipArchiveEntry> appDefinitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
+                    packageType = (flowDefinitions.Count == 1 && appDefinitions.Count == 0) ? PackageType.FlowPackage : PackageType.SolutionPackage;
+                    foreach (ZipArchiveEntry definition in flowDefinitions)
                     {
                         using (StreamReader reader = new StreamReader(definition.Open()))
                         {
