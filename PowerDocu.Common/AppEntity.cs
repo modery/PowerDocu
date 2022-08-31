@@ -17,6 +17,7 @@ namespace PowerDocu.Common
         public HashSet<string> ContextVariables = new HashSet<string>();
         public HashSet<string> Collections = new HashSet<string>();
         public Dictionary<string,List<ControlPropertyReference>> VariableCollectionControlReferences = new Dictionary<string, List<ControlPropertyReference>>();
+        public Dictionary<ControlEntity,List<string>> ScreenNavigations = new Dictionary<ControlEntity, List<string>>();
         public Dictionary<string, MemoryStream> ResourceStreams = new Dictionary<string, MemoryStream>();
         public AppEntity()
         {
