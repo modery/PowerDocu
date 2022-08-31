@@ -41,7 +41,7 @@ namespace PowerDocu.AppDocumenter
                     addAppGeneralInfo();
                     addAppDataSources();
                     addAppResources();
-                    addAppControlsOverview();
+                    addAppControlsOverview(wordDocument);
                     if (DetailedDocumentation) addDetailedAppControls();
                 }
                 DetailedDocumentation = !DetailedDocumentation;
@@ -107,7 +107,7 @@ namespace PowerDocu.AppDocumenter
                 allControls.AddRange(getAllChildControls(control));
             }
             statisticsTable.Append(CreateRow(new Text("Controls (excluding Screens)"), new Text("" + (allControls.Count - app.Controls.Where(o => o.Type == "screen").ToList().Count))));
-            statisticsTable.Append(CreateRow(new Text("Variables"), new Text("" + app.GlobalVariables.Count)));
+            statisticsTable.Append(CreateRow(new Text("Variables"), new Text("" + (app.GlobalVariables.Count + app.ContextVariables.Count))));
             statisticsTable.Append(CreateRow(new Text("Collections"), new Text("" + app.Collections.Count)));
             statisticsTable.Append(CreateRow(new Text("Data Sources"), new Text("" + app.DataSources.Count)));
             statisticsTable.Append(CreateRow(new Text("Resources"), new Text("" + app.Resources.Count)));
@@ -156,17 +156,17 @@ namespace PowerDocu.AppDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Variables & Collections"));
             ApplyStyleToParagraph("Heading2", para);
-            body.AppendChild(new Paragraph(new Run(new Text($"There are {app.GlobalVariables.Count} Variables and {app.Collections.Count} Collections."))));
+            body.AppendChild(new Paragraph(new Run(new Text($"There are {app.GlobalVariables.Count} Global Variables, {app.ContextVariables.Count} Context Variables and {app.Collections.Count} Collections."))));
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Variables"));
+            run.AppendChild(new Text("Global Variables"));
             ApplyStyleToParagraph("Heading3", para);
             Table table = CreateTable();
             table.Append(CreateHeaderRow(new Text("Variable Name"), new Text("Used In")));
             foreach (string var in app.GlobalVariables.OrderBy(o => o).ToHashSet())
             {
                 Table varReferenceTable = CreateTable();
-                List<ControlPropertyReference> references = app.VariableCollectionControlReferences[var];
+                app.VariableCollectionControlReferences.TryGetValue(var, out List<ControlPropertyReference> references);
                 if (references != null)
                 {
                     varReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
@@ -177,9 +177,27 @@ namespace PowerDocu.AppDocumenter
                 }
                 table.Append(CreateRow(new Text(var), varReferenceTable));
             }
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run(new Break())));
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Context Variables"));
+            ApplyStyleToParagraph("Heading3", para);
+            table = CreateTable();
+            table.Append(CreateHeaderRow(new Text("Variable Name"), new Text("Used In")));
             foreach (string var in app.ContextVariables.OrderBy(o => o).ToHashSet())
             {
-                table.Append(CreateRow(new Text(var), new Text("Context Variable")));
+                Table varReferenceTable = CreateTable();
+                app.VariableCollectionControlReferences.TryGetValue(var, out List<ControlPropertyReference> references);
+                if (references != null)
+                {
+                    varReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
+                    foreach (ControlPropertyReference reference in references.OrderBy(o => o.Control.Name).ThenBy(o => o.RuleProperty))
+                    {
+                        varReferenceTable.Append(CreateRow(new Text(reference.Control.Name + " (" + reference.Control.Screen()?.Name + ")"), new Text(reference.RuleProperty)));
+                    }
+                }
+                table.Append(CreateRow(new Text(var), varReferenceTable));
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
@@ -192,7 +210,7 @@ namespace PowerDocu.AppDocumenter
             foreach (string coll in app.Collections.OrderBy(o => o).ToHashSet())
             {
                 Table collReferenceTable = CreateTable();
-                List<ControlPropertyReference> references = app.VariableCollectionControlReferences[coll];
+                app.VariableCollectionControlReferences.TryGetValue(coll, out List<ControlPropertyReference> references);
                 if (references != null)
                 {
                     collReferenceTable.Append(CreateHeaderRow(new Text("Control"), new Text("Property")));
@@ -207,7 +225,7 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private void addAppControlsOverview()
+        private void addAppControlsOverview(WordprocessingDocument wordDoc)
         {
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
@@ -223,9 +241,34 @@ namespace PowerDocu.AppDocumenter
                     run.AppendChild(new Text("Screen: " + control.Name));
                     ApplyStyleToParagraph("Heading3", para);
                     body.AppendChild(CreateControlTable(control));
-                    body.AppendChild(new Paragraph(new Run(new Break())));
                 }
             }
+            body.AppendChild(new Paragraph(new Run(new Break())));
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Screen Navigation"));
+            ApplyStyleToParagraph("Heading3", para);
+            body.AppendChild(new Paragraph(new Run(new Text("The following diagram shows the navigation between the different screens."))));
+            ImagePart imagePart = wordDoc.MainDocumentPart.AddImagePart(ImagePartType.Png);
+            int imageWidth, imageHeight;
+            using (FileStream stream = new FileStream(folderPath + "ScreenNavigation.png", FileMode.Open))
+            {
+                using (var image = Image.FromStream(stream, false, false))
+                {
+                    imageWidth = image.Width;
+                    imageHeight = image.Height;
+                }
+                stream.Position = 0;
+                imagePart.FeedData(stream);
+            }
+            ImagePart svgPart = wordDoc.MainDocumentPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
+            using (FileStream stream = new FileStream(folderPath + "ScreenNavigation.svg", FileMode.Open))
+            {
+                svgPart.FeedData(stream);
+            }
+            body.AppendChild(new Paragraph(new Run(
+                InsertSvgImage(wordDoc.MainDocumentPart.GetIdOfPart(svgPart), wordDoc.MainDocumentPart.GetIdOfPart(imagePart), imageWidth, imageHeight)
+            )));
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
