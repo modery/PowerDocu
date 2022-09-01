@@ -38,7 +38,7 @@ namespace PowerDocu.GUI
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(1000, 600);
-            this.MinimumSize = new Size(convertToDPISpecific(500), convertToDPISpecific(250));
+            this.MinimumSize = new Size(convertToDPISpecific(800), convertToDPISpecific(250));
             this.SizeChanged += new EventHandler(sizeChanged);
             this.Text = "PowerDocu GUI (" + PowerDocuReleaseHelper.currentVersion.ToString() + ")";
             openFileToParseDialog = new OpenFileDialog()
@@ -108,19 +108,6 @@ namespace PowerDocu.GUI
             };
             Controls.Add(appStatusTextBox);
 
-            newReleaseButton = new IconButton()
-            {
-                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
-                Location = new Point(ClientSize.Width - 80, 60),
-                IconChar = IconChar.PlusCircle,
-                IconColor = Color.Green,
-                IconSize = convertToDPISpecific(32),
-                IconFont = IconFont.Auto,
-                Visible = false
-            };
-            newReleaseButton.Click += new EventHandler(newReleaseButton_Click);
-            Controls.Add(newReleaseButton);
-
             updateConnectorIconsButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
@@ -133,6 +120,19 @@ namespace PowerDocu.GUI
             };
             updateConnectorIconsButton.Click += new EventHandler(updateConnectorIconsButton_Click);
             Controls.Add(updateConnectorIconsButton);
+
+            newReleaseButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(ClientSize.Width - 80, 15 + updateConnectorIconsButton.Height),
+                IconChar = IconChar.PlusCircle,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                Visible = false
+            };
+            newReleaseButton.Click += new EventHandler(newReleaseButton_Click);
+            Controls.Add(newReleaseButton);
         }
 
         private int convertToDPISpecific(int number)

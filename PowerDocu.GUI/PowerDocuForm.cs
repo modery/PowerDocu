@@ -148,7 +148,7 @@ namespace PowerDocu.GUI
                     - 40
             );
             updateConnectorIconsButton.Location = new Point(ClientSize.Width - 80, 15);
-            newReleaseButton.Location = new Point(ClientSize.Width - 80, 60);
+            newReleaseButton.Location = new Point(ClientSize.Width - 80, 15 + updateConnectorIconsButton.Height);
         }
     }
 
