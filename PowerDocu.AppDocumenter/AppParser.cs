@@ -263,8 +263,10 @@ namespace PowerDocu.AppDocumenter
             }
             else
             {
-                List<ControlPropertyReference> list = new List<ControlPropertyReference>();
-                list.Add(new ControlPropertyReference() { Control = control, RuleProperty = property });
+                List<ControlPropertyReference> list = new List<ControlPropertyReference>
+                {
+                    new ControlPropertyReference() { Control = control, RuleProperty = property }
+                };
                 currentApp.VariableCollectionControlReferences.Add(globalVar, list);
             }
         }
@@ -277,8 +279,10 @@ namespace PowerDocu.AppDocumenter
             }
             else
             {
-                List<string> list = new List<string>();
-                list.Add(destinationScreen);
+                List<string> list = new List<string>
+                {
+                    destinationScreen
+                };
                 currentApp.ScreenNavigations.Add(controlEntity, list);
             }
         }
