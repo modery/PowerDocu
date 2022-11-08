@@ -66,10 +66,23 @@ namespace PowerDocu.GUI
                 IconFont = IconFont.Auto,
                 ImageAlign = ContentAlignment.MiddleCenter
             };
+            outputFormatComboBox = new ComboBox()
+            {
+                Location = new Point(15, 25 + selectWordTemplateButton.Height),
+                Size = new System.Drawing.Size(85, 21),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            outputFormatComboBox.Items.AddRange(new object[] {OutputFormatHelper.Word,
+                        OutputFormatHelper.Markdown,
+                        OutputFormatHelper.All
+                        });
+            outputFormatComboBox.SelectedIndex = 0;
+            Controls.Add(outputFormatComboBox);
+
             selectFileToParseButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
-                Location = new Point(15, 15 + selectWordTemplateButton.Height),
+                Location = new Point(15, 40 + selectWordTemplateButton.Height + outputFormatComboBox.Height),
                 IconChar = IconChar.FileArchive,
                 IconColor = Color.Orange,
                 IconSize = convertToDPISpecific(32),
@@ -90,18 +103,28 @@ namespace PowerDocu.GUI
             };
             Controls.Add(wordTemplateInfoLabel);
 
+
             fileToParseInfoLabel = new Label()
             {
-                Location = new Point(30 + selectFileToParseButton.Width, 25 + selectWordTemplateButton.Height),
+                Location = new Point(30 + selectFileToParseButton.Width, 50 + selectWordTemplateButton.Height + outputFormatComboBox.Height),
                 Text = "Select App, Flow, or Solution to document",
                 Width = convertToDPISpecific(300),
                 Height = convertToDPISpecific(30)
             };
             Controls.Add(fileToParseInfoLabel);
+            outputFormatInfoLabel = new Label()
+            {
+                Location = new Point(30 + outputFormatComboBox.Width, outputFormatComboBox.Location.Y + 5),
+                Text = "Select output file format",
+                Width = convertToDPISpecific(300),
+                Height = convertToDPISpecific(30)
+            };
+            Controls.Add(outputFormatInfoLabel);
+
             appStatusTextBox = new TextBox
             {
-                Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - 40),
-                Location = new Point(15, 30 + selectFileToParseButton.Height + selectWordTemplateButton.Height),
+                Size = new Size(ClientSize.Width - 30, ClientSize.Height - selectFileToParseButton.Height - selectWordTemplateButton.Height - outputFormatComboBox.Height - 65),
+                Location = new Point(15, 45 + selectFileToParseButton.Height + selectWordTemplateButton.Height + outputFormatComboBox.Height),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true
@@ -149,6 +172,8 @@ namespace PowerDocu.GUI
         private TextBox appStatusTextBox;
         private Label wordTemplateInfoLabel;
         private Label fileToParseInfoLabel;
+        private Label outputFormatInfoLabel;
+        private ComboBox outputFormatComboBox;
 
         #endregion
     }

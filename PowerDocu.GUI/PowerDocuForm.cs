@@ -60,8 +60,9 @@ namespace PowerDocu.GUI
                             NotificationHelper.SendNotification(
                                 "Trying to process Power Automate Flows"
                             );
-                            FlowDocumentationGenerator.GenerateWordDocumentation(
+                            FlowDocumentationGenerator.GenerateDocumentation(
                                 fileName,
+                                outputFormatComboBox.SelectedItem.ToString(),
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null
@@ -145,7 +146,8 @@ namespace PowerDocu.GUI
                 ClientSize.Height
                     - selectFileToParseButton.Height
                     - selectWordTemplateButton.Height
-                    - 40
+                    - outputFormatComboBox.Height
+                    - 65
             );
             updateConnectorIconsButton.Location = new Point(ClientSize.Width - 80, 15);
             newReleaseButton.Location = new Point(ClientSize.Width - 80, 15 + updateConnectorIconsButton.Height);
