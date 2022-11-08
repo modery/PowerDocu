@@ -123,10 +123,5 @@ namespace PowerDocu.Common
             }
             return table;
         }
-
-        protected string getLinkFromText(string text)
-        {
-            return "#" + text.ToLower();
-        }
     }
 }
