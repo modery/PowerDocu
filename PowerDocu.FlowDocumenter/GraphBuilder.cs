@@ -76,7 +76,7 @@ namespace PowerDocu.FlowDocumenter
         private string generateImageFiles(RootGraph rootGraph, bool showSubactions)
         {
             //Generate image files
-            string filename = "flow" + (showSubactions ? " detailed" : "");
+            string filename = "flow" + (showSubactions ? "-detailed" : "");
             // can't save directly as PNG (limitation of the .Net Wrapper), saving as SVG is the only option 
             rootGraph.ToSvgFile(folderPath + filename + ".svg");
             //rootGraph.ToDotFile(folderPath + filename+".dot");

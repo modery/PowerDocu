@@ -18,9 +18,9 @@ namespace PowerDocu.FlowDocumenter
             else
             {
                 if (args.Length == 1)
-                    FlowDocumentationGenerator.GenerateWordDocumentation(args[0]);
+                    FlowDocumentationGenerator.GenerateDocumentation(args[0], "All");
                 if (args.Length == 2)
-                    FlowDocumentationGenerator.GenerateWordDocumentation(args[0], args[1]);
+                    FlowDocumentationGenerator.GenerateDocumentation(args[0], "All", args[1]);
             }
         }
     }

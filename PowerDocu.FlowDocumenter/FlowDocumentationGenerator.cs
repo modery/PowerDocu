@@ -6,7 +6,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static void GenerateWordDocumentation(string filePath, string wordTemplate = null)
+        public static void GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -22,17 +22,27 @@ namespace PowerDocu.FlowDocumenter
                     GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
-                    if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                    FlowDocumentationContent content = new FlowDocumentationContent(flow, path);
+                    if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                     {
-                        FlowWordDocBuilder wordzip = new FlowWordDocBuilder(flow, path, null);
+                        NotificationHelper.SendNotification("Creating Word documentation");
+                        if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                        {
+                            FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, null);
+                        }
+                        else
+                        {
+                            FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, wordTemplate);
+                        }
                     }
-                    else
+                    if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
                     {
-                        FlowWordDocBuilder wordzip = new FlowWordDocBuilder(flow, path, wordTemplate);
+                        NotificationHelper.SendNotification("Creating Markdown documentation");
+                        FlowMarkdownBuilder markdownFile = new FlowMarkdownBuilder(content);
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;
-                NotificationHelper.SendNotification("FlowDocumenter: Created Word documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
+                NotificationHelper.SendNotification("FlowDocumenter: Created documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
             }
             else
             {

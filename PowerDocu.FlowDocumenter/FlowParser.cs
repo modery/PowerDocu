@@ -151,8 +151,6 @@ namespace PowerDocu.FlowDocumenter
             foreach (JProperty connRef in connectionReferences)
             {
                 JObject cRefDetails = (JObject)connRef.Value;
-                //TODO connections work, connection references don't
-
                 //if it's a connection reference
                 /* Example:
                 {"shared_commondataserviceforapps": {
@@ -286,6 +284,36 @@ namespace PowerDocu.FlowDocumenter
                             break;
                         case "foreach":
                             //TODO
+                            //{"foreach": "@outputs('List_Environment_Capacity_information')?['body/value']"}
+                            //{"foreach": "@body('Get_calendar_view_of_events_(V2)')?['value']"}
+                            //{"foreach": "@items('Apply_to_each_Environment')?['properties/capacity']"}
+                            //{"foreach": "@variables('Apps_Editted')"}
+                            break;
+                        case "runtimeConfiguration":
+                            //TODO
+                            // {"runtimeConfiguration": {"paginationPolicy": {"minimumItemCount": 100000}}}
+                            break;
+                        case "kind":
+                            //TODO
+                            //{"kind": "GetPastTime"}
+                            //{"kind": "PowerApp"}
+                            //{"kind": "Http"}
+                            break;
+                        case "metadata":
+                            //TODO
+                            break;
+                        case "limit":
+                            //TODO
+                            // {"limit": {"count": 240,"timeout": "P10D"}}
+                            //{"limit": {"count": 60,"timeout": "PT1H"}}
+                            break;
+                        case "operationOptions":
+                            //TODO
+                            //{"operationOptions": "DisableAsyncPattern"}
+                            break;
+                        case "trackedProperties":
+                            //TODO
+                            //{"trackedProperties": {"12": 12,"23": 23}}
                             break;
                         default:
                             break;
