@@ -62,18 +62,12 @@ namespace PowerDocu.FlowDocumenter
             }
             metadataTable = new MdTable(new MdTableRow(new List<string>() { "Flow Name", content.metadata.Name }), tableRows);
             // prepare the common sections for all documents
-            mainDocument.Root.Add(new MdHeading(content.metadata.header, 1));
-            mainDocument.Root.Add(metadataTable);
-            mainDocument.Root.Add(getNavigationLinks());
-            connectionsDocument.Root.Add(new MdHeading(content.metadata.header, 1));
-            connectionsDocument.Root.Add(metadataTable);
-            connectionsDocument.Root.Add(getNavigationLinks());
-            variablesDocument.Root.Add(new MdHeading(content.metadata.header, 1));
-            variablesDocument.Root.Add(metadataTable);
-            variablesDocument.Root.Add(getNavigationLinks());
-            triggerActionsDocument.Root.Add(new MdHeading(content.metadata.header, 1));
-            triggerActionsDocument.Root.Add(metadataTable);
-            triggerActionsDocument.Root.Add(getNavigationLinks());
+            foreach (MdDocument doc in set.Documents)
+            {
+                doc.Root.Add(new MdHeading(content.metadata.header, 1));
+                doc.Root.Add(metadataTable);
+                doc.Root.Add(getNavigationLinks());
+            }
         }
 
         private void addFlowOverview()
