@@ -18,6 +18,7 @@ namespace PowerDocu.FlowDocumenter
 
         public FlowDocumentationContent(FlowEntity flow, string path)
         {
+            NotificationHelper.SendNotification("Preparing documentation content for " + flow.Name);
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
             filename = CharsetHelper.GetSafeName(flow.Name) + ((flow.ID != null) ? ("(" + flow.ID + ")") : "");
             metadata = new FlowMetadata(flow);
@@ -27,7 +28,6 @@ namespace PowerDocu.FlowDocumenter
             variables = new FlowVariables(flow);
             details = new FlowDetails();
             actions = new FlowActions(flow);
-            NotificationHelper.SendNotification("Preparing documentation content for " + flow.Name);
         }
     }
 

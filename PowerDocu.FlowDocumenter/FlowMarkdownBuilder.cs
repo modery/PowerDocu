@@ -10,14 +10,8 @@ namespace PowerDocu.FlowDocumenter
 {
     class FlowMarkdownBuilder : MarkdownBuilder
     {
-        private readonly MdDocument mainDocument;
-        private readonly string mainDocumentFileName;
-        private readonly MdDocument connectionsDocument;
-        private readonly string connectionsDocumentFileName;
-        private readonly MdDocument variablesDocument;
-        private readonly string variablesDocumentFileName;
-        private readonly MdDocument triggerActionsDocument;
-        private readonly string triggerActionsFileName;
+        private readonly string mainDocumentFileName, connectionsDocumentFileName, variablesDocumentFileName, triggerActionsFileName;
+        private readonly MdDocument mainDocument, connectionsDocument, variablesDocument, triggerActionsDocument;
         private readonly FlowDocumentationContent content;
         private readonly DocumentSet<MdDocument> set;
         private MdTable metadataTable;
