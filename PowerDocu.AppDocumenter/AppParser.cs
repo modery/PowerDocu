@@ -191,6 +191,17 @@ namespace PowerDocu.AppDocumenter
                 }
             }
             controlEntity.Type = controlEntity.Properties.Where(e => e.expressionOperator == "Template")?.First().expressionOperands.Cast<Expression>().First(eo => eo.expressionOperator == "Name").expressionOperands[0].ToString();
+            //for containers, there are a few different types (Contaner, Horizontal Container, Vertical Container) which are defined by the "VariantName" property
+            if (controlEntity.Type.Equals("groupContainer"))
+            {
+                controlEntity.Type = controlEntity.Properties.First(o => o.expressionOperator.Equals("VariantName")).expressionOperands[0].ToString();
+            }
+            //components can safely be identified through the Id of the template
+            string controlId = controlEntity.Properties.Where(e => e.expressionOperator == "Template")?.First().expressionOperands.Cast<Expression>().First(eo => eo.expressionOperator == "Id").expressionOperands[0].ToString();
+            if (controlId.Equals("http://microsoft.com/appmagic/Component"))
+            {
+                controlEntity.Type = "component";
+            }
             return controlEntity;
         }
 
@@ -290,7 +301,6 @@ namespace PowerDocu.AppDocumenter
         private void CheckForVariables(ControlEntity controlEntity, string input)
         {
             //Reference: https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/working-with-variables#types-of-variables
-
             string code = input.Replace("\n", "").Replace("\r", "");
             MatchCollection matches;
             //check for Global Variables            
