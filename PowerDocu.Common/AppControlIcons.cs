@@ -23,6 +23,7 @@ namespace PowerDocu.Common
                 "checkbox" => CheckboxIcon,
                 "circle" => ShapesIcon,
                 "combobox" => ComboBoxIcon,
+                "component" => ComponentIcon,
                 "dataTable" => DataGridIcon,
                 "datepicker" => DatePickerIcon,
                 "dropdown" => DropDownIcon,
@@ -35,6 +36,7 @@ namespace PowerDocu.Common
                 "galleryTemplate" => UnknownControlIcon,
                 "group" => GroupIcon,
                 "hexagon" => ShapesIcon,
+                "horizontalAutoLayoutContainer" => HorizontalLayoutContainerIcon,
                 "htmlViewer" => HtmlViewerIcon,
                 "icon" => IconsIcon,
                 "image" => ImageIcon,
@@ -44,6 +46,7 @@ namespace PowerDocu.Common
                 "legend" => UnknownControlIcon,
                 "lineChart" => LineChartIcon,
                 "listbox" => ListboxIcon,
+                "manualLayoutContainer" => ManualLayoutContainerIcon,
                 "Map" => MapIcon,
                 "markupInMr" => MarkupInMrIcon,
                 "MeasureInMR" => MeasureInMRIcon,
@@ -70,6 +73,7 @@ namespace PowerDocu.Common
                 "toggleSwitch" => ToggleSwitchIcon,
                 "triangle" => ShapesIcon,
                 "typedDataCard" => UnknownControlIcon,
+                "verticalAutoLayoutContainer" => VerticalLayoutContainerIcon,
                 "videoPlayback" => VideoIcon,
                 "ViewIn3D" => ViewIn3DIcon,
                 "ViewInMR" => ViewInMRIcon,
@@ -640,6 +644,45 @@ namespace PowerDocu.Common
             {
                 return IconHeader +
                 @"<path d=""M13 2H16V5H15V3H13V2ZM1 3V5H0V2H3V3H1ZM15 13V11H16V14H13V13H15ZM1 11V13H3V14H0V11H1Z"" fill=""#3A3A38""></path><path d=""M6.63184 10H5.73975L5.29883 8.75244H3.37109L2.94727 10H2.05859L3.89404 5.09863H4.81006L6.63184 10ZM5.0835 8.08936L4.40332 6.13428C4.38281 6.07048 4.36117 5.96794 4.33838 5.82666H4.32471C4.3042 5.95654 4.28141 6.05908 4.25635 6.13428L3.58301 8.08936H5.0835Z"" fill=""#01918D""></path><path d=""M8.02637 9.49414H8.0127V10H7.21973V4.81836H8.0127V7.11523H8.02637C8.29753 6.65039 8.69401 6.41797 9.21582 6.41797C9.65788 6.41797 10.0031 6.5752 10.2515 6.88965C10.5021 7.20182 10.6274 7.62109 10.6274 8.14746C10.6274 8.73307 10.4873 9.20247 10.207 9.55566C9.92676 9.90658 9.54395 10.082 9.05859 10.082C8.60286 10.082 8.25879 9.88607 8.02637 9.49414ZM8.00586 8.10303V8.53711C8.00586 8.79232 8.08675 9.00879 8.24854 9.18652C8.4126 9.36426 8.61995 9.45312 8.87061 9.45312C9.16455 9.45312 9.39469 9.33919 9.56104 9.11133C9.72965 8.88119 9.81396 8.56104 9.81396 8.15088C9.81396 7.8068 9.73535 7.53792 9.57812 7.34424C9.42318 7.14827 9.2124 7.05029 8.9458 7.05029C8.66325 7.05029 8.43538 7.15055 8.26221 7.35107C8.09131 7.55159 8.00586 7.80225 8.00586 8.10303Z"" fill=""#01918D""></path><path d=""M13.9429 9.83936C13.6626 10.0011 13.3311 10.082 12.9482 10.082C12.4287 10.082 12.0094 9.92025 11.6904 9.59668C11.3714 9.27083 11.2119 8.84928 11.2119 8.33203C11.2119 7.75553 11.3828 7.29297 11.7246 6.94434C12.0687 6.59342 12.5278 6.41797 13.1021 6.41797C13.4211 6.41797 13.7025 6.4738 13.9463 6.58545V7.32373C13.7025 7.14144 13.4427 7.05029 13.167 7.05029C12.832 7.05029 12.5575 7.16423 12.3433 7.39209C12.1291 7.61768 12.022 7.9139 12.022 8.28076C12.022 8.64307 12.1222 8.92904 12.3228 9.13867C12.5256 9.34831 12.7967 9.45312 13.1362 9.45312C13.4211 9.45312 13.6899 9.35173 13.9429 9.14893V9.83936Z"" fill=""#01918D""></path>" +
+                IconFooter;
+            }
+        }
+
+        public static string ManualLayoutContainerIcon
+        {
+            get
+            {
+                return @"<svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" width=""2048"" height=""2048""><g>" +
+                @"<path d=""M0 1920V0h1920v1920H0zm128-128h1664V128H128v1664zM1536 579v762l-576 287-576-287V579l576-287 576 287zm-512 335v539l384-191V722l-384 192zm-64-111l369-184-369-184-369 184 369 184zm-64 111L512 722v540l384 191V914z""></path>" +
+                IconFooter;
+            }
+        }
+
+        public static string HorizontalLayoutContainerIcon
+        {
+            get
+            {
+                return IconHeader +
+                @"<path d=""M1 0.5H6C6.27614 0.5 6.5 0.723858 6.5 1V15C6.5 15.2761 6.27614 15.5 6 15.5H1C0.723858 15.5 0.5 15.2761 0.5 15V1C0.5 0.723858 0.723858 0.5 1 0.5ZM10 0.5H15C15.2761 0.5 15.5 0.723858 15.5 1V15C15.5 15.2761 15.2761 15.5 15 15.5H10C9.72386 15.5 9.5 15.2761 9.5 15V1C9.5 0.723858 9.72386 0.5 10 0.5Z"" fill=""white"" stroke=""#444444""></path>" +
+                IconFooter;
+            }
+        }
+
+        public static string VerticalLayoutContainerIcon
+        {
+            get
+            {
+                return IconHeader +
+                @"<path d=""M1 0.5H15C15.2761 0.5 15.5 0.723858 15.5 1V6C15.5 6.27614 15.2761 6.5 15 6.5H1C0.723858 6.5 0.5 6.27614 0.5 6V1C0.5 0.723858 0.723858 0.5 1 0.5ZM1 9.5H15C15.2761 9.5 15.5 9.72386 15.5 10V15C15.5 15.2761 15.2761 15.5 15 15.5H1C0.723858 15.5 0.5 15.2761 0.5 15V10C0.5 9.72386 0.723858 9.5 1 9.5Z"" fill=""white"" stroke=""#444444""></path>" +
+                IconFooter;
+            }
+        }
+        public static string ComponentIcon
+        {
+            get
+            {
+                return @"<svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" width=""2048"" height=""2048""><g>" +
+                @"<path d=""M1024 256v768h768v896H128V256h896zM896 384H256v640h640V384zM256 1792h640v-640H256v640zm768 0h640v-640h-640v640zm256-1024V0h768v768h-768zm128-128h512V128h-512v512z""></path>" +
                 IconFooter;
             }
         }
