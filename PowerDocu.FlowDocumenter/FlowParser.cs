@@ -26,26 +26,22 @@ namespace PowerDocu.FlowDocumenter
             NotificationHelper.SendNotification(" - Processing " + filename);
             if (filename.EndsWith("zip", StringComparison.OrdinalIgnoreCase))
             {
-                using (FileStream stream = new FileStream(filename, FileMode.Open))
+                using FileStream stream = new FileStream(filename, FileMode.Open);
+                List<ZipArchiveEntry> flowDefinitions = ZipHelper.getWorkflowFilesFromZip(stream);
+                //Getting any potential app definitions as well, so that we can define if the package is a simple Flow (only 1 FLow inside) or a Solution
+                List<ZipArchiveEntry> appDefinitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
+                packageType = (flowDefinitions.Count == 1 && appDefinitions.Count == 0) ? PackageType.FlowPackage : PackageType.SolutionPackage;
+                foreach (ZipArchiveEntry definition in flowDefinitions)
                 {
-                    List<ZipArchiveEntry> flowDefinitions = ZipHelper.getWorkflowFilesFromZip(stream);
-                    //Getting any potential app definitions as well, so that we can define if the package is a simple Flow (only 1 FLow inside) or a Solution
-                    List<ZipArchiveEntry> appDefinitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
-                    packageType = (flowDefinitions.Count == 1 && appDefinitions.Count == 0) ? PackageType.FlowPackage : PackageType.SolutionPackage;
-                    foreach (ZipArchiveEntry definition in flowDefinitions)
+                    using StreamReader reader = new StreamReader(definition.Open());
+                    NotificationHelper.SendNotification("  - Processing workflow definition " + definition.FullName);
+                    string definitionContent = reader.ReadToEnd();
+                    FlowEntity flow = parseFlow(definitionContent);
+                    if (String.IsNullOrEmpty(flow.Name))
                     {
-                        using (StreamReader reader = new StreamReader(definition.Open()))
-                        {
-                            NotificationHelper.SendNotification("  - Processing workflow definition " + definition.FullName);
-                            string definitionContent = reader.ReadToEnd();
-                            FlowEntity flow = parseFlow(definitionContent);
-                            if (String.IsNullOrEmpty(flow.Name))
-                            {
-                                flow.Name = definition.Name.Replace(".json", "");
-                            }
-                            flows.Add(flow);
-                        }
+                        flow.Name = definition.Name.Replace(".json", "");
                     }
+                    flows.Add(flow);
                 }
             }
             else if (filename.EndsWith("json", StringComparison.OrdinalIgnoreCase))
@@ -349,11 +345,8 @@ namespace PowerDocu.FlowDocumenter
                     //this is not a nice way, but works so far
                     //exported Flow
                     JToken connectionToken = (JToken)inputNode.Value["connection"]?["name"];
-                    if (connectionToken == null)
-                    {
-                        //seen as part of a solution
-                        connectionToken = (JToken)inputNode.Value["apiId"];
-                    }
+                    //seen as part of a solution
+                    connectionToken ??= (JToken)inputNode.Value["apiId"];
                     if (connectionToken != null)
                     {
                         conn = extractConnectorName(connectionToken.ToString());

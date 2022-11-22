@@ -92,7 +92,7 @@ namespace PowerDocu.FlowDocumenter
                 {
                     tableRows.Add(new MdTableRow(kvp2.Key, kvp2.Value));
                 }
-                MdTable table = new MdTable(new MdTableRow(new MdTextSpan("Connector"), getConnectorNameAndIcon(connectorUniqueName, "https://docs.microsoft.com/connectors/" + connectorUniqueName)), tableRows); //todo:  
+                MdTable table = new MdTable(new MdTableRow(new MdTextSpan("Connector"), getConnectorNameAndIcon(connectorUniqueName, "https://docs.microsoft.com/connectors/" + connectorUniqueName)), tableRows);
                 connectionsDocument.Root.Add(table);
             }
         }
