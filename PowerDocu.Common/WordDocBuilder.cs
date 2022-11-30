@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -12,7 +11,6 @@ using A = DocumentFormat.OpenXml.Drawing;
 using A14 = DocumentFormat.OpenXml.Office2010.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
-using PowerDocu.Common;
 
 namespace PowerDocu.Common
 {
@@ -32,42 +30,57 @@ namespace PowerDocu.Common
         protected int maxImageHeight = PageHeight - PageMarginTop - PageMarginBottom;
         protected const string cellHeaderBackground = "E5E5FF";
         protected readonly Random random = new Random();
-        protected string folderPath;
         protected MainDocumentPart mainPart;
         protected Body body;
         protected Dictionary<string, string> SVGImages;
 
         public HashSet<int> UsedRandomNumbers = new HashSet<int>();
 
-        protected void InitializeWordDocument(string filename, string template)
+        protected string InitializeWordDocument(string filename, string template)
         {
             SVGImages = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(template) && template.EndsWith("docm"))
+            {
+                filename += ".docm";
+            }
+            else
+            {
+                filename += ".docx";
+            }
             //create a new document if no template is provided
             if (String.IsNullOrEmpty(template))
             {
-                using (WordprocessingDocument wordDocument =
-                WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document))
-                {
-                    MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                using WordprocessingDocument wordDocument = WordprocessingDocument.Create(filename, WordprocessingDocumentType.Document);
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
 
-                    // Create the document structure and add some text.
-                    mainPart.Document = new Document();
-                    AddStylesPartToPackage(wordDocument);
-                    Body body = mainPart.Document.AppendChild(new Body());
+                // Create the document structure and add some text.
+                mainPart.Document = new Document();
+                AddStylesPartToPackage(wordDocument);
+                Body body = mainPart.Document.AppendChild(new Body());
 
-                    // Set Page Size and Page Margin so that we can place the image as desired.
-                    // Available Width = PageWidth - PageMarginLeft - PageMarginRight (= 17000 - 1000 - 1000 = 15000 for default values)
-                    var sectionProperties = new SectionProperties();
-                    sectionProperties.AppendChild(new PageSize { Width = PageWidth, Height = PageHeight });
-                    sectionProperties.AppendChild(new PageMargin { Left = PageMarginLeft, Bottom = PageMarginBottom, Top = PageMarginTop, Right = PageMarginRight });
-                    body.AppendChild(sectionProperties);
-                }
+                // Set Page Size and Page Margin so that we can place the image as desired.
+                // Available Width = PageWidth - PageMarginLeft - PageMarginRight (= 17000 - 1000 - 1000 = 15000 for default values)
+                var sectionProperties = new SectionProperties();
+                sectionProperties.AppendChild(new PageSize { Width = PageWidth, Height = PageHeight });
+                sectionProperties.AppendChild(new PageMargin { Left = PageMarginLeft, Bottom = PageMarginBottom, Top = PageMarginTop, Right = PageMarginRight });
+                body.AppendChild(sectionProperties);
             }
             else
             {
                 //Create a copy of the Word template that will be used to add the documentation
                 File.Copy(template, filename, true);
+                using WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true);
+                if (template.EndsWith("dotx"))
+                {
+                    wordDocument.ChangeDocumentType(WordprocessingDocumentType.Document);
+                }
+                if (template.EndsWith("docm"))
+                {
+                    wordDocument.ChangeDocumentType(WordprocessingDocumentType.MacroEnabledDocument);
+                }
+                wordDocument.Close();
             }
+            return filename;
         }
 
         protected TableRow CreateHeaderRow(params OpenXmlElement[] cellValues)
@@ -376,7 +389,7 @@ namespace PowerDocu.Common
             return part;
         }
 
-        /* helper class to add the givens style to the provided paragraph */
+        /* helper class to add the given style to the provided paragraph */
         protected void ApplyStyleToParagraph(string styleid, Paragraph p)
         {
             // If the paragraph has no ParagraphProperties object, create one.
@@ -472,8 +485,7 @@ namespace PowerDocu.Common
 
         protected Table AddExpressionTable(Expression expression, Table table = null, double factor = 1, bool showShading = true, bool firstColumnBold = false)
         {
-            if (table == null)
-                table = CreateTable(BorderValues.Single, factor);
+            table ??= CreateTable(BorderValues.Single, factor);
             if (expression?.expressionOperator != null)
             {
                 var tr = new TableRow();
@@ -587,18 +599,32 @@ namespace PowerDocu.Common
 
         private void AddSettingsToMainDocumentPart()
         {
-            DocumentSettingsPart settingsPart = mainPart.AddNewPart<DocumentSettingsPart>();
-            settingsPart.Settings = new Settings(
-               new Compatibility(
-                   //Compatibility for Office 2013 onwards, which helps with processing larger documents
-                   new CompatibilitySetting()
-                   {
-                       Name = CompatSettingNameValues.CompatibilityMode,
-                       Val = new StringValue("15"),
-                       Uri = new StringValue("http://schemas.microsoft.com/office/word")
-                   }
-               )
-            );
+            DocumentSettingsPart settingsPart = mainPart.DocumentSettingsPart ?? mainPart.AddNewPart<DocumentSettingsPart>();
+            Compatibility compatibility = new Compatibility(
+                       //Compatibility for Office 2013 onwards, which helps with processing larger documents
+                       new CompatibilitySetting()
+                       {
+                           Name = CompatSettingNameValues.CompatibilityMode,
+                           Val = new StringValue("15"),
+                           Uri = new StringValue("http://schemas.microsoft.com/office/word")
+                       }
+                   );
+            if (settingsPart.Settings == null)
+            {
+                settingsPart.Settings = new Settings(compatibility);
+            }
+            else
+            {
+                Compatibility c = (Compatibility)settingsPart.Settings.ChildElements.FirstOrDefault(o => o.GetType().Equals(typeof(Compatibility)));
+                if (c != null)
+                {
+                    c = compatibility;
+                }
+                else
+                {
+                    settingsPart.Settings.AddChild(compatibility);
+                }
+            }
             settingsPart.Settings.Save();
         }
 
@@ -659,8 +685,8 @@ namespace PowerDocu.Common
         protected string CreateMD5Hash(string input)
         {
             // Step 1, calculate MD5 hash from input
-            MD5 md5 = System.Security.Cryptography.MD5.Create();
-            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+            MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
             byte[] hashBytes = md5.ComputeHash(inputBytes);
 
             // Step 2, convert byte array to hex string

@@ -10,7 +10,7 @@ namespace PowerDocu.AppDocumenter
 {
     public static class AppDocumentationGenerator
     {
-        public static void GenerateWordDocumentation(string filePath, string wordTemplate = null)
+        public static void GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -59,7 +59,7 @@ namespace PowerDocu.AppDocumenter
                                         {
                                             Node source = rootGraph.GetOrAddNode("App");
                                             source.SetAttributeHtml("label", "<table border=\"0\"><tr><td>App</td></tr></table>");
-                                            source.SetAttribute("shape","oval");
+                                            source.SetAttribute("shape", "oval");
                                             Node dest = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(destination));
                                             dest.SetAttributeHtml("label", "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(destination) + "</td></tr></table>");
                                             rootGraph.GetOrAddEdge(source, dest, "App -" + destination);
@@ -95,15 +95,24 @@ namespace PowerDocu.AppDocumenter
                     {
                         bitmap?.Save(folderPath + "ScreenNavigation.png");
                     }
-
-                    //create the Word document
-                    if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                    AppDocumentationContent content = new AppDocumentationContent(app, path);
+                    if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                     {
-                        AppWordDocBuilder wordzip = new AppWordDocBuilder(app, path, null);
+                        //create the Word document
+                        NotificationHelper.SendNotification("Creating Word documentation");
+                        if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                        {
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null);
+                        }
+                        else
+                        {
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate);
+                        }
                     }
-                    else
+                    if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
                     {
-                        AppWordDocBuilder wordzip = new AppWordDocBuilder(app, path, wordTemplate);
+                        NotificationHelper.SendNotification("Creating Markdown documentation");
+                        AppMarkdownBuilder markdownFile = new AppMarkdownBuilder(content);
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;

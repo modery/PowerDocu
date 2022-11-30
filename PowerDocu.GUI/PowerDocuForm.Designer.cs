@@ -51,7 +51,7 @@ namespace PowerDocu.GUI
             openWordTemplateDialog = new OpenFileDialog()
             {
                 FileName = "",
-                Filter = "Word Documents (*.docx)|*.docx",
+                Filter = "Word Documents (*.docx, *.docm, *.dotx)|*.docx;*.docm;*.dotx",
                 Title = "Select the Word document to use as template"
             };
             selectWordTemplateButton = new IconButton()
@@ -69,7 +69,7 @@ namespace PowerDocu.GUI
             outputFormatComboBox = new ComboBox()
             {
                 Location = new Point(15, 25 + selectWordTemplateButton.Height),
-                Size = new System.Drawing.Size(85, 21),
+                Size = new System.Drawing.Size(convertToDPISpecific(85), convertToDPISpecific(21)),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             outputFormatComboBox.Items.AddRange(new object[] {OutputFormatHelper.Word,
@@ -115,7 +115,7 @@ namespace PowerDocu.GUI
             outputFormatInfoLabel = new Label()
             {
                 Location = new Point(30 + outputFormatComboBox.Width, outputFormatComboBox.Location.Y + 5),
-                Text = "Select output file format",
+                Text = "Select output format",
                 Width = convertToDPISpecific(300),
                 Height = convertToDPISpecific(30)
             };

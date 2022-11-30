@@ -68,8 +68,9 @@ namespace PowerDocu.GUI
                                     : null
                             );
                             NotificationHelper.SendNotification("Trying to process Power Apps");
-                            AppDocumentationGenerator.GenerateWordDocumentation(
+                            AppDocumentationGenerator.GenerateDocumentation(
                                 fileName,
+                                outputFormatComboBox.SelectedItem.ToString(),
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null
@@ -77,8 +78,9 @@ namespace PowerDocu.GUI
                         }
                         else if (fileName.EndsWith(".msapp"))
                         {
-                            AppDocumentationGenerator.GenerateWordDocumentation(
+                            AppDocumentationGenerator.GenerateDocumentation(
                                 fileName,
+                                outputFormatComboBox.SelectedItem.ToString(),
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null

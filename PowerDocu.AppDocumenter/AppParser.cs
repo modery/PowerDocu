@@ -18,7 +18,7 @@ namespace PowerDocu.AppDocumenter
             SolutionPackage
         }
         private readonly List<AppEntity> apps = new List<AppEntity>();
-        private AppEntity currentApp;
+        private readonly AppEntity currentApp;
         public PackageType packageType;
 
         public AppParser(string filename)
@@ -26,29 +26,27 @@ namespace PowerDocu.AppDocumenter
             NotificationHelper.SendNotification(" - Processing " + filename);
             if (filename.EndsWith(".zip"))
             {
-                using (FileStream stream = new FileStream(filename, FileMode.Open))
+                using FileStream stream = new FileStream(filename, FileMode.Open);
+                List<ZipArchiveEntry> definitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
+                packageType = PackageType.SolutionPackage;
+                foreach (ZipArchiveEntry definition in definitions)
                 {
-                    List<ZipArchiveEntry> definitions = ZipHelper.getFilesInPathFromZip(stream, "", ".msapp");
-                    packageType = PackageType.SolutionPackage;
-                    foreach (ZipArchiveEntry definition in definitions)
+                    string tempFile = Path.GetDirectoryName(filename) + @"\" + definition.Name;
+                    definition.ExtractToFile(tempFile, true);
+                    NotificationHelper.SendNotification("  - Processing app " + definition.FullName);
+                    using (FileStream appDefinition = new FileStream(tempFile, FileMode.Open))
                     {
-                        string tempFile = Path.GetDirectoryName(filename) + @"\" + definition.Name;
-                        definition.ExtractToFile(tempFile, true);
-                        NotificationHelper.SendNotification("  - Processing app " + definition.FullName);
-                        using (FileStream appDefinition = new FileStream(tempFile, FileMode.Open))
                         {
-                            {
-                                AppEntity app = new AppEntity();
-                                currentApp = app;
-                                parseAppProperties(appDefinition);
-                                parseAppControls(appDefinition);
-                                parseAppDataSources(appDefinition);
-                                parseAppResources(appDefinition);
-                                apps.Add(app);
-                            }
+                            AppEntity app = new AppEntity();
+                            currentApp = app;
+                            parseAppProperties(appDefinition);
+                            parseAppControls(appDefinition);
+                            parseAppDataSources(appDefinition);
+                            parseAppResources(appDefinition);
+                            apps.Add(app);
                         }
-                        File.Delete(tempFile);
                     }
+                    File.Delete(tempFile);
                 }
             }
             else if (filename.EndsWith(".msapp"))
@@ -57,14 +55,12 @@ namespace PowerDocu.AppDocumenter
                 packageType = PackageType.AppPackage;
                 AppEntity app = new AppEntity();
                 currentApp = app;
-                using (FileStream stream = new FileStream(filename, FileMode.Open))
-                {
-                    parseAppProperties(stream);
-                    parseAppControls(stream);
-                    parseAppDataSources(stream);
-                    parseAppResources(stream);
-                    apps.Add(app);
-                }
+                using FileStream stream = new FileStream(filename, FileMode.Open);
+                parseAppProperties(stream);
+                parseAppControls(stream);
+                parseAppDataSources(stream);
+                parseAppResources(stream);
+                apps.Add(app);
             }
             else
             {
@@ -77,31 +73,29 @@ namespace PowerDocu.AppDocumenter
             string[] filesToParse = new string[] { "Resources\\PublishInfo.json", "Header.json", "Properties.json" };
             foreach (string fileToParse in filesToParse)
             {
-                using (StreamReader reader = new StreamReader(ZipHelper.getFileFromZip(appArchive, fileToParse).Open()))
+                using StreamReader reader = new StreamReader(ZipHelper.getFileFromZip(appArchive, fileToParse).Open());
+                string appJSON = reader.ReadToEnd();
+                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+                var _jsonSerializer = JsonSerializer.Create(settings);
+                dynamic propertiesDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                foreach (JToken property in propertiesDefinition.Children())
                 {
-                    string appJSON = reader.ReadToEnd();
-                    var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
-                    var _jsonSerializer = JsonSerializer.Create(settings);
-                    dynamic propertiesDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                    foreach (JToken property in propertiesDefinition.Children())
+                    JProperty prop = (JProperty)property;
+                    currentApp.Properties.Add(Expression.parseExpressions(prop));
+                    if (prop.Name.Equals("AppName"))
                     {
-                        JProperty prop = (JProperty)property;
-                        currentApp.Properties.Add(Expression.parseExpressions(prop));
-                        if (prop.Name.Equals("AppName"))
-                        {
-                            currentApp.Name = prop.Value.ToString();
-                        }
-                        if (prop.Name.Equals("ID"))
-                        {
-                            currentApp.ID = prop.Value.ToString();
-                        }
-                        if (prop.Name.Equals("LogoFileName") && !String.IsNullOrEmpty(prop.Value.ToString()))
-                        {
-                            ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, "Resources\\" + prop.Value.ToString());
-                            MemoryStream ms = new MemoryStream();
-                            resourceFile.Open().CopyTo(ms);
-                            currentApp.ResourceStreams.Add(prop.Value.ToString(), ms);
-                        }
+                        currentApp.Name = prop.Value.ToString();
+                    }
+                    if (prop.Name.Equals("ID"))
+                    {
+                        currentApp.ID = prop.Value.ToString();
+                    }
+                    if (prop.Name.Equals("LogoFileName") && !String.IsNullOrEmpty(prop.Value.ToString()))
+                    {
+                        ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, "Resources\\" + prop.Value.ToString());
+                        MemoryStream ms = new MemoryStream();
+                        resourceFile.Open().CopyTo(ms);
+                        currentApp.ResourceStreams.Add(prop.Value.ToString(), ms);
                     }
                 }
             }
@@ -113,14 +107,12 @@ namespace PowerDocu.AppDocumenter
             //parse the controls. each controlFile represents a screen
             foreach (ZipArchiveEntry controlEntry in controlFiles)
             {
-                using (StreamReader reader = new StreamReader(controlEntry.Open()))
-                {
-                    string appJSON = reader.ReadToEnd();
-                    var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
-                    var _jsonSerializer = JsonSerializer.Create(settings);
-                    dynamic controlsDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                    currentApp.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
-                }
+                using StreamReader reader = new StreamReader(controlEntry.Open());
+                string appJSON = reader.ReadToEnd();
+                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+                var _jsonSerializer = JsonSerializer.Create(settings);
+                dynamic controlsDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+                currentApp.Controls.Add(parseControl(((JObject)controlsDefinition.TopParent).Children().ToList()));
             }
             foreach (ControlEntity control in currentApp.Controls)
             {
@@ -532,32 +524,30 @@ namespace PowerDocu.AppDocumenter
         private void parseAppDataSources(Stream appArchive)
         {
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\DataSources.json");
-            using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
+            using StreamReader reader = new StreamReader(dataSourceFile.Open());
+            string appJSON = reader.ReadToEnd();
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+            var _jsonSerializer = JsonSerializer.Create(settings);
+            dynamic datasourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+            foreach (JToken datasource in datasourceDefinition.DataSources.Children())
             {
-                string appJSON = reader.ReadToEnd();
-                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
-                var _jsonSerializer = JsonSerializer.Create(settings);
-                dynamic datasourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                foreach (JToken datasource in datasourceDefinition.DataSources.Children())
+                DataSource ds = new DataSource();
+                foreach (JProperty prop in datasource.Children())
                 {
-                    DataSource ds = new DataSource();
-                    foreach (JProperty prop in datasource.Children())
+                    switch (prop.Name)
                     {
-                        switch (prop.Name)
-                        {
-                            case "Name":
-                                ds.Name = prop.Value.ToString();
-                                break;
-                            case "Type":
-                                ds.Type = prop.Value.ToString();
-                                break;
-                            default:
-                                ds.Properties.Add(Expression.parseExpressions(prop));
-                                break;
-                        }
+                        case "Name":
+                            ds.Name = prop.Value.ToString();
+                            break;
+                        case "Type":
+                            ds.Type = prop.Value.ToString();
+                            break;
+                        default:
+                            ds.Properties.Add(Expression.parseExpressions(prop));
+                            break;
                     }
-                    currentApp.DataSources.Add(ds);
                 }
+                currentApp.DataSources.Add(ds);
             }
         }
 
@@ -565,48 +555,46 @@ namespace PowerDocu.AppDocumenter
         {
             string[] ResourceExtensions = new string[] { "jpg", "jpeg", "gif", "png", "bmp", "tif", "tiff", "svg" };
             ZipArchiveEntry dataSourceFile = ZipHelper.getFileFromZip(appArchive, "References\\Resources.json");
-            using (StreamReader reader = new StreamReader(dataSourceFile.Open()))
+            using StreamReader reader = new StreamReader(dataSourceFile.Open());
+            string appJSON = reader.ReadToEnd();
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
+            var _jsonSerializer = JsonSerializer.Create(settings);
+            dynamic resourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
+            foreach (JToken resource in resourceDefinition.Resources.Children())
             {
-                string appJSON = reader.ReadToEnd();
-                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, MaxDepth = 128 };
-                var _jsonSerializer = JsonSerializer.Create(settings);
-                dynamic resourceDefinition = JsonConvert.DeserializeObject<JObject>(appJSON, settings).ToObject(typeof(object), _jsonSerializer);
-                foreach (JToken resource in resourceDefinition.Resources.Children())
+                Resource res = new Resource();
+                string pathToResource = "";
+                foreach (JProperty prop in resource.Children())
                 {
-                    Resource res = new Resource();
-                    string pathToResource = "";
-                    foreach (JProperty prop in resource.Children())
+                    switch (prop.Name)
                     {
-                        switch (prop.Name)
-                        {
-                            case "Name":
-                                res.Name = prop.Value.ToString();
-                                break;
-                            case "Content":
-                                res.Content = prop.Value.ToString();
-                                break;
-                            case "ResourceKind":
-                                res.ResourceKind = prop.Value.ToString();
-                                break;
-                            case "Path":
-                                pathToResource = prop.Value.ToString();
-                                break;
-                            default:
-                                res.Properties.Add(Expression.parseExpressions(prop));
-                                break;
-                        }
+                        case "Name":
+                            res.Name = prop.Value.ToString();
+                            break;
+                        case "Content":
+                            res.Content = prop.Value.ToString();
+                            break;
+                        case "ResourceKind":
+                            res.ResourceKind = prop.Value.ToString();
+                            break;
+                        case "Path":
+                            pathToResource = prop.Value.ToString();
+                            break;
+                        default:
+                            res.Properties.Add(Expression.parseExpressions(prop));
+                            break;
                     }
-                    currentApp.Resources.Add(res);
-                    if (res.ResourceKind == "LocalFile")
+                }
+                currentApp.Resources.Add(res);
+                if (res.ResourceKind == "LocalFile")
+                {
+                    string extension = pathToResource[(pathToResource.LastIndexOf('.') + 1)..].ToLower();
+                    if (ResourceExtensions.Contains(extension))
                     {
-                        string extension = pathToResource.Substring(pathToResource.LastIndexOf('.') + 1).ToLower();
-                        if (ResourceExtensions.Contains(extension))
-                        {
-                            ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, pathToResource);
-                            MemoryStream ms = new MemoryStream();
-                            resourceFile.Open().CopyTo(ms);
-                            currentApp.ResourceStreams.Add(res.Name, ms);
-                        }
+                        ZipArchiveEntry resourceFile = ZipHelper.getFileFromZip(appArchive, pathToResource);
+                        MemoryStream ms = new MemoryStream();
+                        resourceFile.Open().CopyTo(ms);
+                        currentApp.ResourceStreams.Add(res.Name, ms);
                     }
                 }
             }

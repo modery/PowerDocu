@@ -22,8 +22,7 @@ namespace PowerDocu.FlowDocumenter
         {
             this.content = contentDocumentation;
             Directory.CreateDirectory(content.folderPath);
-            string filename = content.folderPath + content.filename + ".docx";
-            InitializeWordDocument(filename, template);
+            string filename = InitializeWordDocument(content.folderPath + content.filename, template);
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Open(filename, true))
             {
                 mainPart = wordDocument.MainDocumentPart;

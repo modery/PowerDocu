@@ -18,9 +18,9 @@ namespace PowerDocu.AppDocumenter
             else
             {
                 if (args.Length == 1)
-                    AppDocumentationGenerator.GenerateWordDocumentation(args[0]);
+                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All");
                 if (args.Length == 2)
-                    AppDocumentationGenerator.GenerateWordDocumentation(args[0], args[1]);
+                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All", args[1]);
             }
         }
     }
