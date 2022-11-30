@@ -4,7 +4,7 @@ After you have built a Flow in Power Automate or a canvas app in Power Apps, you
 
 This is where **PowerDocu** can help!
 
-PowerDocu contains two console applications called **FlowDocumenter** and **AppDocumenter**, as well as a **Windows GUI executable** to easily perform documentations. FlowDocumenter allows the automatic generation of technical documentation based on a provided exported Flow package or an exported Solution package, and AppDocumenter does the same for exported Power Apps canvas app. The GUI application handles both types and is the most convenient option to use generally.
+PowerDocu contains a **Windows GUI executable** to easily perform technical documentations. It allows the automatic generation of technical documentation based on a provided exported Flow package, an exported Power Apps canvas app, or an exported Solution package. The documentation can be generated as a Word document or in Markdown format (for example to host it in GitHub or Azure DevOps).
 
 ![PowerDocu.GUI](Images/PowerDocu.GUI.png)
 
@@ -12,22 +12,24 @@ PowerDocu contains two console applications called **FlowDocumenter** and **AppD
 As part of a Microsoft 365 Community call, an overview and a demo of PowerDocu were given. Want to see the tool in action? Check out this recording on YouTube:
 [![PowerDocu demo as part of the Microsoft 365 Community call](Images/youtube-microsoft365community-powerdocu.jpg)](https://www.youtube.com/watch?v=2-mH8vdVlaM)
 
-**Example of a documented Flow:**
+Another recording was done for the Low Code Revolution show hosted by April Dunnam:
+[![Low Code Revolution - Automatically create Technical Documentation for your Power Apps and Power Automate Flows](Images/youtube-low-code-revolution.png)](https://www.youtube.com/watch?v=jpPsngS8rww)
+
+
+**Examples of generated documentation**
+
+Visit [Examples](./examples/examples.md) for more details. The screenshots below give an overview of what gets generated
 
 ![Example of generated Flow Word documentation](Images/Weather-Flow-Documentation-1.png)
-![Example of generated Flow Word documentation](Images/Weather-Flow-Documentation-2.png)
 
-**Example of a documented Power App:**
-
-![Example of generated app Word documentation](Images/MeetingCaptureApp-Documentation-1.png)
-![Example of generated app Word documentation](Images/MeetingCaptureApp-Documentation-2.png)
-![Example of generated app Word documentation](Images/MeetingCaptureApp-Documentation-3.png)
+![Example of generated app Markdown documentation](Images/Markdown-GitHub-PowerApp-BuildingAccess-0.png)
+![Example of generated app Markdown documentation](Images/Markdown-Azure-DevOps-PowerApp-BuildingAccess-0.png)
 
 ## What is generated as part of the technical documentation?
 
 The documentation for each Flow includes
 
-1. A generated Word document including sections on
+1. A generated Word document or Markdown content including sections on
     1. General information of the Flow
     2. The connectors that are used by the Flow
     3. The Trigger that starts the Flow
@@ -38,7 +40,7 @@ The documentation for each Flow includes
 
 The documentation for each canvas app includes
 
-1. A generated Word document including sections on
+1. A generated Word document or Markdown content including sections on
     1. General information of the app and its properties
     2. The global variables and collections used in the app (and in which controls they are used)
     3. The Data Sources used
@@ -48,11 +50,11 @@ The documentation for each canvas app includes
 
 The documentation for a solution includes
 
-1. Generated Word documents for each app inside the solution
-2. Generated Word documents for each Flow inside the solution
+1. Generated documentation for each app inside the solution
+2. Generated documentation for each Flow inside the solution
 
 
-> **_NOTE:_** PowerDocu is currently in a relatively stable state. However, if you find any bugs or other issues, please log an **[Issue](https://github.com/modery/PowerDocu/issues)** in this GitHub project. For any improvement recommendations and suggestions, please open a **[Discussion](https://github.com/modery/PowerDocu/discussions)**. Most importantly, if you want to contribute to this project's code, please fork this repository and submit appropriate Pull Requests. **Any kind of contribution is more than welcome!**
+> **_NOTE:_** If you find any bugs or other issues, please log an **[Issue](https://github.com/modery/PowerDocu/issues)** in this GitHub project. For any improvement recommendations and suggestions, please open a **[Discussion](https://github.com/modery/PowerDocu/discussions)**. Most importantly, if you want to contribute to this project's code, please fork this repository and submit appropriate Pull Requests. **Any kind of contribution is more than welcome!**
 
 ## How to use PowerDocu
 
