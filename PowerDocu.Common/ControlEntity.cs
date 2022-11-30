@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace PowerDocu.Common
@@ -21,6 +20,17 @@ namespace PowerDocu.Common
             if (this.Type == "screen") return this;
             if (Parent != null) return Parent.Screen();
             return null;
+        }
+
+        public static List<ControlEntity> getAllChildControls(ControlEntity control)
+        {
+            List<ControlEntity> childControls = new List<ControlEntity>();
+            foreach (ControlEntity childControl in control.Children)
+            {
+                childControls.Add(childControl);
+                childControls.AddRange(getAllChildControls(childControl));
+            }
+            return childControls;
         }
     }
 
