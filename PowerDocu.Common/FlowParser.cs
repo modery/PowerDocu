@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.IO.Compression;
-using PowerDocu.Common;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace PowerDocu.FlowDocumenter
+namespace PowerDocu.Common
 {
-    class FlowParser
+    public class FlowParser
     {
         public enum PackageType
         {
