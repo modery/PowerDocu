@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PowerDocu.Common\PowerDocu.Common.csproj" />
+    <ProjectReference Include="..\modules\PowerDocu.Common\PowerDocu.Common\PowerDocu.Common.csproj" />
   </ItemGroup>
 
 </Project>

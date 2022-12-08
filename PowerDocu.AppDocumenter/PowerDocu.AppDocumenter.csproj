@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\PowerDocu.Common\PowerDocu.Common.csproj" />
+    <ProjectReference Include="..\modules\PowerDocu.Common\PowerDocu.Common\PowerDocu.Common.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

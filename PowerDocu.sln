@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.FlowDocumenter", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.GUI", "PowerDocu.GUI\PowerDocu.GUI.csproj", "{3E33F41C-0C7B-4C0D-91BD-56F520AFC5F0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.Common", "PowerDocu.Common\PowerDocu.Common.csproj", "{006E057F-1D12-4FBA-94B9-94A1E4A75A17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.Common", "modules\PowerDocu.Common\PowerDocu.Common\PowerDocu.Common.csproj", "{006E057F-1D12-4FBA-94B9-94A1E4A75A17}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerDocu.AppDocumenter", "PowerDocu.AppDocumenter\PowerDocu.AppDocumenter.csproj", "{15EC009C-DEB1-437C-B81F-34A2D4F624A0}"
 EndProject
