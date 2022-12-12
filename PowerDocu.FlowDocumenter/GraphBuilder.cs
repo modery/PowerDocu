@@ -1,6 +1,7 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using PowerDocu.Common;
 using Rubjerg.Graphviz;
 using Svg;
@@ -280,7 +281,7 @@ namespace PowerDocu.FlowDocumenter
                 //Only connect if there is no preceding node (meaning it's the first node in the current level) or if the 'parent' is the previous node), and if there's no existing edge (to avoid duplicates)
                 if ((precedingNeighbour == null || previousNeighbourNode.GetName().Equals(precedingNeighbour.Name)) && !edges.Contains(edgeName))
                 {
-                    CreateEdge(currentNode, previousNeighbourNode, precedingNeighbour, edgeName, rootGraph);
+                    CreateEdge(currentNode, previousNeighbourNode, node, precedingNeighbour, edgeName, rootGraph);
                 }
                 else if (precedingNeighbour != null && !edges.Contains(edgeName))
                 {
@@ -288,7 +289,7 @@ namespace PowerDocu.FlowDocumenter
                     Node precNode = rootGraph.GetNode(precedingNeighbour.Name);
                     if (precNode != null)
                     {
-                        CreateEdge(currentNode, precNode, precedingNeighbour, edgeName, rootGraph);
+                        CreateEdge(currentNode, precNode, node, precedingNeighbour, edgeName, rootGraph);
                     }
                 }
 
@@ -299,7 +300,7 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private void CreateEdge(Node currentNode, Node previousNeighbourNode, ActionNode precedingNeighbour, string edgeName, RootGraph rootGraph)
+        private void CreateEdge(Node currentNode, Node previousNeighbourNode, ActionNode currentActionNode, ActionNode precedingNeighbour, string edgeName, RootGraph rootGraph)
         {
             Edge edgeAB = null;
             SubGraph prevCluster = (nodeClusterRelationship.ContainsKey(previousNeighbourNode)) ? nodeClusterRelationship[previousNeighbourNode] : null;
@@ -392,13 +393,21 @@ namespace PowerDocu.FlowDocumenter
             {
                 if (curCluster != null)
                 {
-                    //update 5
                     edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
                     edgeAB.SetLogicalHead(curCluster);
                 }
                 else
                 {
                     edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                }
+            }
+            if (precedingNeighbour?.nodeRunAfterConditions?.ContainsKey(currentActionNode) == true)
+            {
+                precedingNeighbour.nodeRunAfterConditions.TryGetValue(currentActionNode, out string[] runAfterConditions);
+                if (!runAfterConditions.Contains("Succeeded"))
+                {
+                    edgeAB.SafeSetAttribute("style", "dotted", "");
+                    edgeAB.SafeSetAttribute("color", "red", "");
                 }
             }
             edges.Add(edgeName);
