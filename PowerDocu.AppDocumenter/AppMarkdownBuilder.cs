@@ -269,7 +269,7 @@ namespace PowerDocu.AppDocumenter
                 screenDocuments.TryGetValue(screen.Name, out MdDocument screenDoc);
                 screenDoc.Root.Add(new MdHeading(screen.Name, 2));
                 addAppControlsTable(screen, screenDoc);
-                foreach (ControlEntity control in content.appControls.allControls.Where(o => o.Type != "appinfo" && o.Type != "screen" && o.Screen().Equals(screen)).OrderBy(o => o.Name).ToList())
+                foreach (ControlEntity control in content.appControls.allControls.Where(o => o.Type != "appinfo" && o.Type != "screen" && screen.Equals(o.Screen())).OrderBy(o => o.Name).ToList())
                 {
                     screenDoc.Root.Add(new MdHeading(control.Name, 2));
                     addAppControlsTable(control, screenDoc);
