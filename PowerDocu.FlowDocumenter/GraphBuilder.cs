@@ -145,7 +145,7 @@ namespace PowerDocu.FlowDocumenter
                 //might not have subactions for yes/no? to check!
                 //if there are actions inside (likely only for Control), let's create a container
                 //How about a SCOPE? TODO
-                if (node.Subactions.Count > 0)
+                if (node.Subactions.Count + node.Elseactions.Count > 0)
                 {
                     // if there are subactions, then we need to create a cluster for the current node and its child nodes
                     // if we are inside a cluster, then we create the new cluster as a child
@@ -176,7 +176,6 @@ namespace PowerDocu.FlowDocumenter
                     if (!nodeClusterRelationship.ContainsKey(currentNode))
                         nodeClusterRelationship.Add(currentNode, cluster);
 
-                    //TODO: what if there are no subactions but only elseactions?
                     if (showSubactions)
                     {
                         foreach (ActionNode subaction in node.Subactions)
@@ -233,7 +232,7 @@ namespace PowerDocu.FlowDocumenter
                 SubGraph noCluster = null;
                 string edgeName;
                 Node currentNode = rootGraph.GetNode(CharsetHelper.GetSafeName(node.Name));
-                if (node.Subactions.Count > 0)
+                if (node.Subactions.Count + node.Elseactions.Count > 0)
                 {
                     if (currentCluster != null)
                     {
