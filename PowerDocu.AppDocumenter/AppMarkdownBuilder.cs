@@ -396,7 +396,7 @@ namespace PowerDocu.AppDocumenter
                     }
                     else
                     {
-                        tableRows.Add(new MdTableRow(expression.expressionOperator, expression.expressionOperands?[0].ToString()));
+                        tableRows.Add(new MdTableRow(expression.expressionOperator, expression.expressionOperands?[0]?.ToString()));
                     }
                 }
                 dataSourcesDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
