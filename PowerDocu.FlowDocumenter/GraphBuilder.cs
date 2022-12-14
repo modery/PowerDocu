@@ -182,7 +182,7 @@ namespace PowerDocu.FlowDocumenter
                         foreach (ActionNode subaction in node.Subactions)
                         {
                             //connect the subactions to the current node inside the cluster
-                            if (node.Elseactions.Count > 0)
+                            if (node.Elseactions.Count > 0 || node.Type.Equals("If"))
                             {
                                 yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
                                 if (!clusterRelationship.ContainsKey(yesCluster))
