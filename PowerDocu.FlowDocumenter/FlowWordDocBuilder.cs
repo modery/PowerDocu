@@ -6,10 +6,6 @@ using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using A = DocumentFormat.OpenXml.Drawing;
-using A14 = DocumentFormat.OpenXml.Office2010.Drawing;
-using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
-using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 using PowerDocu.Common;
 
 namespace PowerDocu.FlowDocumenter
@@ -302,37 +298,46 @@ namespace PowerDocu.FlowDocumenter
                         foreach (Expression actionInput in action.actionInputs)
                         {
                             TableCell operandsCell = CreateTableCell();
-                            if (actionInput.expressionOperands.Count > 1)
+                            //special handling
+                            if (action.Type.Equals("ParseJson") && actionInput.expressionOperator.Equals("schema"))
                             {
-                                Table operandsTable = CreateTable(BorderValues.Single, 0.8);
-                                foreach (object actionInputOperand in actionInput.expressionOperands)
-                                {
-                                    if (actionInputOperand.GetType() == typeof(Expression))
-                                    {
-                                        AddExpressionTable((Expression)actionInputOperand, operandsTable, 0.8);
-                                    }
-                                    else
-                                    {
-                                        operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
-                                    }
-                                }
-                                operandsCell.Append(operandsTable, new Paragraph());
+                                operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(actionInput.expressionOperands[0]?.ToString())));
+                                    //new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
                             }
                             else
                             {
-                                if (actionInput.expressionOperands.Count == 0)
+                                if (actionInput.expressionOperands.Count > 1)
                                 {
-                                    operandsCell.Append(new Paragraph(new Run(new Text(""))));
+                                    Table operandsTable = CreateTable(BorderValues.Single, 0.8);
+                                    foreach (object actionInputOperand in actionInput.expressionOperands)
+                                    {
+                                        if (actionInputOperand.GetType() == typeof(Expression))
+                                        {
+                                            AddExpressionTable((Expression)actionInputOperand, operandsTable, 0.8);
+                                        }
+                                        else
+                                        {
+                                            operandsTable.Append(CreateRow(new Text(actionInputOperand.ToString())));
+                                        }
+                                    }
+                                    operandsCell.Append(operandsTable, new Paragraph());
                                 }
                                 else
                                 {
-                                    if (actionInput.expressionOperands[0]?.GetType() == typeof(Expression))
+                                    if (actionInput.expressionOperands.Count == 0)
                                     {
-                                        operandsCell.Append(AddExpressionTable((Expression)actionInput.expressionOperands[0]), new Paragraph());
+                                        operandsCell.Append(new Paragraph(new Run(new Text(""))));
                                     }
                                     else
                                     {
-                                        operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                        if (actionInput.expressionOperands[0]?.GetType() == typeof(Expression))
+                                        {
+                                            operandsCell.Append(AddExpressionTable((Expression)actionInput.expressionOperands[0]), new Paragraph());
+                                        }
+                                        else
+                                        {
+                                            operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                        }
                                     }
                                 }
                             }
