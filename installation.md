@@ -30,3 +30,8 @@ To generate documentation for a Power Apps canvas app, you need to export it fro
 2. Select *File* and *Save As*, then choose *This Computer*
 ![Export app](Images/Export-App-Package.png)
 3. The exported package will be downloaded to your computer
+
+## Use a Word template
+In the GUI, you can select a Word document (regular Word files with extension .docx, Macro-enabled Word documents with extension .docm, and Word templates with extension .dotx) to be used as the template for the generated documentation. The document that you select will not be modified in any way, but rather will be used as a template for any generated documentation as part of the current session.
+
+PowerDocu simply appends the documented content as headings (H1 to H4), normal text, and tables. It is recommended to have the Heading styles available in your Word template.
