@@ -17,10 +17,11 @@ namespace PowerDocu.AppDocumenter
             }
             else
             {
+                //TODO for the moment, the documentDefaultChangesOnly and documentDefaults are set to true here. need to set it properly
                 if (args.Length == 1)
-                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All");
+                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All", true, true);
                 if (args.Length == 2)
-                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All", args[1]);
+                    AppDocumentationGenerator.GenerateDocumentation(args[0], "All", true, true, args[1]);
             }
         }
     }

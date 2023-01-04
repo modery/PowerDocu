@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using PowerDocu.AppDocumenter;
-using PowerDocu.FlowDocumenter;
+using PowerDocu.SolutionDocumenter;
 using PowerDocu.Common;
 
 namespace PowerDocu.GUI
@@ -29,6 +29,8 @@ namespace PowerDocu.GUI
             if (await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
             {
                 newReleaseButton.Visible = true;
+                newReleaseLabel.Text += PowerDocuReleaseHelper.latestVersionTag;
+                newReleaseLabel.Visible = true;
                 NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
                 NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " or press the Update button to download it");
                 NotificationHelper.SendNotification(Environment.NewLine);
@@ -58,19 +60,13 @@ namespace PowerDocu.GUI
                         if (fileName.EndsWith(".zip"))
                         {
                             NotificationHelper.SendNotification(
-                                "Trying to process Power Automate Flows"
+                                "Trying to process Solution, Apps, and Flows"
                             );
-                            FlowDocumentationGenerator.GenerateDocumentation(
+                            SolutionDocumentationGenerator.GenerateDocumentation(
                                 fileName,
                                 outputFormatComboBox.SelectedItem.ToString(),
-                                (openWordTemplateDialog.FileName != "")
-                                    ? openWordTemplateDialog.FileName
-                                    : null
-                            );
-                            NotificationHelper.SendNotification("Trying to process Power Apps");
-                            AppDocumentationGenerator.GenerateDocumentation(
-                                fileName,
-                                outputFormatComboBox.SelectedItem.ToString(),
+                                documentChangesOnlyRadioButton.Checked,
+                                documentDefaultsCheckBox.Checked,
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null
@@ -81,6 +77,8 @@ namespace PowerDocu.GUI
                             AppDocumentationGenerator.GenerateDocumentation(
                                 fileName,
                                 outputFormatComboBox.SelectedItem.ToString(),
+                                documentChangesOnlyRadioButton.Checked,
+                                documentDefaultsCheckBox.Checked,
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null
@@ -136,23 +134,68 @@ namespace PowerDocu.GUI
             System.Diagnostics.Process.Start(sInfo);
         }
 
-        private void updateConnectorIconsButton_Click(object sender, EventArgs e)
+        private async void updateConnectorIconsButton_Click(object sender, EventArgs e)
         {
-            ConnectorHelper.UpdateConnectorIcons();
+            await ConnectorHelper.UpdateConnectorIcons();
+            updateConnectorIconsLabel.Text = "Update your existing set of connector icons\n(" + ConnectorHelper.numberOfConnectors() + " connectors, " + ConnectorHelper.numberOfConnectorIcons() + " icons)";
+        }
+
+        private void backNextButton_Click(object sender, EventArgs e)
+        {
+            if (sender.Equals(nextLeftPanelButton))
+            {
+                step1Panel.Visible = false;
+                step2Panel.Visible = true;
+                nextLeftPanelButton.Enabled = false;
+                nextLeftPanelButton.BackColor = Color.LightGray;
+                backLeftPanelButton.Enabled = true;
+                backLeftPanelButton.BackColor = Color.DodgerBlue;
+                settingsDetailsLabel.Text = "  Output format: " + outputFormatComboBox.SelectedItem.ToString() + "\n" +
+                                            ((openWordTemplateDialog.FileName != "") ? "  Word Template: " + openWordTemplateDialog.FileName + "\n" : "") +
+                                            (documentChangesOnlyRadioButton.Checked ?
+                                                "  Include changed App properties "
+                                                : "  Include all App properties ") +
+                                            (documentDefaultsCheckBox.Checked ? "and default values" : "") +
+                                             " in documentation";
+            }
+            if (sender.Equals(backLeftPanelButton))
+            {
+                step1Panel.Visible = true;
+                step2Panel.Visible = false;
+                nextLeftPanelButton.Enabled = true;
+                nextLeftPanelButton.BackColor = Color.DodgerBlue;
+                backLeftPanelButton.Enabled = false;
+                backLeftPanelButton.BackColor = Color.LightGray;
+            }
+            UpdateNavigation();
         }
 
         private void sizeChanged(object sender, EventArgs e)
         {
-            appStatusTextBox.Size = new Size(
-                ClientSize.Width - 30,
-                ClientSize.Height
-                    - selectFileToParseButton.Height
-                    - selectWordTemplateButton.Height
-                    - outputFormatComboBox.Height
-                    - 65
-            );
-            updateConnectorIconsButton.Location = new Point(ClientSize.Width - 80, 15);
-            newReleaseButton.Location = new Point(ClientSize.Width - 80, 15 + updateConnectorIconsButton.Height);
+            appStatusTextBox.Size = new Size(ClientSize.Width - 30, ClientSize.Height - 395);
+        }
+
+        private void dpiChanged(object sender, EventArgs e)
+        {
+            //todo currently still having some issues
+            this.MinimumSize = new Size(convertToDPISpecific(800), convertToDPISpecific(350));
+        }
+
+        private void outputFormatComboBox_Changed(object sender, EventArgs e)
+        {
+            if (outputFormatComboBox != null && selectWordTemplateButton != null)
+            {
+                if (outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.Word) || outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.All))
+                {
+                    selectWordTemplateButton.Enabled = true;
+                    wordTemplateInfoLabel.ForeColor = Color.Black;
+                }
+                else
+                {
+                    selectWordTemplateButton.Enabled = false;
+                    wordTemplateInfoLabel.ForeColor = Color.Gray;
+                }
+            }
         }
     }
 

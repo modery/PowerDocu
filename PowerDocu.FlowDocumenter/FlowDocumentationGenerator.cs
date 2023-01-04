@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using PowerDocu.Common;
 
@@ -6,7 +7,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static void GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
+        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -17,7 +18,8 @@ namespace PowerDocu.FlowDocumenter
                 {
                     path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
-                foreach (FlowEntity flow in flowParserFromZip.getFlows())
+                List<FlowEntity> flows = flowParserFromZip.getFlows();
+                foreach (FlowEntity flow in flows)
                 {
                     GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
@@ -43,11 +45,13 @@ namespace PowerDocu.FlowDocumenter
                 }
                 DateTime endDocGeneration = DateTime.Now;
                 NotificationHelper.SendNotification("FlowDocumenter: Created documentation for " + filePath + ". A total of " + flowParserFromZip.getFlows().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
+                return flows;
             }
             else
             {
                 NotificationHelper.SendNotification("File not found: " + filePath);
             }
+            return null;
         }
     }
 }

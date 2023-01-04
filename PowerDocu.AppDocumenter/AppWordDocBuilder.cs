@@ -15,10 +15,14 @@ namespace PowerDocu.AppDocumenter
     {
         private readonly AppDocumentationContent content;
         private bool DetailedDocumentation = false;
+        private bool documentChangedDefaultsOnly;
+        private bool showDefaults;
 
-        public AppWordDocBuilder(AppDocumentationContent contentDocumentation, string template)
+        public AppWordDocBuilder(AppDocumentationContent contentDocumentation, string template, bool documentChangedDefaultsOnly = false, bool showDefaults = true)
         {
             content = contentDocumentation;
+            this.documentChangedDefaultsOnly = documentChangedDefaultsOnly;
+            this.showDefaults = showDefaults;
             Directory.CreateDirectory(content.folderPath);
             do
             {
@@ -103,6 +107,7 @@ namespace PowerDocu.AppDocumenter
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
+            addAppControlsTable(content.appControls.controls.First<ControlEntity>(o => o.Type == "appinfo"));
             if (DetailedDocumentation)
             {
                 para = body.AppendChild(new Paragraph());
@@ -207,27 +212,24 @@ namespace PowerDocu.AppDocumenter
             ApplyStyleToParagraph("Heading1", para);
             body.AppendChild(new Paragraph(new Run(new Text(content.appControls.infoTextScreens))));
             body.AppendChild(new Paragraph(new Run(new Text(content.appControls.infoTextControls))));
-            foreach (ControlEntity control in content.appControls.controls)
+            foreach (ControlEntity control in content.appControls.controls.Where(o => o.Type != "appinfo"))
             {
-                if (control.Type != "appinfo")
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                if (DetailedDocumentation)
                 {
-                    para = body.AppendChild(new Paragraph());
-                    run = para.AppendChild(new Run());
-                    if (DetailedDocumentation)
+                    run.AppendChild(new Hyperlink(new Text("Screen: " + control.Name))
                     {
-                        run.AppendChild(new Hyperlink(new Text("Screen: " + control.Name))
-                        {
-                            Anchor = CreateMD5Hash(control.Name),
-                            DocLocation = ""
-                        });
-                    }
-                    else
-                    {
-                        run.AppendChild(new Text("Screen: " + control.Name));
-                    }
-                    ApplyStyleToParagraph("Heading2", para);
-                    body.AppendChild(CreateControlTable(control));
+                        Anchor = CreateMD5Hash(control.Name),
+                        DocLocation = ""
+                    });
                 }
+                else
+                {
+                    run.AppendChild(new Text("Screen: " + control.Name));
+                }
+                ApplyStyleToParagraph("Heading2", para);
+                body.AppendChild(CreateControlTable(control));
             }
             body.AppendChild(new Paragraph(new Run(new Break())));
             para = body.AppendChild(new Paragraph());
@@ -309,7 +311,13 @@ namespace PowerDocu.AppDocumenter
                 ApplyStyleToParagraph("Heading2", para);
                 body.AppendChild(new Paragraph(new Run()));
                 addAppControlsTable(screen);
-                foreach (ControlEntity control in content.appControls.allControls.Where(o => o.Type != "appinfo" && o.Type != "screen" && o.Screen()?.Equals(screen) == true).OrderBy(o => o.Name).ToList())
+                foreach (ControlEntity control in content
+                    .appControls
+                    .allControls
+                    .Where(o => o.Type != "appinfo" && o.Type != "screen" && screen.Equals(o.Screen()))
+                    .OrderBy(o => o.Name)
+                    .ToList()
+                    )
                 {
                     para = body.AppendChild(new Paragraph());
                     run = para.AppendChild(new Run());
@@ -328,6 +336,7 @@ namespace PowerDocu.AppDocumenter
 
         private void addAppControlsTable(ControlEntity control)
         {
+            Entity defaultEntity = DefaultChangeHelper.GetEntityDefaults(control.Type);
             Table table = CreateTable();
             Table typeTable = CreateTable(BorderValues.None);
             typeTable.Append(CreateRow(InsertSvgImage(mainPart, AppControlIcons.GetControlIcon(control.Type), 16, 16), new Text(control.Type)));
@@ -335,63 +344,86 @@ namespace PowerDocu.AppDocumenter
             string category = "";
             foreach (Rule rule in control.Rules.OrderBy(o => o.Category).ThenBy(o => o.Property).ToList())
             {
-                if (!content.ColourProperties.Contains(rule.Property))
+                string defaultValue = defaultEntity?.Rules.Find(r => r.Property == rule.Property)?.InvariantScript;
+                if (String.IsNullOrEmpty(defaultValue))
+                    defaultValue = DefaultChangeHelper.DefaultValueIfUnknown;
+                if (!documentChangedDefaultsOnly || (defaultValue != rule.InvariantScript))
                 {
-                    if (rule.Category != category)
+                    if (!content.ColourProperties.Contains(rule.Property))
                     {
-                        category = rule.Category;
-                        table.Append(CreateMergedRow(new Text(category), 2, WordDocBuilder.cellHeaderBackground));
-                    }
-                    if (rule.InvariantScript.StartsWith("RGBA("))
-                    {
-                        Table colorTable = CreateTable(BorderValues.None);
-                        colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                        string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                        if (!String.IsNullOrEmpty(colour))
+                        if (rule.Category != category)
                         {
-                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            category = rule.Category;
+                            table.Append(CreateMergedRow(new Text(category), 2, WordDocBuilder.cellHeaderBackground));
                         }
-                    }
-                    else
-                    {
-                        table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                        if (rule.InvariantScript.StartsWith("RGBA("))
+                        {
+                            //todo show default
+                            Table colorTable = CreateTable(BorderValues.None);
+                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                                table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            }
+                        }
+                        else
+                        {
+                            table.Append(CreateRowForControlProperty(rule, defaultValue));
+                        }
                     }
                 }
             }
-            table.Append(CreateMergedRow(new Text("Color Properties"), 2, WordDocBuilder.cellHeaderBackground));
+            bool colourPropertiesHeaderAdded = false;
             foreach (string property in content.ColourProperties)
             {
                 Rule rule = control.Rules.Find(o => o.Property == property);
                 if (rule != null)
                 {
-                    if (rule.InvariantScript.StartsWith("RGBA("))
+                    string defaultValue = defaultEntity?.Rules.Find(r => r.Property == rule.Property)?.InvariantScript;
+                    if (String.IsNullOrEmpty(defaultValue))
+                        defaultValue = DefaultChangeHelper.DefaultValueIfUnknown;
+                    if (!documentChangedDefaultsOnly || defaultValue != rule.InvariantScript)
                     {
-                        Table colorTable = CreateTable(BorderValues.None);
-                        colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                        string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                        if (!String.IsNullOrEmpty(colour))
+                        //we only need to add this once, and only if we add content
+                        if (!colourPropertiesHeaderAdded)
                         {
-                            colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                            table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            table.Append(CreateMergedRow(new Text("Color Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                            colourPropertiesHeaderAdded = true;
                         }
-                    }
-                    else
-                    {
-                        table.Append(CreateRow(new Text(rule.Property), new Text(rule.InvariantScript)));
+                        if (rule.InvariantScript.StartsWith("RGBA("))
+                        {
+                            //todo show default
+                            Table colorTable = CreateTable(BorderValues.None);
+                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+                                table.Append(CreateRow(new Text(rule.Property), colorTable));
+                            }
+                        }
+                        else
+                        {
+                            table.Append(CreateRowForControlProperty(rule, defaultValue));
+                        }
                     }
                 }
             }
-            table.Append(CreateMergedRow(new Text("Child & Parent Controls"), 2, WordDocBuilder.cellHeaderBackground));
-            Table childtable = CreateTable(BorderValues.None);
-            foreach (ControlEntity childControl in control.Children)
+            if (control.Children.Count > 0 || control.Parent != null)
             {
-                childtable.Append(CreateRow(new Text(childControl.Name)));
-            }
-            table.Append(CreateRow(new Text("Child Controls"), childtable));
-            if (control.Parent != null)
-            {
-                table.Append(CreateRow(new Text("Parent Control"), new Text(control.Parent.Name)));
+                table.Append(CreateMergedRow(new Text("Child & Parent Controls"), 2, WordDocBuilder.cellHeaderBackground));
+                Table childtable = CreateTable(BorderValues.None);
+                foreach (ControlEntity childControl in control.Children)
+                {
+                    childtable.Append(CreateRow(new Text(childControl.Name)));
+                }
+                table.Append(CreateRow(new Text("Child Controls"), childtable));
+                if (control.Parent != null)
+                {
+                    table.Append(CreateRow(new Text("Parent Control"), new Text(control.Parent.Name)));
+                }
             }
             //todo isLocked property could be documented
             /* //Other properties are likely not needed for documentation, still keeping this code in case we want to show them at some point
@@ -400,9 +432,41 @@ namespace PowerDocu.AppDocumenter
             {
                 AddExpressionTable(expression, table);
             }*/
-
             body.Append(table);
             body.AppendChild(new Paragraph(new Run(new Break())));
+        }
+
+        private TableRow CreateRowForControlProperty(Rule rule, string defaultValue)
+        {
+            OpenXmlElement value = new Text(rule.InvariantScript);
+            if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
+            {
+                TableCellWidth fiftyPercentWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "2500" };
+                value = CreateTable(BorderValues.None);
+                TableRow tr = CreateRow(new Text(rule.InvariantScript), new Text(defaultValue));
+                //update the cell with the current value
+                TableCell tc = (TableCell)tr.FirstChild;
+                var shading = new Shading()
+                {
+                    Color = "auto",
+                    Fill = "ccffcc",
+                    Val = ShadingPatternValues.Clear
+                };
+                tc.TableCellProperties.Append(shading);
+                tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
+                //update the cell with the default value
+                tc = (TableCell)tr.LastChild;
+                shading = new Shading()
+                {
+                    Color = "auto",
+                    Fill = "ffcccc",
+                    Val = ShadingPatternValues.Clear
+                };
+                tc.TableCellProperties.Append(shading);
+                tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
+                value.Append(tr);
+            }
+            return CreateRow(new Text(rule.Property), value);
         }
 
         private void addAppDataSources()

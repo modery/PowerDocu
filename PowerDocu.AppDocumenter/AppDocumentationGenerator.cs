@@ -10,7 +10,7 @@ namespace PowerDocu.AppDocumenter
 {
     public static class AppDocumentationGenerator
     {
-        public static void GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
+        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -21,8 +21,8 @@ namespace PowerDocu.AppDocumenter
                 {
                     path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
-
-                foreach (AppEntity app in appParserFromZip.getApps())
+                List<AppEntity> apps = appParserFromZip.getApps();
+                foreach (AppEntity app in apps)
                 {
                     string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc - " + app.Name + @"\");
                     Directory.CreateDirectory(folderPath);
@@ -102,11 +102,11 @@ namespace PowerDocu.AppDocumenter
                         NotificationHelper.SendNotification("Creating Word documentation");
                         if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null);
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null, documentDefaultChangesOnly, documentDefaults);
                         }
                         else
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate);
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate, documentDefaultChangesOnly, documentDefaults);
                         }
                     }
                     if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
@@ -117,11 +117,13 @@ namespace PowerDocu.AppDocumenter
                 }
                 DateTime endDocGeneration = DateTime.Now;
                 NotificationHelper.SendNotification("AppDocumenter: Created Word documentation for " + filePath + ". A total of " + appParserFromZip.getApps().Count + " files were processed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
+                return apps;
             }
             else
             {
                 NotificationHelper.SendNotification("File not found: " + filePath);
             }
+            return null;
         }
     }
 }

@@ -132,6 +132,7 @@ namespace PowerDocu.AppDocumenter
         public string imageScreenNavigation = "ScreenNavigation";
         public List<ControlEntity> controls;
         public List<ControlEntity> allControls = new List<ControlEntity>();
+        public string[] controlPropertiesToSkip = new string[] { "X", "Y", "ZIndex"};
         public AppControls(AppEntity app)
         {
             controls = app.Controls.OrderBy(o => o.Name).ToList();

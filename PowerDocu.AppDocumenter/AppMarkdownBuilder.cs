@@ -19,10 +19,14 @@ namespace PowerDocu.AppDocumenter
         private readonly DocumentSet<MdDocument> set;
         private MdTable metadataTable;
         private readonly int appLogoWidth = 250;
+        private bool documentChangedDefaultsOnly;
+        private bool showDefaults;
 
-        public AppMarkdownBuilder(AppDocumentationContent contentdocumentation)
+        public AppMarkdownBuilder(AppDocumentationContent contentdocumentation, bool documentChangedDefaultsOnly = false, bool showDefaults = true)
         {
             content = contentdocumentation;
+            this.documentChangedDefaultsOnly = documentChangedDefaultsOnly;
+            this.showDefaults = showDefaults;
             Directory.CreateDirectory(content.folderPath);
             mainDocumentFileName = ("index " + content.filename + ".md").Replace(" ", "-");
             appDetailsFileName = ("appdetails " + content.filename + ".md").Replace(" ", "-");
@@ -114,12 +118,12 @@ namespace PowerDocu.AppDocumenter
                     if (appLogo.Width > appLogoWidth)
                     {
                         Bitmap resized = new Bitmap(appLogo, new Size(appLogoWidth, appLogoWidth * appLogo.Height / appLogo.Width));
-                        resized.Save(content.folderPath + @"resources\appLogoSmall.png");
-                        tableRows.Add(new MdTableRow("App Logo", new MdImageSpan("App Logo", "resources/appLogoSmall.png")));
+                        resized.Save(content.folderPath + @"resources\applogoSmall.png");
+                        tableRows.Add(new MdTableRow("App Logo", new MdImageSpan("App Logo", "resources/applogoSmall.png")));
                     }
                     else
                     {
-                        tableRows.Add(new MdTableRow("App Logo", new MdImageSpan("App Logo", "resources/appLogo.png")));
+                        tableRows.Add(new MdTableRow("App Logo", new MdImageSpan("App Logo", "resources/applogo.png")));
                     }
                 }
             }
@@ -226,13 +230,10 @@ namespace PowerDocu.AppDocumenter
             controlsDocument.Root.Add(new MdHeading(content.appControls.headerOverview, 2));
             controlsDocument.Root.Add(new MdParagraph(new MdTextSpan(content.appControls.infoTextScreens)));
             controlsDocument.Root.Add(new MdParagraph(new MdTextSpan(content.appControls.infoTextControls)));
-            foreach (ControlEntity control in content.appControls.controls)
+            foreach (ControlEntity control in content.appControls.controls.Where(o => o.Type != "appinfo"))
             {
-                if (control.Type != "appinfo")
-                {
-                    controlsDocument.Root.Add(new MdHeading(new MdLinkSpan("Screen: " + control.Name, ("screen " + control.Name + " " + content.filename + ".md").Replace(" ", "-")), 3));
-                    controlsDocument.Root.Add(CreateControlList(control));
-                }
+                controlsDocument.Root.Add(new MdHeading(new MdLinkSpan("Screen: " + control.Name, ("screen " + control.Name + " " + content.filename + ".md").Replace(" ", "-")), 3));
+                controlsDocument.Root.Add(CreateControlList(control));
             }
             controlsDocument.Root.Add(new MdHeading(content.appControls.headerScreenNavigation, 2));
             controlsDocument.Root.Add(new MdParagraph(new MdTextSpan(content.appControls.infoTextScreenNavigation)));
@@ -279,6 +280,7 @@ namespace PowerDocu.AppDocumenter
 
         private void addAppControlsTable(ControlEntity control, MdDocument screenDoc)
         {
+            Entity defaultEntity = DefaultChangeHelper.GetEntityDefaults(control.Type);
             List<MdTableRow> tableRows = new List<MdTableRow>();
             var svgDocument = SvgDocument.FromSvg<SvgDocument>(AppControlIcons.GetControlIcon(control.Type));
             //generating the PNG from the SVG with a width of 16px because some SVGs are huge and downscaled, thus can't be shown directly
@@ -291,36 +293,42 @@ namespace PowerDocu.AppDocumenter
             string category = "";
             foreach (Rule rule in control.Rules.OrderBy(o => o.Category).ThenBy(o => o.Property).ToList())
             {
-                if (!content.ColourProperties.Contains(rule.Property))
+                string defaultValue = defaultEntity?.Rules.Find(r => r.Property == rule.Property)?.InvariantScript;
+                if (String.IsNullOrEmpty(defaultValue))
+                    defaultValue = DefaultChangeHelper.DefaultValueIfUnknown;
+                if (!documentChangedDefaultsOnly || (defaultValue != rule.InvariantScript))
                 {
-                    if (rule.Category != category)
+                    if (!content.ColourProperties.Contains(rule.Property))
                     {
-                        if (tableRows.Count > 0)
+                        if (rule.Category != category)
                         {
-                            screenDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
-                            tableRows = new List<MdTableRow>();
+                            if (tableRows.Count > 0)
+                            {
+                                screenDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                                tableRows = new List<MdTableRow>();
+                            }
+                            category = rule.Category;
+                            screenDoc.Root.Add(new MdHeading(category, 3));
                         }
-                        category = rule.Category;
-                        screenDoc.Root.Add(new MdHeading(category, 3));
-                    }
-                    if (rule.InvariantScript.StartsWith("RGBA("))
-                    {
-                        string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                        if (!String.IsNullOrEmpty(colour))
+                        if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
-                            colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
-                            colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
-                            tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
+                                colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
+                                colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
+                                tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
+                            }
+                            else
+                            {
+                                tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
+                            }
                         }
                         else
                         {
-                            tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
+                            tableRows.Add(CreateRowForControlProperty(rule, defaultValue));
                         }
-                    }
-                    else
-                    {
-                        tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
                     }
                 }
             }
@@ -334,24 +342,30 @@ namespace PowerDocu.AppDocumenter
                 Rule rule = control.Rules.Find(o => o.Property == property);
                 if (rule != null)
                 {
-                    if (rule.InvariantScript.StartsWith("RGBA("))
+                    string defaultValue = defaultEntity?.Rules.Find(r => r.Property == rule.Property)?.InvariantScript;
+                    if (String.IsNullOrEmpty(defaultValue))
+                        defaultValue = DefaultChangeHelper.DefaultValueIfUnknown;
+                    if (!documentChangedDefaultsOnly || defaultValue != rule.InvariantScript)
                     {
-                        string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                        if (!String.IsNullOrEmpty(colour))
+                        if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
-                            colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
-                            colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
-                            tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
+                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+                            if (!String.IsNullOrEmpty(colour))
+                            {
+                                StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
+                                colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
+                                colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
+                                tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
+                            }
+                            else
+                            {
+                                tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
+                            }
                         }
                         else
                         {
                             tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
                         }
-                    }
-                    else
-                    {
-                        tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
                     }
                 }
             }
@@ -370,6 +384,19 @@ namespace PowerDocu.AppDocumenter
             }
             if (tableRows.Count > 0)
                 screenDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+        }
+
+        private MdTableRow CreateRowForControlProperty(Rule rule, string defaultValue)
+        {
+            if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
+            {
+                StringBuilder table = new StringBuilder("<table border=\"0\">");
+                table.Append("<tr><td style=\"background-color:#ccffcc; width:50%;\">")
+                     .Append(rule.InvariantScript)
+                     .Append("<td style=\"background-color:#ffcccc; width:50%;\">").Append(defaultValue).Append("</td></tr></table>");
+                return new MdTableRow(rule.Property, new MdRawMarkdownSpan(table.ToString()));
+            }
+            return new MdTableRow(rule.Property, rule.InvariantScript);
         }
 
         private void addAppDataSources()
