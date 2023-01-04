@@ -182,7 +182,7 @@ namespace PowerDocu.FlowDocumenter
                         foreach (ActionNode subaction in node.Subactions)
                         {
                             //connect the subactions to the current node inside the cluster
-                            if (node.Elseactions.Count > 0 || node.Type.Equals("If"))
+                            if (node.Elseactions.Count > 0)
                             {
                                 yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
                                 if (!clusterRelationship.ContainsKey(yesCluster))
@@ -191,6 +191,19 @@ namespace PowerDocu.FlowDocumenter
                                 yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
                                 addNodesToGraph(rootGraph, subaction, parentCluster, yesCluster, showSubactions, false);
                             }
+                            //todo if there are no elseactions, there is no cluster and it doesn't get coloured. But of we add it, the CoE flows throw errors
+                            /*else if (node.Type.Equals("If"))
+                            {
+                                //todo there are no elseactions, but we should still create a new cluster for the yes branch (and we don't show the no branch)
+                                yesCluster = cluster.GetOrAddSubgraph("cluster_yes" + CharsetHelper.GetSafeName(node.Name));
+                                //Console.WriteLine("Cluster5: " + yesCluster.GetName() + " - " + cluster.GetName());
+                                if (!clusterRelationship.ContainsKey(yesCluster))
+                                    clusterRelationship.Add(yesCluster, cluster);
+                                yesCluster.SafeSetAttribute("style", "filled", "");
+                                yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
+                                //next line is likely breaking stuff
+                                addNodesToGraph(rootGraph, subaction, cluster, yesCluster, showSubactions, false);
+                            }*/
                             else
                             {
                                 addNodesToGraph(rootGraph, subaction, null, cluster, showSubactions, false);
