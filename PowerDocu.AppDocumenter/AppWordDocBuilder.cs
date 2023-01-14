@@ -395,14 +395,7 @@ namespace PowerDocu.AppDocumenter
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
                             //todo show default
-                            Table colorTable = CreateTable(BorderValues.None);
-                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                            if (!String.IsNullOrEmpty(colour))
-                            {
-                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                                table.Append(CreateRow(new Text(rule.Property), colorTable));
-                            }
+                            table.Append(CreateColorTable(rule));
                         }
                         else
                         {
@@ -469,6 +462,18 @@ namespace PowerDocu.AppDocumenter
             return CreateRow(new Text(rule.Property), value);
         }
 
+        private TableRow CreateColorTable(Rule rule)
+        {
+            Table colorTable = CreateTable(BorderValues.None);
+            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
+            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+            if (!String.IsNullOrEmpty(colour))
+            {
+                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+            }
+            return CreateRow(new Text(rule.Property), colorTable);
+        }
+
         private void addAppDataSources()
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -520,28 +525,35 @@ namespace PowerDocu.AppDocumenter
                 table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
                 if (resource.ResourceKind == "LocalFile" && content.ResourceStreams.TryGetValue(resource.Name, out MemoryStream resourceStream))
                 {
-                    Drawing icon = null;
-                    Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
-                    if (fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
+                    try
                     {
-                        string svg = Encoding.Default.GetString(resourceStream.ToArray());
-                        icon = InsertSvgImage(mainPart, svg, 400, 400);
-                    }
-                    else
-                    {
-                        ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
-                        int imageWidth, imageHeight;
-                        using (var image = Image.FromStream(resourceStream, false, false))
+                        Drawing icon = null;
+                        Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
+                        if (fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
                         {
-                            imageWidth = image.Width;
-                            imageHeight = image.Height;
+                            string svg = Encoding.Default.GetString(resourceStream.ToArray());
+                            icon = InsertSvgImage(mainPart, svg, 400, 400);
                         }
-                        resourceStream.Position = 0;
-                        imagePart.FeedData(resourceStream);
-                        int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
-                        icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                        else
+                        {
+                            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+                            int imageWidth, imageHeight;
+                            using (var image = Image.FromStream(resourceStream, false, false))
+                            {
+                                imageWidth = image.Width;
+                                imageHeight = image.Height;
+                            }
+                            resourceStream.Position = 0;
+                            imagePart.FeedData(resourceStream);
+                            int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
+                            icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                        }
+                        table.Append(CreateRow(new Text("Resource Preview"), icon));
                     }
-                    table.Append(CreateRow(new Text("Resource Preview"), icon));
+                    catch (Exception e)
+                    {
+                        table.Append(CreateRow(new Text("Resource Preview"), new Text("Resource Preview is not available, media file is invalid.")));
+                    }
                 }
                 if (DetailedDocumentation)
                 {
