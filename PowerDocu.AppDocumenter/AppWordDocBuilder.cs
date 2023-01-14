@@ -358,15 +358,7 @@ namespace PowerDocu.AppDocumenter
                         }
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            //todo show default
-                            Table colorTable = CreateTable(BorderValues.None);
-                            colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
-                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                            if (!String.IsNullOrEmpty(colour))
-                            {
-                                colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
-                                table.Append(CreateRow(new Text(rule.Property), colorTable));
-                            }
+                            table.Append(CreateColorTable(rule, defaultValue));
                         }
                         else
                         {
@@ -394,8 +386,7 @@ namespace PowerDocu.AppDocumenter
                         }
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            //todo show default
-                            table.Append(CreateColorTable(rule));
+                            table.Append(CreateColorTable(rule, defaultValue));
                         }
                         else
                         {
@@ -434,35 +425,40 @@ namespace PowerDocu.AppDocumenter
             OpenXmlElement value = new Text(rule.InvariantScript);
             if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
             {
-                TableCellWidth fiftyPercentWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "2500" };
                 value = CreateTable(BorderValues.None);
-                TableRow tr = CreateRow(new Text(rule.InvariantScript), new Text(defaultValue));
-                //update the cell with the current value
-                TableCell tc = (TableCell)tr.FirstChild;
-                var shading = new Shading()
-                {
-                    Color = "auto",
-                    Fill = "ccffcc",
-                    Val = ShadingPatternValues.Clear
-                };
-                tc.TableCellProperties.Append(shading);
-                tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
-                //update the cell with the default value
-                tc = (TableCell)tr.LastChild;
-                shading = new Shading()
-                {
-                    Color = "auto",
-                    Fill = "ffcccc",
-                    Val = ShadingPatternValues.Clear
-                };
-                tc.TableCellProperties.Append(shading);
-                tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
-                value.Append(tr);
+                value.Append(CreateChangedDefaultColourRow(new Text(rule.InvariantScript), new Text(defaultValue)));
             }
             return CreateRow(new Text(rule.Property), value);
         }
 
-        private TableRow CreateColorTable(Rule rule)
+        private TableRow CreateChangedDefaultColourRow(OpenXmlElement firstColumnElement, OpenXmlElement secondColumnElement)
+        {
+            TableCellWidth fiftyPercentWidth = new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "2500" };
+            TableRow tr = CreateRow(firstColumnElement, secondColumnElement);
+            //update the cell with the current value
+            TableCell tc = (TableCell)tr.FirstChild;
+            var shading = new Shading()
+            {
+                Color = "auto",
+                Fill = "ccffcc",
+                Val = ShadingPatternValues.Clear
+            };
+            tc.TableCellProperties.Append(shading);
+            tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
+            //update the cell with the default value
+            tc = (TableCell)tr.LastChild;
+            shading = new Shading()
+            {
+                Color = "auto",
+                Fill = "ffcccc",
+                Val = ShadingPatternValues.Clear
+            };
+            tc.TableCellProperties.Append(shading);
+            tc.TableCellProperties.TableCellWidth = (TableCellWidth)fiftyPercentWidth.Clone();
+            return tr;
+        }
+
+        private TableRow CreateColorTable(Rule rule, string defaultValue)
         {
             Table colorTable = CreateTable(BorderValues.None);
             colorTable.Append(CreateRow(new Text(rule.InvariantScript)));
@@ -470,6 +466,19 @@ namespace PowerDocu.AppDocumenter
             if (!String.IsNullOrEmpty(colour))
             {
                 colorTable.Append(CreateMergedRow(new Text(""), 1, colour));
+            }
+            if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
+            {
+                Table defaultTable = CreateTable(BorderValues.Single);
+                defaultTable.Append(CreateRow(new Text(defaultValue)));
+                string defaultColour = ColourHelper.ParseColor(defaultValue);
+                if (!String.IsNullOrEmpty(defaultColour))
+                {
+                    defaultTable.Append(CreateMergedRow(new Text(""), 1, defaultColour));
+                }
+                Table changesTable = CreateTable(BorderValues.None);
+                changesTable.Append(CreateChangedDefaultColourRow(colorTable, defaultTable));
+                return CreateRow(new Text(rule.Property), changesTable);
             }
             return CreateRow(new Text(rule.Property), colorTable);
         }
