@@ -469,7 +469,7 @@ namespace PowerDocu.AppDocumenter
             }
             if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
             {
-                Table defaultTable = CreateTable(BorderValues.Single);
+                Table defaultTable = CreateTable(BorderValues.None);
                 defaultTable.Append(CreateRow(new Text(defaultValue)));
                 string defaultColour = ColourHelper.ParseColor(defaultValue);
                 if (!String.IsNullOrEmpty(defaultColour))
