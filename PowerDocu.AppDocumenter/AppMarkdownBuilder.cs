@@ -312,18 +312,7 @@ namespace PowerDocu.AppDocumenter
                         }
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                            if (!String.IsNullOrEmpty(colour))
-                            {
-                                StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
-                                colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
-                                colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
-                                tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
-                            }
-                            else
-                            {
-                                tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
-                            }
+                            tableRows.Add(CreateColorTable(rule, defaultValue));
                         }
                         else
                         {
@@ -349,18 +338,7 @@ namespace PowerDocu.AppDocumenter
                     {
                         if (rule.InvariantScript.StartsWith("RGBA("))
                         {
-                            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
-                            if (!String.IsNullOrEmpty(colour))
-                            {
-                                StringBuilder colorTable = new StringBuilder("<table border=\"0\">");
-                                colorTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
-                                colorTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr></table>");
-                                tableRows.Add(new MdTableRow(rule.Property, new MdRawMarkdownSpan(colorTable.ToString())));
-                            }
-                            else
-                            {
-                                tableRows.Add(new MdTableRow(rule.Property, rule.InvariantScript));
-                            }
+                            tableRows.Add(CreateColorTable(rule, defaultValue));
                         }
                         else
                         {
@@ -384,6 +362,44 @@ namespace PowerDocu.AppDocumenter
             }
             if (tableRows.Count > 0)
                 screenDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+        }
+
+        private string CreateChangedDefaultColourRow(string firstColumnElement, string secondColumnElement)
+        {
+            StringBuilder tr = new StringBuilder("<tr>");
+            tr.Append("<td style=\"width:50%; background-color:#ccffcc; color:black;\">")
+                .Append(firstColumnElement)
+                .Append("</td><td style=\"width:50%; background-color:#ffcccc; color:black;\">")
+                .Append(secondColumnElement)
+                .Append("</td></tr>");
+            return tr.ToString();
+        }
+
+        private MdTableRow CreateColorTable(Rule rule, string defaultValue)
+        {
+            StringBuilder colourTable = new StringBuilder("<table border=\"0\">");
+            colourTable.Append("<tr><td>").Append(rule.InvariantScript).Append("</td></tr>");
+            string colour = ColourHelper.ParseColor(rule.InvariantScript[..(rule.InvariantScript.IndexOf(')') + 1)]);
+            if (!String.IsNullOrEmpty(colour))
+            {
+                colourTable.Append("<tr><td style=\"background-color:").Append(colour).Append("\"></td></tr>");
+            }
+            colourTable.Append("</table>");
+            if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
+            {
+                StringBuilder defaultTable = new StringBuilder("<table border=\"0\">");
+                defaultTable.Append("<tr><td>").Append(defaultValue).Append("</td></tr>");
+                string defaultColour = ColourHelper.ParseColor(defaultValue);
+                if (!String.IsNullOrEmpty(defaultColour))
+                {
+                    defaultTable.Append("<tr><td style=\"background-color:").Append(defaultColour).Append("\"></td></tr>");
+                }
+                defaultTable.Append("</table>");
+                StringBuilder changesTable = new StringBuilder("<table border=\"0\">");
+                changesTable.Append(CreateChangedDefaultColourRow(colourTable.ToString(), defaultTable.ToString()));
+                return new MdTableRow(rule.Property, new MdRawMarkdownSpan(changesTable.Append("</table>").ToString()));
+            }
+            return new MdTableRow(rule.Property, new MdRawMarkdownSpan(colourTable.ToString()));
         }
 
         private MdTableRow CreateRowForControlProperty(Rule rule, string defaultValue)
