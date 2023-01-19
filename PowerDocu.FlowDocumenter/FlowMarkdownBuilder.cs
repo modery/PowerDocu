@@ -205,7 +205,7 @@ namespace PowerDocu.FlowDocumenter
 
             foreach (ActionNode action in actionNodesList)
             {
-                string actionDocFileName = ("actions/" + action.Name + "-" + content.filename + ".md").Replace(" ", "-");
+                string actionDocFileName = ("actions/" + CharsetHelper.GetSafeName(action.Name) + "-" + content.filename + ".md").Replace(" ", "-");
                 triggerActionsLinks.Add(new MdListItem(new MdLinkSpan(action.Name, actionDocFileName)));
                 MdDocument actionsDoc = set.CreateMdDocument(actionDocFileName);
                 actionsDoc.Root.Add(new MdHeading(content.metadata.header, 1));
@@ -357,7 +357,7 @@ namespace PowerDocu.FlowDocumenter
 
         private string getLinkFromAction(string name)
         {
-            return (name + "-" + content.filename + ".md").Replace(" ", "-");
+            return (CharsetHelper.GetSafeName(name) + "-" + content.filename + ".md").Replace(" ", "-");
         }
     }
 }
