@@ -46,7 +46,7 @@ namespace PowerDocu.SolutionDocumenter
                     }
                     if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
                     {
-                        //TODO TODO
+                        SolutionMarkdownBuilder mdDoc = new SolutionMarkdownBuilder(solutionContent);
                     }
                     DateTime endDocGeneration = DateTime.Now;
                     NotificationHelper.SendNotification("SolutionDocumenter: Created documentation for " + filePath + ". Total solution documentation completed in " + (endDocGeneration - startDocGeneration).TotalSeconds + " seconds.");
