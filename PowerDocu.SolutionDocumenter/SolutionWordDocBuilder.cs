@@ -230,14 +230,6 @@ namespace PowerDocu.SolutionDocumenter
                     body.Append(table);
                     para = body.AppendChild(new Paragraph());
                     run = para.AppendChild(new Run());
-                    /*List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.DisplayName).ToList();
-                    table.Append(CreateHeaderRow(new Text(componentType)));
-                    foreach (SolutionComponent component in components)
-                    {
-                        string name = String.IsNullOrEmpty(component.SchemaName) ? component.ID : component.SchemaName;
-                        table.Append(CreateRow(new Text(name)));
-                        ApplyStyleToParagraph("Heading2", para);
-                    }*/
                 }
             }
         }
