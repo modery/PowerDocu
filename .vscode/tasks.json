@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/PowerDocu.PowerDocu.GUI/PowerDocu.GUI.csproj",
+                "${workspaceFolder}/PowerDocu.GUI/PowerDocu.GUI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/PowerDocu.PowerDocu.GUI/PowerDocu.GUI.csproj",
+                "${workspaceFolder}/PowerDocu.GUI/PowerDocu.GUI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
