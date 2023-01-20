@@ -45,7 +45,7 @@ namespace PowerDocu.SolutionDocumenter
             table.Append(CreateHeaderRow(new Text("Component Type"), new Text("Number of Components")));
             foreach (string componentType in content.solution.GetComponentTypes())
             {
-                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.DisplayName).ToList();
+                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
                 table.Append(CreateRow(new Text(componentType), new Text(components.Count.ToString())));
             }
             body.Append(table);
@@ -161,28 +161,12 @@ namespace PowerDocu.SolutionDocumenter
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(componentType));
                 ApplyStyleToParagraph("Heading2", para);
-                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.DisplayName).ToList();
+                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
                 Table table = CreateTable();
                 table.Append(CreateHeaderRow(new Text(componentType)));
                 foreach (SolutionComponent component in components)
                 {
-                    string name = "";
-                    switch (componentType)
-                    {
-                        case "Canvas App":
-                            // todo: how can we safely identify the app from here?
-                            //name = content.apps.First(a => a.ID.Equals(component.ID))?.Name;
-                            name = String.IsNullOrEmpty(component.SchemaName) ? component.ID : component.SchemaName;
-                            break;
-                        case "Workflow":
-                            name = content.flows.First(a => a.Name.ToLower().EndsWith(component.ID.ToLower().Replace("{", "").Replace("}", "")))?.Name;
-                            break;
-                        default:
-                            name = String.IsNullOrEmpty(component.SchemaName) ? component.ID : component.SchemaName;
-                            break;
-                    }
-                    name ??= String.IsNullOrEmpty(component.SchemaName) ? component.ID : component.SchemaName;
-                    table.Append(CreateRow(new Text(name)));
+                    table.Append(CreateRow(new Text(content.solution.GetDisplayNameForComponent(component))));
                 }
                 body.Append(table);
                 para = body.AppendChild(new Paragraph());
@@ -193,44 +177,52 @@ namespace PowerDocu.SolutionDocumenter
             ApplyStyleToParagraph("Heading1", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("This solution has the following dependencies"));
-            foreach (string solution in content
+            List<string> dependencies = content
                                         .solution
                                         .Dependencies
-                                        .GroupBy(p => p.Required.Solution)
+                                        .GroupBy(p => p.Required.reqdepSolution)
                                         .Select(g => g.First())
-                                        .OrderBy(t => t.Required.Solution)
-                                        .Select(t => t.Required.Solution)
-                                        .ToList())
+                                        .OrderBy(t => t.Required.reqdepSolution)
+                                        .Select(t => t.Required.reqdepSolution)
+                                        .ToList();
+            if (dependencies.Count > 0)
             {
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Text("Solution: " + solution));
-                ApplyStyleToParagraph("Heading2", para);
-                foreach (SolutionDependency dependency in content.solution.Dependencies.Where(p => p.Required.Solution.Equals(solution)))
+                run.AppendChild(new Text("This solution has the following dependencies: "));
+                foreach (string solution in dependencies)
                 {
-                    Table table = CreateTable();
-                    table.Append(CreateHeaderRow(new Text("Property"), new Text("Requirement"), new Text("Dependency")));
-                    if (!String.IsNullOrEmpty(dependency.Required.DisplayName) || !String.IsNullOrEmpty(dependency.Dependent.DisplayName))
-                        table.Append(CreateRow(new Text("Display Name"), new Text(dependency.Required.DisplayName), new Text(dependency.Dependent.DisplayName)));
-                    if (!String.IsNullOrEmpty(dependency.Required.Type) || !String.IsNullOrEmpty(dependency.Dependent.Type))
-                        table.Append(CreateRow(new Text("Type"), new Text(dependency.Required.Type), new Text(dependency.Dependent.Type)));
-                    if (!String.IsNullOrEmpty(dependency.Required.SchemaName) || !String.IsNullOrEmpty(dependency.Dependent.SchemaName))
-                        table.Append(CreateRow(new Text("Schema Name"), new Text(dependency.Required.SchemaName), new Text(dependency.Dependent.SchemaName)));
-                    if (!String.IsNullOrEmpty(dependency.Required.Solution) || !String.IsNullOrEmpty(dependency.Dependent.Solution))
-                        table.Append(CreateRow(new Text("Solution"), new Text(dependency.Required.Solution), new Text(dependency.Dependent.Solution)));
-                    if (!String.IsNullOrEmpty(dependency.Required.ID) || !String.IsNullOrEmpty(dependency.Dependent.ID))
-                        table.Append(CreateRow(new Text("ID"), new Text(dependency.Required.ID), new Text(dependency.Dependent.ID)));
-                    if (!String.IsNullOrEmpty(dependency.Required.IdSchemaName) || !String.IsNullOrEmpty(dependency.Dependent.IdSchemaName))
-                        table.Append(CreateRow(new Text("ID Schema Name"), new Text(dependency.Required.IdSchemaName), new Text(dependency.Dependent.IdSchemaName)));
-                    if (!String.IsNullOrEmpty(dependency.Required.ParentDisplayName) || !String.IsNullOrEmpty(dependency.Dependent.ParentDisplayName))
-                        table.Append(CreateRow(new Text("Parent Display Name"), new Text(dependency.Required.ParentDisplayName), new Text(dependency.Dependent.ParentDisplayName)));
-                    if (!String.IsNullOrEmpty(dependency.Required.ParentSchemaName) || !String.IsNullOrEmpty(dependency.Dependent.ParentSchemaName))
-                        table.Append(CreateRow(new Text("Parent Schema Name"), new Text(dependency.Required.ParentSchemaName), new Text(dependency.Dependent.ParentSchemaName)));
-                    body.Append(table);
                     para = body.AppendChild(new Paragraph());
                     run = para.AppendChild(new Run());
+                    run.AppendChild(new Text("Solution: " + solution));
+                    ApplyStyleToParagraph("Heading2", para);
+                    foreach (SolutionDependency dependency in content.solution.Dependencies.Where(p => p.Required.reqdepSolution.Equals(solution)))
+                    {
+                        Table table = CreateTable();
+                        table.Append(CreateHeaderRow(new Text("Property"), new Text("Requirement"), new Text("Dependency")));
+                        if (!String.IsNullOrEmpty(dependency.Required.reqdepDisplayName) || !String.IsNullOrEmpty(dependency.Dependent.reqdepDisplayName))
+                            table.Append(CreateRow(new Text("Display Name"), new Text(dependency.Required.reqdepDisplayName), new Text(dependency.Dependent.reqdepDisplayName)));
+                        if (!String.IsNullOrEmpty(dependency.Required.Type) || !String.IsNullOrEmpty(dependency.Dependent.Type))
+                            table.Append(CreateRow(new Text("Type"), new Text(dependency.Required.Type), new Text(dependency.Dependent.Type)));
+                        if (!String.IsNullOrEmpty(dependency.Required.SchemaName) || !String.IsNullOrEmpty(dependency.Dependent.SchemaName))
+                            table.Append(CreateRow(new Text("Schema Name"), new Text(dependency.Required.SchemaName), new Text(dependency.Dependent.SchemaName)));
+                        if (!String.IsNullOrEmpty(dependency.Required.reqdepSolution) || !String.IsNullOrEmpty(dependency.Dependent.reqdepSolution))
+                            table.Append(CreateRow(new Text("Solution"), new Text(dependency.Required.reqdepSolution), new Text(dependency.Dependent.reqdepSolution)));
+                        if (!String.IsNullOrEmpty(dependency.Required.ID) || !String.IsNullOrEmpty(dependency.Dependent.ID))
+                            table.Append(CreateRow(new Text("ID"), new Text(dependency.Required.ID), new Text(dependency.Dependent.ID)));
+                        if (!String.IsNullOrEmpty(dependency.Required.reqdepIdSchemaName) || !String.IsNullOrEmpty(dependency.Dependent.reqdepIdSchemaName))
+                            table.Append(CreateRow(new Text("ID Schema Name"), new Text(dependency.Required.reqdepIdSchemaName), new Text(dependency.Dependent.reqdepIdSchemaName)));
+                        if (!String.IsNullOrEmpty(dependency.Required.reqdepParentDisplayName) || !String.IsNullOrEmpty(dependency.Dependent.reqdepParentDisplayName))
+                            table.Append(CreateRow(new Text("Parent Display Name"), new Text(dependency.Required.reqdepParentDisplayName), new Text(dependency.Dependent.reqdepParentDisplayName)));
+                        if (!String.IsNullOrEmpty(dependency.Required.reqdepParentSchemaName) || !String.IsNullOrEmpty(dependency.Dependent.reqdepParentSchemaName))
+                            table.Append(CreateRow(new Text("Parent Schema Name"), new Text(dependency.Required.reqdepParentSchemaName), new Text(dependency.Dependent.reqdepParentSchemaName)));
+                        body.Append(table);
+                        para = body.AppendChild(new Paragraph());
+                        run = para.AppendChild(new Run());
+                    }
                 }
+            }
+            else
+            {
+                run.AppendChild(new Text("This solution has no dependencies."));
             }
         }
     }
