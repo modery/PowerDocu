@@ -299,7 +299,7 @@ namespace PowerDocu.FlowDocumenter
                 else if (precedingNeighbour != null && !edges.Contains(edgeName))
                 {
                     edgeName = "Edge " + precedingNeighbour.Name + "-" + currentNode.GetName();
-                    Node precNode = rootGraph.GetNode(precedingNeighbour.Name);
+                    Node precNode = rootGraph.GetNode(CharsetHelper.GetSafeName(precedingNeighbour.Name));
                     if (precNode != null)
                     {
                         CreateEdge(currentNode, precNode, node, precedingNeighbour, edgeName, rootGraph);
