@@ -172,7 +172,7 @@ namespace PowerDocu.GUI
 
         private void sizeChanged(object sender, EventArgs e)
         {
-            appStatusTextBox.Size = new Size(ClientSize.Width - 30, ClientSize.Height - 395);
+            appStatusTextBox.Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(405));
         }
 
         private void dpiChanged(object sender, EventArgs e)
