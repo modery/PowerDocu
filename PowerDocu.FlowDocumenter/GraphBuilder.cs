@@ -290,7 +290,6 @@ namespace PowerDocu.FlowDocumenter
                 edgeName = "Edge " + previousNeighbourNode.GetName() + "-" + currentNode.GetName();
                 //get the preceding neighbour, which is on the same hierarchy level
                 ActionNode precedingNeighbour = flow.actions.getPrecedingNeighbour(node);
-
                 //Only connect if there is no preceding node (meaning it's the first node in the current level) or if the 'parent' is the previous node), and if there's no existing edge (to avoid duplicates)
                 if ((precedingNeighbour == null || previousNeighbourNode.GetName().Equals(precedingNeighbour.Name)) && !edges.Contains(edgeName))
                 {
@@ -326,6 +325,7 @@ namespace PowerDocu.FlowDocumenter
                     {
                         SubGraph curClusterParent = (clusterRelationship.ContainsKey(curCluster)) ? clusterRelationship[curCluster] : null;
                         SubGraph prevClusterParent = (clusterRelationship.ContainsKey(prevCluster)) ? clusterRelationship[prevCluster] : null;
+                        //connect a node inside a cluster with a subsequent cluster
                         if (curClusterParent == prevCluster)
                         {
                             edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
@@ -333,7 +333,8 @@ namespace PowerDocu.FlowDocumenter
                         }
                         else
                         {
-                            if (curClusterParent == null || previousNeighbourNode.GetName().Equals(precedingNeighbour?.Name))
+                            //connecting two top level clusters
+                            if (curClusterParent == null || previousNeighbourNode.GetName().Equals(precedingNeighbour?.Name) || curCluster == prevClusterParent)
                             {
                                 //adding an invisible node at the bottom of the previous cluster
                                 Node invisNode = prevCluster.GetOrAddNode("invisnode" + prevCluster + ((prevClusterParent == curCluster) ? currentNode : curCluster));
@@ -362,17 +363,55 @@ namespace PowerDocu.FlowDocumenter
                             }
                             else
                             {
-                                SubGraph curClusterParentParent = clusterRelationship[curClusterParent];
-                                while (curClusterParentParent != prevCluster)
+                                SubGraph prevClusterParentParent = null;
+                                SubGraph curClusterParentParent = null;
+                                if (curClusterParent != null)
+                                    clusterRelationship.TryGetValue(curClusterParent, out curClusterParentParent);
+                                if (prevClusterParent != null)
+                                    clusterRelationship.TryGetValue(prevClusterParent, out prevClusterParentParent);
+                                if (curClusterParentParent != prevClusterParentParent)
                                 {
-                                    curClusterParent = curClusterParentParent;
-                                    curClusterParentParent = clusterRelationship[curClusterParent];
+                                    while (curClusterParentParent != prevCluster)
+                                    {
+                                        curClusterParent = curClusterParentParent;
+                                        curClusterParentParent = clusterRelationship[curClusterParent];
+                                    }
+                                    edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                                    edgeAB.SetLogicalHead(curClusterParent);
                                 }
-                                edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
-                                edgeAB.SetLogicalHead(curClusterParent);
+                                else
+                                {
+                                    //edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
+                                    //edgeAB.SetLogicalHead(curClusterParent);
+                                    //adding an invisible node at the bottom of the previous cluster
+                                    Node invisNode = prevCluster.GetOrAddNode("invisnode" + prevCluster + ((prevClusterParent == curCluster) ? currentNode : curCluster));
+                                    invisNode.SafeSetAttribute("style", "invis", "");
+                                    invisNode.SafeSetAttribute("margin", "0", "");
+                                    invisNode.SafeSetAttribute("width", "0", "");
+                                    invisNode.SafeSetAttribute("height", "0", "");
+                                    invisNode.SafeSetAttribute("shape", "point", "");
+                                    edgeAB = rootGraph.GetOrAddEdge(invisNode, currentNode, edgeName);
+                                    if (prevClusterParent != curCluster)
+                                    {
+                                        edgeAB.SetLogicalHead(curCluster);
+                                    }
+                                    edgeAB.SetLogicalTail(prevCluster);
+                                    //invisible node is at the bottom during the layout process because we connect all other "end nodes" in the preCluster, that is nodes that do not have any neighbour nodes, with it
+                                    foreach (Node clusterNode in prevCluster.Nodes())
+                                    {
+                                        ActionNode clusterActionNode = flow.actions.Find(clusterNode.GetName());
+                                        if (clusterActionNode?.Neighbours.Count + clusterActionNode?.Subactions.Count + clusterActionNode?.Elseactions.Count == 0)
+                                        {
+                                            //creating an invisible edge only if there are no other subsequent nodes (neighbors or subnodes)
+                                            edgeAB = rootGraph.GetOrAddEdge(clusterNode, invisNode, clusterNode + "-" + invisNode);
+                                            edgeAB.SafeSetAttribute("style", "invis", "");
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
+                    //connect two nodes inside a cluster
                     else
                     {
                         edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
@@ -404,16 +443,19 @@ namespace PowerDocu.FlowDocumenter
             }
             else
             {
+                //connect a node with a subsequently following cluster
                 if (curCluster != null)
                 {
                     edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
                     edgeAB.SetLogicalHead(curCluster);
                 }
+                //directly connect two nodes that are not part of a cluster
                 else
                 {
                     edgeAB = rootGraph.GetOrAddEdge(previousNeighbourNode, currentNode, edgeName);
                 }
             }
+            //additional formatting for the edge in case the "run after" property of the action does not include "Succeeded"
             if (precedingNeighbour?.nodeRunAfterConditions?.ContainsKey(currentActionNode) == true)
             {
                 precedingNeighbour.nodeRunAfterConditions.TryGetValue(currentActionNode, out string[] runAfterConditions);
