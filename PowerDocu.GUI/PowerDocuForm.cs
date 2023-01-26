@@ -177,7 +177,6 @@ namespace PowerDocu.GUI
 
         private void dpiChanged(object sender, EventArgs e)
         {
-            //todo currently still having some issues
             this.MinimumSize = new Size(convertToDPISpecific(800), convertToDPISpecific(350));
         }
 
