@@ -79,7 +79,6 @@ namespace PowerDocu.SolutionDocumenter
                 }
                 table.Append(CreateRow(new Text("Localized Names"), localizedNamesTable));
             }
-            //todo implement addresses
             if (content.solution.Publisher.Addresses.Count > 0)
             {
                 Table addressesTable = CreateTable();
@@ -197,7 +196,7 @@ namespace PowerDocu.SolutionDocumenter
                     foreach (SolutionDependency dependency in content.solution.Dependencies.Where(p => p.Required.reqdepSolution.Equals(solution)))
                     {
                         Table table = CreateTable();
-                        table.Append(CreateHeaderRow(new Text("Property"), new Text("Requirement"), new Text("Dependency")));
+                        table.Append(CreateHeaderRow(new Text("Property"), new Text("Required Component"), new Text("Required By")));
                         if (!String.IsNullOrEmpty(dependency.Required.reqdepDisplayName) || !String.IsNullOrEmpty(dependency.Dependent.reqdepDisplayName))
                             table.Append(CreateRow(new Text("Display Name"), new Text(dependency.Required.reqdepDisplayName), new Text(dependency.Dependent.reqdepDisplayName)));
                         if (!String.IsNullOrEmpty(dependency.Required.Type) || !String.IsNullOrEmpty(dependency.Dependent.Type))
