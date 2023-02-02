@@ -16,6 +16,7 @@ namespace PowerDocu.AppDocumenter
         private readonly string mainDocumentFileName, appDetailsFileName, variablesDocumentFileName, dataSourcesFileName, resourcesFileName, controlsFileName;
         private readonly MdDocument mainDocument, appDetailsDocument, variablesDocument, dataSourcesDocument, resourcesDocument, controlsDocument;
         private readonly Dictionary<string, MdDocument> screenDocuments = new Dictionary<string, MdDocument>();
+        private readonly Dictionary<string, MdDocument> datasourcesDocuments = new Dictionary<string, MdDocument>();
         private readonly DocumentSet<MdDocument> set;
         private MdTable metadataTable;
         private readonly int appLogoWidth = 250;
@@ -39,6 +40,11 @@ namespace PowerDocu.AppDocumenter
             appDetailsDocument = set.CreateMdDocument(appDetailsFileName);
             variablesDocument = set.CreateMdDocument(variablesDocumentFileName);
             dataSourcesDocument = set.CreateMdDocument(dataSourcesFileName);
+            //a dedicated document for each datasource
+            foreach (DataSource datasource in content.appDataSources.dataSources.OrderBy(o => o.Name).ToList())
+            {
+                datasourcesDocuments.Add(datasource.Name, set.CreateMdDocument(("datasource " + datasource.Name + " " + content.filename + ".md").Replace(" ", "-")));
+            }
             resourcesDocument = set.CreateMdDocument(resourcesFileName);
             controlsDocument = set.CreateMdDocument(controlsFileName);
             //a dedicated document for each screen
@@ -422,27 +428,37 @@ namespace PowerDocu.AppDocumenter
 
             foreach (DataSource datasource in content.appDataSources.dataSources)
             {
-                dataSourcesDocument.Root.Add(new MdHeading(datasource.Name, 3));
+                dataSourcesDocument.Root.Add(new MdHeading(new MdLinkSpan(datasource.Name, ("datasource " + datasource.Name + " " + content.filename + ".md").Replace(" ", "-")), 3));
+                datasourcesDocuments.TryGetValue(datasource.Name, out MdDocument dataSourceDocument);
+                dataSourceDocument.Root.Add(new MdHeading(datasource.Name, 3));
                 List<MdTableRow> tableRows = new List<MdTableRow>
                 {
                     new MdTableRow("Name", datasource.Name),
                     new MdTableRow("Type", datasource.Type)
                 };
-                dataSourcesDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
                 tableRows = new List<MdTableRow>();
-                dataSourcesDocument.Root.Add(new MdHeading("DataSource Properties", 4));
+                dataSourceDocument.Root.Add(new MdHeading("DataSource Properties", 4));
                 foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
                 {
-                    if (expression.expressionOperands.Count > 1)
+                    if (expression.expressionOperator != "TableDefinition")
                     {
-                        tableRows.Add(new MdTableRow(expression.expressionOperator, new MdRawMarkdownSpan(AddExpressionDetails(new List<Expression> { expression }))));
+                        if (expression.expressionOperands.Count > 1)
+                        {
+                            tableRows.Add(new MdTableRow(expression.expressionOperator, new MdRawMarkdownSpan(AddExpressionDetails(new List<Expression> { expression }))));
+                        }
+                        else
+                        {
+                            tableRows.Add(new MdTableRow(expression.expressionOperator, (expression.expressionOperands.Count > 0) ? expression.expressionOperands[0].ToString() : ""));
+                        }
                     }
                     else
                     {
-                        tableRows.Add(new MdTableRow(expression.expressionOperator, (expression.expressionOperands.Count > 0) ? expression.expressionOperands[0].ToString() : ""));
+                        //todo document the table definition ? probably make it configurable
+                        // removed it for the moment as it resulted in very large files with likely little value
                     }
                 }
-                dataSourcesDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
             }
         }
 
