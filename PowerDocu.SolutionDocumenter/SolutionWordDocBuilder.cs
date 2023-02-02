@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using DocumentFormat.OpenXml.Packaging;
@@ -156,22 +157,29 @@ namespace PowerDocu.SolutionDocumenter
             run.AppendChild(new Text("This solution contains the following components"));
             foreach (string componentType in content.solution.GetComponentTypes())
             {
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Text(componentType));
-                ApplyStyleToParagraph("Heading2", para);
-                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
-                Table table = CreateTable();
-                table.Append(CreateHeaderRow(new Text(componentType)));
-                foreach (SolutionComponent component in components)
+                switch (componentType)
                 {
-                    table.Append(CreateRow(new Text(content.solution.GetDisplayNameForComponent(component))));
+                    case "Role":
+                        renderSecurityRoles();
+                        break;
+                    default:
+                        para = body.AppendChild(new Paragraph());
+                        run = para.AppendChild(new Run());
+                        run.AppendChild(new Text(componentType));
+                        ApplyStyleToParagraph("Heading2", para);
+                        List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
+                        Table table = CreateTable();
+                        table.Append(CreateHeaderRow(new Text(componentType)));
+                        foreach (SolutionComponent component in components)
+                        {
+                            table.Append(CreateRow(new Text(content.solution.GetDisplayNameForComponent(component))));
+                        }
+                        body.Append(table);
+                        para = body.AppendChild(new Paragraph());
+                        run = para.AppendChild(new Run());
+                        break;
                 }
-                body.Append(table);
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
             }
-
             run.AppendChild(new Text("Solution Component Dependencies"));
             ApplyStyleToParagraph("Heading1", para);
             para = body.AppendChild(new Paragraph());
@@ -223,6 +231,83 @@ namespace PowerDocu.SolutionDocumenter
             {
                 run.AppendChild(new Text("This solution has no dependencies."));
             }
+        }
+
+        private void renderSecurityRoles()
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Security Roles"));
+            ApplyStyleToParagraph("Heading2", para);
+            foreach (RoleEntity role in content.solution.Customizations.getRoles())
+            {
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text(role.Name + " (" + role.ID + ")"));
+                ApplyStyleToParagraph("Heading3", para);
+                Table table = CreateTable();
+                table.Append(CreateHeaderRow(new Text("Table"), new Text("Create"), new Text("Read"), new Text("Write"), new Text("Delete"), new Text("Append"), new Text("Append To"), new Text("Assign"), new Text("Share")));
+                foreach (TableAccess tableAccess in role.Tables.OrderBy(o => o.Name))
+                {
+                    TableRow row = CreateRow(new Text(tableAccess.Name),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Create)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Read)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Write)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Delete)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Append)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.AppendTo)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Assign)),
+                                            new Paragraph(new ParagraphProperties(new Justification() { Val = JustificationValues.Center }), getAccessLevelIcon(tableAccess.Share))
+                    );
+                    table.Append(row);
+                }
+                body.Append(table);
+                if (role.miscellaneousPrivileges.Count > 0)
+                {
+                    para = body.AppendChild(new Paragraph());
+                    run = para.AppendChild(new Run());
+                    run.AppendChild(new Text("Miscellaneous Privileges associated with this role:"));
+                    table = CreateTable();
+                    table.Append(CreateHeaderRow(new Text("Miscellaneous Privilege"), new Text("Level")));
+                    foreach (KeyValuePair<string, string> miscPrivilege in role.miscellaneousPrivileges)
+                    {
+                        table.Append(CreateRow(new Text(miscPrivilege.Key), getAccessLevelIcon(miscPrivilege.Value)));
+                    }
+                    body.Append(table);
+                }
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+            }
+        }
+
+        private Drawing getAccessLevelIcon(AccessLevel accessLevel)
+        {
+            string iconFile = AssemblyHelper.GetExecutablePath() + @"Resources\security-role-access-level-";
+            iconFile += accessLevel switch
+            {
+                AccessLevel.Global => "global.png",
+                AccessLevel.Deep => "deep.png",
+                AccessLevel.Local => "local.png",
+                AccessLevel.Basic => "basic.png",
+                _ => "none.png",
+            };
+            using FileStream stream = new FileStream(iconFile, FileMode.Open);
+            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+            imagePart.FeedData(stream);
+            return InsertImage(mainPart.GetIdOfPart(imagePart), 12, 12);
+        }
+
+        private Drawing getAccessLevelIcon(string accessLevel)
+        {
+            AccessLevel level = accessLevel switch
+            {
+                "Global" => AccessLevel.Global,
+                "Deep" => AccessLevel.Deep,
+                "Loca" => AccessLevel.Local,
+                "Basic" => AccessLevel.Basic,
+                _ => AccessLevel.None
+            };
+            return getAccessLevelIcon(level);
         }
     }
 }
