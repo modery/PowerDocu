@@ -149,17 +149,25 @@ namespace PowerDocu.SolutionDocumenter
             solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("This solution contains the following components")));
             foreach (string componentType in content.solution.GetComponentTypes())
             {
-                solutionDoc.Root.Add(new MdHeading(componentType, 3));
-                List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
-                List<MdTableRow> componentTableRows = new List<MdTableRow>();
-                foreach (SolutionComponent component in components)
+                switch (componentType)
                 {
-                    //todo add link to documentation
-                    componentTableRows.Add(new MdTableRow(new MdTextSpan(content.solution.GetDisplayNameForComponent(component))));
-                }
-                if (componentTableRows.Count > 0)
-                {
-                    solutionDoc.Root.Add(new MdTable(new MdTableRow(componentType), componentTableRows));
+                    case "Role":
+                        renderSecurityRoles();
+                        break;
+                    default:
+                        solutionDoc.Root.Add(new MdHeading(componentType, 3));
+                        List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
+                        List<MdTableRow> componentTableRows = new List<MdTableRow>();
+                        foreach (SolutionComponent component in components)
+                        {
+                            //todo add link to documentation
+                            componentTableRows.Add(new MdTableRow(new MdTextSpan(content.solution.GetDisplayNameForComponent(component))));
+                        }
+                        if (componentTableRows.Count > 0)
+                        {
+                            solutionDoc.Root.Add(new MdTable(new MdTableRow(componentType), componentTableRows));
+                        }
+                        break;
                 }
             }
 
@@ -208,6 +216,72 @@ namespace PowerDocu.SolutionDocumenter
             {
                 solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("This solution has no dependencies.")));
             }
+        }
+
+        private void renderSecurityRoles()
+        {
+            solutionDoc.Root.Add(new MdHeading("Security Roles", 3));
+            foreach (RoleEntity role in content.solution.Customizations.getRoles())
+            {
+                solutionDoc.Root.Add(new MdHeading(role.Name + " (" + role.ID + ")", 4));
+                List<MdTableRow> componentTableRows = new List<MdTableRow>();
+                foreach (TableAccess tableAccess in role.Tables.OrderBy(o => o.Name))
+                {
+                    MdTableRow row = new MdTableRow(tableAccess.Name,
+                                           getAccessLevelIcon(tableAccess.Create),
+                                           getAccessLevelIcon(tableAccess.Read),
+                                           getAccessLevelIcon(tableAccess.Write),
+                                           getAccessLevelIcon(tableAccess.Delete),
+                                           getAccessLevelIcon(tableAccess.Append),
+                                           getAccessLevelIcon(tableAccess.AppendTo),
+                                           getAccessLevelIcon(tableAccess.Assign),
+                                           getAccessLevelIcon(tableAccess.Share)
+                    );
+                    componentTableRows.Add(row);
+                }
+                solutionDoc.Root.Add(new MdTable(new MdTableRow("Table", "Create", "Read", "Write", "Delete", "Append", "Append To", "Assign", "Share"), componentTableRows));
+
+                if (role.miscellaneousPrivileges.Count > 0)
+                {
+                    solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("Miscellaneous Privileges associated with this role:")));
+                    List<MdTableRow> miscPrivTableRows = new List<MdTableRow>();
+                    foreach (KeyValuePair<string, string> miscPrivilege in role.miscellaneousPrivileges)
+                    {
+                        miscPrivTableRows.Add(new MdTableRow(miscPrivilege.Key, getAccessLevelIcon(miscPrivilege.Value)));
+                    }
+                    solutionDoc.Root.Add(new MdTable(new MdTableRow("Miscellaneous Privilege", "Level"), miscPrivTableRows));
+                }
+            }
+        }
+
+        private MdImageSpan getAccessLevelIcon(AccessLevel accessLevel)
+        {
+            Directory.CreateDirectory(content.folderPath + "Resources");
+            string iconFile = @"Resources\security-role-access-level-";
+            iconFile += accessLevel switch
+            {
+                AccessLevel.Global => "global.png",
+                AccessLevel.Deep => "deep.png",
+                AccessLevel.Local => "local.png",
+                AccessLevel.Basic => "basic.png",
+                _ => "none.png",
+            };
+            if (!File.Exists(content.folderPath + iconFile))
+                File.Copy(AssemblyHelper.GetExecutablePath() + iconFile, content.folderPath + iconFile);
+            return new MdImageSpan(accessLevel.ToString(), iconFile.Replace(@"\","/"));
+        }
+
+        private MdImageSpan getAccessLevelIcon(string accessLevel)
+        {
+            AccessLevel level = accessLevel switch
+            {
+                "Global" => AccessLevel.Global,
+                "Deep" => AccessLevel.Deep,
+                "Loca" => AccessLevel.Local,
+                "Basic" => AccessLevel.Basic,
+                _ => AccessLevel.None
+            };
+            return getAccessLevelIcon(level);
         }
     }
 }
