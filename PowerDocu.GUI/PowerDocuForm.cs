@@ -43,7 +43,7 @@ namespace PowerDocu.GUI
             }
         }
 
-        private void selectZIPFileButton_Click(object sender, EventArgs e)
+        private void SelectZIPFileButton_Click(object sender, EventArgs e)
         {
             if (openFileToParseDialog.ShowDialog() == DialogResult.OK)
             {
@@ -101,7 +101,7 @@ namespace PowerDocu.GUI
             }
         }
 
-        private void selectWordTemplateButton_Click(object sender, EventArgs e)
+        private void SelectWordTemplateButton_Click(object sender, EventArgs e)
         {
             if (openWordTemplateDialog.ShowDialog() == DialogResult.OK)
             {
@@ -125,7 +125,7 @@ namespace PowerDocu.GUI
             }
         }
 
-        private void newReleaseButton_Click(object sender, EventArgs e)
+        private void NewReleaseButton_Click(object sender, EventArgs e)
         {
             var sInfo = new System.Diagnostics.ProcessStartInfo(PowerDocuReleaseHelper.latestVersionUrl)
             {
@@ -134,13 +134,13 @@ namespace PowerDocu.GUI
             System.Diagnostics.Process.Start(sInfo);
         }
 
-        private async void updateConnectorIconsButton_Click(object sender, EventArgs e)
+        private async void UpdateConnectorIconsButton_Click(object sender, EventArgs e)
         {
             await ConnectorHelper.UpdateConnectorIcons();
             updateConnectorIconsLabel.Text = "Update your existing set of connector icons\n(" + ConnectorHelper.numberOfConnectors() + " connectors, " + ConnectorHelper.numberOfConnectorIcons() + " icons)";
         }
 
-        private void backNextButton_Click(object sender, EventArgs e)
+        private void BackNextButton_Click(object sender, EventArgs e)
         {
             if (sender.Equals(nextLeftPanelButton))
             {
@@ -170,17 +170,17 @@ namespace PowerDocu.GUI
             UpdateNavigation();
         }
 
-        private void sizeChanged(object sender, EventArgs e)
+        private void SizeChangedHandler(object sender, EventArgs e)
         {
             appStatusTextBox.Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(405));
         }
 
-        private void dpiChanged(object sender, EventArgs e)
+        private void DpiChangedHandler(object sender, EventArgs e)
         {
             this.MinimumSize = new Size(convertToDPISpecific(800), convertToDPISpecific(350));
         }
 
-        private void outputFormatComboBox_Changed(object sender, EventArgs e)
+        private void OutputFormatComboBox_Changed(object sender, EventArgs e)
         {
             if (outputFormatComboBox != null && selectWordTemplateButton != null)
             {

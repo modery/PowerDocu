@@ -39,8 +39,8 @@ namespace PowerDocu.GUI
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(convertToDPISpecific(1000), convertToDPISpecific(600));
             this.MinimumSize = new Size(convertToDPISpecific(600), convertToDPISpecific(500));
-            this.SizeChanged += new EventHandler(sizeChanged);
-            this.DpiChanged += new DpiChangedEventHandler(dpiChanged);
+            this.SizeChanged += new EventHandler(SizeChangedHandler);
+            this.DpiChanged += new DpiChangedEventHandler(DpiChangedHandler);
             this.Text = "PowerDocu GUI (" + PowerDocuReleaseHelper.currentVersion.ToString() + ")";
             this.Paint += new PaintEventHandler(PowerDocuForm_Paint);
 
@@ -82,7 +82,7 @@ namespace PowerDocu.GUI
                 Location = new Point(convertToDPISpecific(20), convertToDPISpecific(110)),
                 Enabled = false
             };
-            backLeftPanelButton.Click += new EventHandler(backNextButton_Click);
+            backLeftPanelButton.Click += new EventHandler(BackNextButton_Click);
             leftPanel.Controls.Add(backLeftPanelButton);
             nextLeftPanelButton = new Button()
             {
@@ -92,7 +92,7 @@ namespace PowerDocu.GUI
                 ForeColor = Color.White,
                 Location = new Point(convertToDPISpecific(80), convertToDPISpecific(110)),
             };
-            nextLeftPanelButton.Click += new EventHandler(backNextButton_Click);
+            nextLeftPanelButton.Click += new EventHandler(BackNextButton_Click);
             leftPanel.Controls.Add(nextLeftPanelButton);
             settingsLabel = new Label()
             {
@@ -136,7 +136,7 @@ namespace PowerDocu.GUI
                         OutputFormatHelper.Markdown,
                         OutputFormatHelper.All
                         });
-            outputFormatComboBox.SelectedIndexChanged += new EventHandler(outputFormatComboBox_Changed);
+            outputFormatComboBox.SelectedIndexChanged += new EventHandler(OutputFormatComboBox_Changed);
             outputFormatComboBox.SelectedIndex = 0;
             outputFormatGroup.Controls.Add(outputFormatComboBox);
             outputFormatInfoLabel = new Label()
@@ -157,7 +157,7 @@ namespace PowerDocu.GUI
                 IconFont = IconFont.Auto,
                 ImageAlign = ContentAlignment.MiddleCenter
             };
-            selectWordTemplateButton.Click += new EventHandler(selectWordTemplateButton_Click);
+            selectWordTemplateButton.Click += new EventHandler(SelectWordTemplateButton_Click);
             outputFormatGroup.Controls.Add(selectWordTemplateButton);
             wordTemplateInfoLabel = new Label()
             {
@@ -221,7 +221,7 @@ namespace PowerDocu.GUI
                 IconFont = IconFont.Auto,
                 Visible = true
             };
-            updateConnectorIconsButton.Click += new EventHandler(updateConnectorIconsButton_Click);
+            updateConnectorIconsButton.Click += new EventHandler(UpdateConnectorIconsButton_Click);
             otherOptionsGroup.Controls.Add(updateConnectorIconsButton);
             updateConnectorIconsLabel = new Label()
             {
@@ -243,7 +243,7 @@ namespace PowerDocu.GUI
                 IconFont = IconFont.Auto,
                 Visible = false
             };
-            newReleaseButton.Click += new EventHandler(newReleaseButton_Click);
+            newReleaseButton.Click += new EventHandler(NewReleaseButton_Click);
             otherOptionsGroup.Controls.Add(newReleaseButton);
             newReleaseLabel = new Label()
             {
@@ -275,7 +275,7 @@ namespace PowerDocu.GUI
                 IconFont = IconFont.Auto,
 
             };
-            selectFileToParseButton.Click += new EventHandler(selectZIPFileButton_Click);
+            selectFileToParseButton.Click += new EventHandler(SelectZIPFileButton_Click);
             step2Panel.Controls.Add(selectFileToParseButton);
             fileToParseInfoLabel = new Label()
             {
