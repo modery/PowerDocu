@@ -302,7 +302,7 @@ namespace PowerDocu.FlowDocumenter
                             if (action.Type.Equals("ParseJson") && actionInput.expressionOperator.Equals("schema"))
                             {
                                 operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(actionInput.expressionOperands[0]?.ToString())));
-                                    //new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                //new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
                             }
                             else
                             {
@@ -334,9 +334,13 @@ namespace PowerDocu.FlowDocumenter
                                         {
                                             operandsCell.Append(AddExpressionTable((Expression)actionInput.expressionOperands[0]), new Paragraph());
                                         }
+                                        else if (actionInput.expressionOperands[0]?.GetType() == typeof(List<object>))
+                                        {
+                                            operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(Expression.createStringFromExpressionList((List<object>)actionInput.expressionOperands[0]))));
+                                        }
                                         else
                                         {
-                                            operandsCell.Append(new Paragraph(new Run(new Text(actionInput.expressionOperands[0]?.ToString()))));
+                                            operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(actionInput.expressionOperands[0]?.ToString())));
                                         }
                                     }
                                 }
