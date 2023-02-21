@@ -288,7 +288,9 @@ namespace PowerDocu.FlowDocumenter
                 //TODO provide more details, such as information about subaction, subsequent actions, switch actions, ...
                 if (action.actionExpression != null || !String.IsNullOrEmpty(action.Expression))
                 {
+                    //todo two options here: use a nicer looking table, or use a nicer looking output
                     actionDetailsTable.Append(CreateRow(new Text("Expression"), (action.actionExpression != null) ? AddExpressionTable(action.actionExpression) : new Text(action.Expression)));
+                    //actionDetailsTable.Append(CreateRow(new Text("Expression"), CreateRunWithLinebreaks((action.actionExpression != null) ? action.actionExpression.ToString() : action.Expression)));
                 }
                 if (action.actionInputs.Count > 0 || !String.IsNullOrEmpty(action.Inputs))
                 {
@@ -336,7 +338,23 @@ namespace PowerDocu.FlowDocumenter
                                         }
                                         else if (actionInput.expressionOperands[0]?.GetType() == typeof(List<object>))
                                         {
-                                            operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(Expression.createStringFromExpressionList((List<object>)actionInput.expressionOperands[0]))));
+                                            Table operandsTable = CreateTable();
+                                            foreach(object obj in (List<object>)actionInput.expressionOperands[0]) {
+                                                if(obj.GetType().Equals(typeof(Expression))) {
+                                                    AddExpressionTable((Expression)obj,operandsTable);
+                                                } else  if(obj.GetType().Equals(typeof(List<object>))) {
+                                                    Table innerOperandsTable = CreateTable();
+                                                    foreach(object o in (List<object>)obj) {
+                                                        AddExpressionTable((Expression)o,innerOperandsTable);
+                                                    }
+                                                    operandsCell.Append(innerOperandsTable, new Paragraph());
+                                                }
+                                                else {
+                                                    string s = "";
+                                                }
+                                            }
+                                            operandsCell.Append(operandsTable, new Paragraph());
+                                            //operandsCell.Append(new Paragraph(CreateRunWithLinebreaks(Expression.createStringFromExpressionList((List<object>)actionInput.expressionOperands[0]))));
                                         }
                                         else
                                         {

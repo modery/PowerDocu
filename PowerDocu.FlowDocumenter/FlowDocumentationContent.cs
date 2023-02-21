@@ -172,41 +172,7 @@ namespace PowerDocu.FlowDocumenter
                     if (exp.expressionOperator == "variables")
                     {
                         Dictionary<string, string> variableValueTable = new Dictionary<string, string>();
-                        string vname = "";
-                        string vtype = "";
-                        foreach (Expression expO in exp.expressionOperands)
-                        {
-                            if (expO.expressionOperator == "name")
-                            {
-                                vname = expO.expressionOperands[0].ToString();
-                            }
-                            if (expO.expressionOperator == "type")
-                            {
-                                vtype = expO.expressionOperands[0].ToString();
-                            }
-                            if (expO.expressionOperator == "value")
-                            {
-                                if (expO.expressionOperands.Count == 1)
-                                {
-                                    variableValueTable.Add(expO.expressionOperands[0].ToString(), "");
-                                }
-                                else
-                                {
-                                    foreach (var eop in expO.expressionOperands)
-                                    {
-                                        if (eop.GetType() == typeof(string))
-                                        {
-                                            variableValueTable.Add(eop.ToString(), "");
-                                        }
-                                        else
-                                        {
-                                            variableValueTable.Add(((Expression)eop).expressionOperator,
-                                            (((Expression)eop).expressionOperands.Count > 0) ? ((Expression)eop).expressionOperands[0].ToString() : "");
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        getVariableDetails(exp.expressionOperands, variableValueTable, out string vname, out string vtype);
                         List<ActionNode> referencedInNodes = new List<ActionNode>
                         {
                             node
@@ -257,6 +223,66 @@ namespace PowerDocu.FlowDocumenter
                 }
             }
         }
+
+        private void getVariableDetails(List<object> expressionOperands, Dictionary<string, string> variableValueTable, out string vname, out string vtype)
+        {
+            vname = "";
+            vtype = "";
+            foreach (object obj in expressionOperands)
+            {
+                if (obj.GetType().Equals(typeof(Expression)))
+                {
+                    Expression expO = (Expression)obj;
+                    if (expO.expressionOperator == "name")
+                    {
+                        vname = expO.expressionOperands[0].ToString();
+                    }
+                    if (expO.expressionOperator == "type")
+                    {
+                        vtype = expO.expressionOperands[0].ToString();
+                    }
+                    if (expO.expressionOperator == "value")
+                    {
+                        if (expO.expressionOperands.Count == 1 && !expO.expressionOperands.GetType().Equals(typeof(List<object>)))
+                        {
+                            variableValueTable.Add(expO.expressionOperands[0].ToString(), "");
+                        }
+                        else
+                        {
+                            foreach (var eop in expO.expressionOperands)
+                            {
+                                if (eop.GetType() == typeof(string))
+                                {
+                                    variableValueTable.Add(eop.ToString(), "");
+                                }
+                                else if (eop.GetType() == typeof(Expression))
+                                {
+                                    if (!variableValueTable.ContainsKey(((Expression)eop).expressionOperator))
+                                    {
+                                        variableValueTable.Add(((Expression)eop).expressionOperator,
+                                                                (((Expression)eop).expressionOperands.Count > 0) ? ((Expression)eop).expressionOperands[0].ToString() : "");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Duplicate key: " + ((Expression)eop).expressionOperator);
+                                    }
+                                }
+                                else if (eop.GetType() == typeof(List<object>))
+                                {
+                                    variableValueTable.Add(Expression.createStringFromExpressionList((List<object>)eop), "");
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (obj.GetType().Equals(typeof(List<object>)))
+                {
+                    List<object> topList = (List<object>)obj;
+                    List<object> innerList = (List<object>)topList[0];
+                    getVariableDetails(innerList, variableValueTable, out vname, out vtype);
+                }
+            }
+        }
     }
 
     public class FlowDetails
@@ -275,6 +301,8 @@ namespace PowerDocu.FlowDocumenter
         public FlowActions(FlowEntity flow)
         {
             actionsTable = new Dictionary<string, Dictionary<string, string>>();
+            //todo allow configurable sort order
+            //actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Order).ToList();
             actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
             infoText = $"There are a total of {actionNodesList.Count} actions used in this Flow:";
         }

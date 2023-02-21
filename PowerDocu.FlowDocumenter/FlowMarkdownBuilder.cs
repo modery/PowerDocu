@@ -241,7 +241,6 @@ namespace PowerDocu.FlowDocumenter
                     actionsDoc.Root.Add(new MdHeading("Inputs", 3));
                     if (action.actionInputs.Count > 0)
                     {
-                        tableRows.Add(new MdTableRow("test", "test"));
                         foreach (Expression actionInput in action.actionInputs)
                         {
                             StringBuilder operandsCell = new StringBuilder();
@@ -273,7 +272,22 @@ namespace PowerDocu.FlowDocumenter
                                     {
                                         operandsCell.Append(AddExpressionTable((Expression)actionInput.expressionOperands[0]));
                                     }
-                                    else
+                                    else if (actionInput.expressionOperands[0]?.GetType() == typeof(List<object>)) {
+                                        operandsCell.Append("<table>");
+                                            foreach(object obj in (List<object>)actionInput.expressionOperands[0]) {
+                                                if(obj.GetType().Equals(typeof(Expression))) {
+                                                    operandsCell.Append(AddExpressionTable((Expression)obj,false));
+                                                } else  if(obj.GetType().Equals(typeof(List<object>))) {
+                                                    foreach(object o in (List<object>)obj) {
+                                                        operandsCell.Append(AddExpressionTable((Expression)o,false));
+                                                    }
+                                                }
+                                                else {
+                                                    string s = "";
+                                                }
+                                            }
+                                            operandsCell.Append("</table>");
+                                    }else
                                     {
                                         operandsCell.Append(actionInput.expressionOperands[0]?.ToString());
                                     }
