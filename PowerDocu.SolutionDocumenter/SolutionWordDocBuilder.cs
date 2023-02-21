@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using PowerDocu.Common;
@@ -162,6 +162,9 @@ namespace PowerDocu.SolutionDocumenter
                     case "Role":
                         renderSecurityRoles();
                         break;
+                    case "Entity":
+                        renderEntities();
+                        break;
                     default:
                         para = body.AppendChild(new Paragraph());
                         run = para.AppendChild(new Run());
@@ -230,6 +233,26 @@ namespace PowerDocu.SolutionDocumenter
             else
             {
                 run.AppendChild(new Text("This solution has no dependencies."));
+            }
+        }
+
+        private void renderEntities()
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Tables"));
+            ApplyStyleToParagraph("Heading2", para);
+            foreach (XmlNode entity in content.solution.Customizations.getEntities())
+            {
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run(new Text(entity.SelectSingleNode("Name").Attributes.GetNamedItem("LocalizedName").InnerText + " (" + entity.SelectSingleNode("Name").InnerText + ")")));
+                //run.AppendChild(new Text(entity..Name + " (" + role.ID + ")"));
+                ApplyStyleToParagraph("Heading3", para);
+                Table table = CreateTable();
+                //table.Append(CreateRow(""));
+                //body.Append(table);
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
             }
         }
 

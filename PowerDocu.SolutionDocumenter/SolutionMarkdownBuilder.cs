@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using PowerDocu.Common;
 using Grynwald.MarkdownGenerator;
 
@@ -154,6 +155,9 @@ namespace PowerDocu.SolutionDocumenter
                     case "Role":
                         renderSecurityRoles();
                         break;
+                    case "Entity":
+                        renderEntities();
+                        break;
                     default:
                         solutionDoc.Root.Add(new MdHeading(componentType, 3));
                         List<SolutionComponent> components = content.solution.Components.Where(c => c.Type == componentType).OrderBy(c => c.reqdepDisplayName).ToList();
@@ -254,6 +258,15 @@ namespace PowerDocu.SolutionDocumenter
             }
         }
 
+        private void renderEntities()
+        {
+            solutionDoc.Root.Add(new MdHeading("Tables", 3));
+            foreach (XmlNode entity in content.solution.Customizations.getEntities())
+            {
+                solutionDoc.Root.Add(new MdHeading(entity.SelectSingleNode("Name").Attributes.GetNamedItem("LocalizedName").InnerText + " (" + entity.SelectSingleNode("Name").InnerText + ")", 4));
+            }
+        }
+
         private MdImageSpan getAccessLevelIcon(AccessLevel accessLevel)
         {
             Directory.CreateDirectory(content.folderPath + "Resources");
@@ -268,7 +281,7 @@ namespace PowerDocu.SolutionDocumenter
             };
             if (!File.Exists(content.folderPath + iconFile))
                 File.Copy(AssemblyHelper.GetExecutablePath() + iconFile, content.folderPath + iconFile);
-            return new MdImageSpan(accessLevel.ToString(), iconFile.Replace(@"\","/"));
+            return new MdImageSpan(accessLevel.ToString(), iconFile.Replace(@"\", "/"));
         }
 
         private MdImageSpan getAccessLevelIcon(string accessLevel)
