@@ -53,7 +53,16 @@ namespace PowerDocu.FlowDocumenter
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
             trigger.SetAttribute("color", "green");
-            trigger.SetAttribute("label", CharsetHelper.GetSafeName(flow.trigger.Name));
+            if (!String.IsNullOrEmpty(flow.trigger.Description))
+            {
+                string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
+                html += "<tr><td><FONT POINT-SIZE=\"10\">(" + flow.trigger.Description + ")</FONT></td></tr></table>";
+                trigger.SetAttributeHtml("label", html);
+            }
+            else
+            {
+                trigger.SetAttribute("label", CharsetHelper.GetSafeName(flow.trigger.Name));
+            }
             if (!String.IsNullOrEmpty(flow.trigger.Connector))
             {
                 string connectorIcon = ConnectorHelper.getConnectorIconFile(flow.trigger.Connector);
@@ -63,7 +72,13 @@ namespace PowerDocu.FlowDocumenter
                     string connectorIcon32Path = folderPath + Path.GetFileNameWithoutExtension(connectorIcon) + "32.png";
                     ImageHelper.ConvertImageTo32(connectorIcon, connectorIcon32Path);
                     //path to image is absolute here, as GraphViz wasn't able to render it properly if relative. Will be replaced in the SVG just before the PNG gets generated
-                    trigger.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr></table>");
+                    string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
+                    if (!String.IsNullOrEmpty(flow.trigger.Description))
+                    {
+                        html += "<tr><td></td><td><FONT POINT-SIZE=\"10\">" + flow.trigger.Description + "</FONT></td></tr>";
+                    }
+                    html += "</table>";
+                    trigger.SetAttributeHtml("label", html);
                 }
             }
             addNodesToGraph(rootGraph, rootAction, null, null, showSubactions, true);
@@ -129,7 +144,16 @@ namespace PowerDocu.FlowDocumenter
                 currentNode.SetAttribute("style", "filled");
                 currentNode.SetAttribute("fillcolor", "white");
                 //setting the label here again with the name is required to make the connector icon code below work properly
-                currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
+                if (!String.IsNullOrEmpty(node.Description))
+                {
+                    string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
+                    html += "<tr><td><font point-size=\"10\">" + node.Description + "</font></td></tr></table>";
+                    currentNode.SetAttributeHtml("label", html);
+                }
+                else
+                {
+                    currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
+                }
                 if (!String.IsNullOrEmpty(node.Connection))
                 {
                     string connectorIcon = ConnectorHelper.getConnectorIconFile(node.Connection);
@@ -139,7 +163,13 @@ namespace PowerDocu.FlowDocumenter
                         string connectorIcon32Path = folderPath + Path.GetFileNameWithoutExtension(connectorIcon) + "32.png";
                         ImageHelper.ConvertImageTo32(connectorIcon, connectorIcon32Path);
                         //path to image is absolute here, as GraphViz wasn't able to render it properly if relative. Will be replaced in the SVG just before the PNG gets generated
-                        currentNode.SetAttributeHtml("label", "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr></table>");
+                        string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
+                        if (!String.IsNullOrEmpty(node.Description))
+                        {
+                            html += "<tr><td></td><td><font point-size=\"10\">" + node.Description + "</font></td></tr>";
+                        }
+                        html += "</table>";
+                        currentNode.SetAttributeHtml("label", html);
                     }
                 }
 
