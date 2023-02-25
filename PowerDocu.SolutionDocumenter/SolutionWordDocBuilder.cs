@@ -242,15 +242,39 @@ namespace PowerDocu.SolutionDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Tables"));
             ApplyStyleToParagraph("Heading2", para);
-            foreach (XmlNode entity in content.solution.Customizations.getEntities())
+            foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {
                 para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run(new Text(entity.SelectSingleNode("Name").Attributes.GetNamedItem("LocalizedName").InnerText + " (" + entity.SelectSingleNode("Name").InnerText + ")")));
+                run = para.AppendChild(new Run(new Text(tableEntity.getLocalizedName() + " (" + tableEntity.getName() + ")")));
                 //run.AppendChild(new Text(entity..Name + " (" + role.ID + ")"));
                 ApplyStyleToParagraph("Heading3", para);
                 Table table = CreateTable();
-                //table.Append(CreateRow(""));
-                //body.Append(table);
+                table.Append(CreateRow(new Text("Primary Column"), new Text(tableEntity.getPrimaryColumn())));
+                table.Append(CreateRow(new Text("Description"), new Text(tableEntity.getDescription())));
+                body.Append(table);
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                table = CreateTable();
+                table.Append(CreateHeaderRow(new Text("Display Name"),
+                                             new Text("Name"),
+                                             new Text("Data type"),
+                                             new Text("Managed"),
+                                             new Text("Customizable"),
+                                             new Text("Required"),
+                                             new Text("Searchable")));
+                foreach (ColumnEntity columnEntity in tableEntity.GetColumns())
+                {
+                    string primaryNameColumn = columnEntity.getDisplayMask().Contains("PrimaryName") ? " (Primary name column)" : "";
+                    table.Append(CreateRow(
+                        new Text(columnEntity.getDisplayName() + primaryNameColumn),
+                        new Text(columnEntity.getName()),
+                        new Text(columnEntity.getDataType()),
+                        new Text(columnEntity.isManaged().ToString()),
+                        new Text(columnEntity.isCustomizable().ToString()),
+                        new Text(columnEntity.isRequired().ToString()),
+                        new Text(columnEntity.isSearchable().ToString())));
+                }
+                body.Append(table);
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
             }

@@ -261,9 +261,9 @@ namespace PowerDocu.SolutionDocumenter
         private void renderEntities()
         {
             solutionDoc.Root.Add(new MdHeading("Tables", 3));
-            foreach (XmlNode entity in content.solution.Customizations.getEntities())
+            foreach (TableEntity entity in content.solution.Customizations.getEntities())
             {
-                solutionDoc.Root.Add(new MdHeading(entity.SelectSingleNode("Name").Attributes.GetNamedItem("LocalizedName").InnerText + " (" + entity.SelectSingleNode("Name").InnerText + ")", 4));
+                solutionDoc.Root.Add(new MdHeading(entity.getLocalizedName() + " (" + entity.getName() + ")", 4));
             }
         }
 
