@@ -261,9 +261,29 @@ namespace PowerDocu.SolutionDocumenter
         private void renderEntities()
         {
             solutionDoc.Root.Add(new MdHeading("Tables", 3));
-            foreach (TableEntity entity in content.solution.Customizations.getEntities())
+            foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {
-                solutionDoc.Root.Add(new MdHeading(entity.getLocalizedName() + " (" + entity.getName() + ")", 4));
+                solutionDoc.Root.Add(new MdHeading(tableEntity.getLocalizedName() + " (" + tableEntity.getName() + ")", 4));
+                List<MdTableRow> tableRows = new List<MdTableRow>
+                {
+                    new MdTableRow("Primary Column", tableEntity.getPrimaryColumn()),
+                    new MdTableRow("Description", tableEntity.getDescription())
+                };
+                solutionDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                tableRows = new List<MdTableRow>();
+
+                foreach (ColumnEntity columnEntity in tableEntity.GetColumns())
+                {
+                    string primaryNameColumn = columnEntity.getDisplayMask().Contains("PrimaryName") ? " (Primary name column)" : "";
+                    tableRows.Add(new MdTableRow(columnEntity.getDisplayName() + primaryNameColumn,
+                                                columnEntity.getName(),
+                                                columnEntity.getDataType(),
+                                                columnEntity.isCustomizable().ToString(),
+                                                columnEntity.isRequired().ToString(),
+                                                columnEntity.isSearchable().ToString()
+                                                ));
+                }
+                solutionDoc.Root.Add(new MdTable(new MdTableRow("Display Name", "Name", "Data type", "Customizable", "Required", "Searchable"), tableRows));
             }
         }
 

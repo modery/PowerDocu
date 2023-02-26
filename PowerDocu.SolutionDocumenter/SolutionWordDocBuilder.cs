@@ -258,7 +258,6 @@ namespace PowerDocu.SolutionDocumenter
                 table.Append(CreateHeaderRow(new Text("Display Name"),
                                              new Text("Name"),
                                              new Text("Data type"),
-                                             new Text("Managed"),
                                              new Text("Customizable"),
                                              new Text("Required"),
                                              new Text("Searchable")));
@@ -269,7 +268,6 @@ namespace PowerDocu.SolutionDocumenter
                         new Text(columnEntity.getDisplayName() + primaryNameColumn),
                         new Text(columnEntity.getName()),
                         new Text(columnEntity.getDataType()),
-                        new Text(columnEntity.isManaged().ToString()),
                         new Text(columnEntity.isCustomizable().ToString()),
                         new Text(columnEntity.isRequired().ToString()),
                         new Text(columnEntity.isSearchable().ToString())));
