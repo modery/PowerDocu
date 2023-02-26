@@ -62,12 +62,12 @@ namespace PowerDocu.GUI
             step1Panel = new Panel()
             {
                 Location = new Point(leftPanel.Width, 0),
-                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(380))
+                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(410))
             };
             step2Panel = new Panel()
             {
                 Location = new Point(leftPanel.Width, 0),
-                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(380)),
+                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(410)),
                 Visible = false
             };
             Controls.Add(leftPanel);
@@ -326,8 +326,8 @@ namespace PowerDocu.GUI
             //status box
             appStatusTextBox = new TextBox
             {
-                Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(405)),
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(395)),
+                Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(435)),
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(425)),
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true
