@@ -67,6 +67,7 @@ namespace PowerDocu.GUI
                                 outputFormatComboBox.SelectedItem.ToString(),
                                 documentChangesOnlyRadioButton.Checked,
                                 documentDefaultsCheckBox.Checked,
+                                flowActionSortOrderComboBox.SelectedItem.ToString(),
                                 (openWordTemplateDialog.FileName != "")
                                     ? openWordTemplateDialog.FileName
                                     : null

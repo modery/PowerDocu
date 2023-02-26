@@ -7,7 +7,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string wordTemplate = null)
+        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -24,7 +24,12 @@ namespace PowerDocu.FlowDocumenter
                     GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
-                    FlowDocumentationContent content = new FlowDocumentationContent(flow, path);
+                    FlowActionSortOrder sortOrder = flowActionSortOrder switch {
+                        "By order of appearance" => FlowActionSortOrder.SortByOrder,
+                        "By name" => FlowActionSortOrder.SortByName,
+                        _ => FlowActionSortOrder.SortByName
+                    };
+                    FlowDocumentationContent content = new FlowDocumentationContent(flow, path, sortOrder);
                     if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                     {
                         NotificationHelper.SendNotification("Creating Word documentation");

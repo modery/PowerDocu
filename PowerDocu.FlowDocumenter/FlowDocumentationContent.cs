@@ -16,7 +16,7 @@ namespace PowerDocu.FlowDocumenter
         public FlowDetails details;
         public FlowActions actions;
 
-        public FlowDocumentationContent(FlowEntity flow, string path)
+        public FlowDocumentationContent(FlowEntity flow, string path, FlowActionSortOrder sortOrder = FlowActionSortOrder.SortByName)
         {
             NotificationHelper.SendNotification("Preparing documentation content for " + flow.Name);
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc - " + flow.Name + @"\");
@@ -27,8 +27,14 @@ namespace PowerDocu.FlowDocumenter
             trigger = new FlowTrigger(flow);
             variables = new FlowVariables(flow);
             details = new FlowDetails();
-            actions = new FlowActions(flow);
+            actions = new FlowActions(flow, sortOrder);
         }
+    }
+
+    public enum FlowActionSortOrder
+    {
+        SortByOrder,
+        SortByName
     }
 
     public class FlowMetadata
@@ -298,12 +304,17 @@ namespace PowerDocu.FlowDocumenter
         public string infoText = "";
         public Dictionary<string, Dictionary<string, string>> actionsTable;
         public List<ActionNode> actionNodesList;
-        public FlowActions(FlowEntity flow)
+        public FlowActions(FlowEntity flow, FlowActionSortOrder sortOrder)
         {
             actionsTable = new Dictionary<string, Dictionary<string, string>>();
-            //todo allow configurable sort order
-            //actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Order).ToList();
-            actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
+            if (sortOrder == FlowActionSortOrder.SortByOrder)
+            {
+                actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Order).ToList();
+            }
+            if (sortOrder == FlowActionSortOrder.SortByName)
+            {
+                actionNodesList = flow.actions.ActionNodes.OrderBy(o => o.Name).ToList();
+            }
             infoText = $"There are a total of {actionNodesList.Count} actions used in this Flow:";
         }
     }

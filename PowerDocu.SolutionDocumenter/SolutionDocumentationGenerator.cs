@@ -9,7 +9,7 @@ namespace PowerDocu.SolutionDocumenter
 {
     public static class SolutionDocumentationGenerator
     {
-        public static void GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string wordTemplate = null)
+        public static void GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string flowActionSortOrder, string wordTemplate = null)
         {
             if (File.Exists(filePath))
             {
@@ -17,6 +17,7 @@ namespace PowerDocu.SolutionDocumenter
                 List<FlowEntity> flows = FlowDocumentationGenerator.GenerateDocumentation(
                     filePath,
                     fileFormat,
+                    flowActionSortOrder,
                     wordTemplate
                 );
                 List<AppEntity> apps = AppDocumentationGenerator.GenerateDocumentation(

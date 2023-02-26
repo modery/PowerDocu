@@ -105,7 +105,7 @@ namespace PowerDocu.GUI
             {
                 Location = new Point(convertToDPISpecific(40), convertToDPISpecific(79)),
                 Text = "Generate Documentation",
-                 Height = convertToDPISpecific(20)
+                Height = convertToDPISpecific(20)
             };
             leftPanel.Controls.Add(documentLabel);
             UpdateNavigation();
@@ -174,11 +174,12 @@ namespace PowerDocu.GUI
                 Text = "Documentation Options",
                 Padding = new Padding(10),
                 Location = new Point(convertToDPISpecific(15), outputFormatGroup.Height + convertToDPISpecific(25)),
-                Size = new System.Drawing.Size(convertToDPISpecific(400), convertToDPISpecific(105)),
+                Size = new System.Drawing.Size(convertToDPISpecific(400), convertToDPISpecific(145)),
                 AutoSize = false
             };
             step1Panel.Controls.Add(documentationOptionsGroup);
-            documentChangesOnlyRadioButton =  new RadioButton() {
+            documentChangesOnlyRadioButton = new RadioButton()
+            {
                 TextAlign = ContentAlignment.MiddleLeft,
                 Text = "Canvas Apps: Document changes only",
                 Checked = true,
@@ -186,11 +187,12 @@ namespace PowerDocu.GUI
                 Location = new Point(convertToDPISpecific(15), convertToDPISpecific(15))
             };
             documentationOptionsGroup.Controls.Add(documentChangesOnlyRadioButton);
-             documentEverythingRadioButton =  new RadioButton() {
+            documentEverythingRadioButton = new RadioButton()
+            {
                 TextAlign = ContentAlignment.MiddleLeft,
                 Text = "Canvas Apps: Document all properties",
                 Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
-                Location = new Point(convertToDPISpecific(15), 10+documentChangesOnlyRadioButton.Height)
+                Location = new Point(convertToDPISpecific(15), 10 + documentChangesOnlyRadioButton.Height)
             };
             documentationOptionsGroup.Controls.Add(documentEverythingRadioButton);
             documentDefaultsCheckBox = new CheckBox()
@@ -202,6 +204,24 @@ namespace PowerDocu.GUI
                 Location = new Point(convertToDPISpecific(15), documentEverythingRadioButton.Location.Y + documentEverythingRadioButton.Height)
             };
             documentationOptionsGroup.Controls.Add(documentDefaultsCheckBox);
+            flowActionSortOrderInfoLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(15), documentDefaultsCheckBox.Location.Y + documentDefaultsCheckBox.Height + convertToDPISpecific(5)),
+                Text = "Sort Flow Actions",
+                Width = convertToDPISpecific(100),
+                Height = convertToDPISpecific(30)
+            };
+            documentationOptionsGroup.Controls.Add(flowActionSortOrderInfoLabel);
+            flowActionSortOrderComboBox = new ComboBox()
+            {
+                Location = new Point(convertToDPISpecific(30) + flowActionSortOrderInfoLabel.Width, flowActionSortOrderInfoLabel.Location.Y - convertToDPISpecific(5)),
+                Size = new System.Drawing.Size(convertToDPISpecific(150), convertToDPISpecific(21)),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            flowActionSortOrderComboBox.Items.AddRange(new object[] { "By name", "By order of appearance" });
+            flowActionSortOrderComboBox.SelectedIndex = 0;
+            documentationOptionsGroup.Controls.Add(flowActionSortOrderComboBox);
+
             otherOptionsGroup = new GroupBox()
             {
                 Text = "Other Options",
@@ -335,13 +355,13 @@ namespace PowerDocu.GUI
         private IconButton selectFileToParseButton, selectWordTemplateButton, newReleaseButton, updateConnectorIconsButton;
         private OpenFileDialog openFileToParseDialog, openWordTemplateDialog;
         private TextBox appStatusTextBox;
-        private ComboBox outputFormatComboBox;
+        private ComboBox outputFormatComboBox, flowActionSortOrderComboBox;
         private GroupBox outputFormatGroup, documentationOptionsGroup, otherOptionsGroup;
         private CheckBox documentDefaultsCheckBox;
         private RadioButton documentChangesOnlyRadioButton, documentEverythingRadioButton;
         private Panel leftPanel, step1Panel, step2Panel;
         private Button nextLeftPanelButton, backLeftPanelButton;
-        private Label wordTemplateInfoLabel, fileToParseInfoLabel, outputFormatInfoLabel, settingsLabel, documentLabel, newReleaseLabel, updateConnectorIconsLabel, settingsTitleLabel, settingsDetailsLabel;
+        private Label wordTemplateInfoLabel, fileToParseInfoLabel, outputFormatInfoLabel, flowActionSortOrderInfoLabel, settingsLabel, documentLabel, newReleaseLabel, updateConnectorIconsLabel, settingsTitleLabel, settingsDetailsLabel;
 
         #endregion
     }
