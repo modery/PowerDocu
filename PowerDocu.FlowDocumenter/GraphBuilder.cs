@@ -56,7 +56,7 @@ namespace PowerDocu.FlowDocumenter
             if (!String.IsNullOrEmpty(flow.trigger.Description))
             {
                 string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
-                html += "<tr><td><FONT POINT-SIZE=\"10\">(" + flow.trigger.Description + ")</FONT></td></tr></table>";
+                html += "<tr><td><FONT POINT-SIZE=\"10\">(" + System.Web.HttpUtility.HtmlEncode(flow.trigger.Description) + ")</FONT></td></tr></table>";
                 trigger.SetAttributeHtml("label", html);
             }
             else
@@ -75,7 +75,7 @@ namespace PowerDocu.FlowDocumenter
                     string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
                     if (!String.IsNullOrEmpty(flow.trigger.Description))
                     {
-                        html += "<tr><td></td><td><FONT POINT-SIZE=\"10\">" + flow.trigger.Description + "</FONT></td></tr>";
+                        html += "<tr><td></td><td><FONT POINT-SIZE=\"10\">" + System.Web.HttpUtility.HtmlEncode(flow.trigger.Description) + "</FONT></td></tr>";
                     }
                     html += "</table>";
                     trigger.SetAttributeHtml("label", html);
@@ -147,7 +147,7 @@ namespace PowerDocu.FlowDocumenter
                 if (!String.IsNullOrEmpty(node.Description))
                 {
                     string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
-                    html += "<tr><td><font point-size=\"10\">" + node.Description + "</font></td></tr></table>";
+                    html += "<tr><td><font point-size=\"10\">" + System.Web.HttpUtility.HtmlEncode(node.Description) + "</font></td></tr></table>";
                     currentNode.SetAttributeHtml("label", html);
                 }
                 else
@@ -166,7 +166,7 @@ namespace PowerDocu.FlowDocumenter
                         string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
                         if (!String.IsNullOrEmpty(node.Description))
                         {
-                            html += "<tr><td></td><td><font point-size=\"10\">" + node.Description + "</font></td></tr>";
+                            html += "<tr><td></td><td><font point-size=\"10\">" + System.Web.HttpUtility.HtmlEncode(node.Description) + "</font></td></tr>";
                         }
                         html += "</table>";
                         currentNode.SetAttributeHtml("label", html);
