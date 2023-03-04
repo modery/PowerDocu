@@ -52,6 +52,7 @@ The documentation for a solution includes
 
 1. Generated documentation for each app inside the solution
 2. Generated documentation for each Flow inside the solution
+3. Details of the solution itself, including a list of all components inside and documented Dataverse tables
 
 
 > **_NOTE:_** If you find any bugs or other issues, please log an **[Issue](https://github.com/modery/PowerDocu/issues)** in this GitHub project. For any improvement recommendations and suggestions, please open a **[Discussion](https://github.com/modery/PowerDocu/discussions)**. Most importantly, if you want to contribute to this project's code, please fork this repository and submit appropriate Pull Requests. **Any kind of contribution is more than welcome!**
@@ -63,6 +64,11 @@ Please refer to [Installation & Usage](installation.md) for information on how t
 ## How does the generated documentation look like?
 
 Please have a look at the [examples](examples/examples.md) provided.
+
+## What else are you planning to include in PowerDocu?
+
+Please have a look at the [roadmap](roadmap.md) for PowerDocu.
+
 
 ## How can I help to improve PowerDocu?
 
