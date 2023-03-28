@@ -82,3 +82,4 @@ If you can think of ways to improve it, here are some things that you can do:
 
 - **PowerApps-docstring** is a console based, pipeline ready application that automatically generates user and technical documentation for PowerApps: https://github.com/sebastian-muthwill/powerapps-docstring
 - **FlowToVisio**, a tool to create Visio representations of your Cloud Flows: https://github.com/LinkeD365/FlowToVisio
+- **Power Apps Helper** is a VSCode extension that allows you to generate a solution dependency diagram for your whole environment: https://never-stop-learning.de/analyse-dataverse-solution-dependencies/
