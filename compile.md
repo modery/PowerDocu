@@ -13,24 +13,24 @@ To compile PowerDocu, the following prerequisites need to be installed on your W
 The following can be executed in a Command Prompt, PowerShell window, VSCode Terminal, and others:
 Run the following command to get the latest version of the PowerDocu source code into a subfolder called "PowerDocu" inside the current directory
 
-'''
+```
 git clone https://github.com/modery/PowerDocu
-'''
+```
 
 ![GIT Clone](Images/git-1-clone.png)
 
 Navigate into the PowerDocu folder
 
-'''
+```
 cd PowerDocu
-'''
+```
 
 Besides the PowerDocu code, you also need to get the PowerDocu.Common code which is inside a submodule. Do so by running these two commands:
 
-'''
+```
 git submodule init
 git submodule update
-'''
+```
 
 ![GIT Submodule Init](Images/git-2-submodule-init.png)
 
