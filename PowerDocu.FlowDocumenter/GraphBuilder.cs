@@ -49,10 +49,12 @@ namespace PowerDocu.FlowDocumenter
             Node.IntroduceAttribute(rootGraph, "style", "");
             Node.IntroduceAttribute(rootGraph, "fillcolor", "");
             Node.IntroduceAttribute(rootGraph, "label", "");
-            ActionNode rootAction = flow.actions.getRootNode();
+            List<ActionNode> rootActions = flow.actions.getRootNodes();
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
-            trigger.SetAttribute("color", "green");
+            trigger.SetAttribute("color", GraphColours.GetColourForAction("Trigger"));
+            trigger.SetAttribute("fillcolor", GraphColours.GetFillColourForAction("Trigger"));
+            trigger.SetAttribute("style", "filled");
             if (!String.IsNullOrEmpty(flow.trigger.Description))
             {
                 string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
@@ -81,9 +83,12 @@ namespace PowerDocu.FlowDocumenter
                     trigger.SetAttributeHtml("label", html);
                 }
             }
-            addNodesToGraph(rootGraph, rootAction, null, null, showSubactions, true);
-            nodesInGraph = new List<string>();
-            addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
+            foreach (ActionNode rootAction in rootActions)
+            {
+                addNodesToGraph(rootGraph, rootAction, null, null, showSubactions, true);
+                nodesInGraph = new List<string>();
+                addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
+            }
             rootGraph.ComputeLayout();
 
             NotificationHelper.SendNotification("  - Created Graph " + folderPath + generateImageFiles(rootGraph, showSubactions) + ".png");
@@ -140,9 +145,9 @@ namespace PowerDocu.FlowDocumenter
                 //adding the current item as a new node
                 Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
                 currentNode.SetAttribute("shape", "record");
-                currentNode.SetAttribute("color", "blue");
+                currentNode.SetAttribute("color", GraphColours.GetColourForAction(node.Type));
                 currentNode.SetAttribute("style", "filled");
-                currentNode.SetAttribute("fillcolor", "white");
+                currentNode.SetAttribute("fillcolor", GraphColours.GetFillColourForAction(node.Type));
                 //setting the label here again with the name is required to make the connector icon code below work properly
                 if (!String.IsNullOrEmpty(node.Description))
                 {
@@ -202,7 +207,7 @@ namespace PowerDocu.FlowDocumenter
                         }
                     }
                     cluster.SafeSetAttribute("style", "filled", "");
-                    cluster.SafeSetAttribute("fillcolor", "grey90", "");
+                    cluster.SafeSetAttribute("fillcolor", GraphColours.GetFillColourForAction("Cluster"), "");
                     cluster.AddExisting(currentNode);
                     if (!nodeClusterRelationship.ContainsKey(currentNode))
                         nodeClusterRelationship.Add(currentNode, cluster);
@@ -218,7 +223,8 @@ namespace PowerDocu.FlowDocumenter
                                 if (!clusterRelationship.ContainsKey(yesCluster))
                                     clusterRelationship.Add(yesCluster, cluster);
                                 yesCluster.SafeSetAttribute("style", "filled", "");
-                                yesCluster.SafeSetAttribute("fillcolor", "lightgreen", "");
+                                yesCluster.SafeSetAttribute("fillcolor", GraphColours.GetFillColourForAction("YesCluster"), "");
+                                yesCluster.SafeSetAttribute("color", GraphColours.GetColourForAction("YesCluster"), "");
                                 addNodesToGraph(rootGraph, subaction, parentCluster, yesCluster, showSubactions, false);
                             }
                             //todo if there are no elseactions, there is no cluster and it doesn't get coloured. But of we add it, the CoE flows throw errors
@@ -246,7 +252,8 @@ namespace PowerDocu.FlowDocumenter
                             if (!clusterRelationship.ContainsKey(noCluster))
                                 clusterRelationship.Add(noCluster, cluster);
                             noCluster.SafeSetAttribute("style", "filled", "");
-                            noCluster.SafeSetAttribute("fillcolor", "lightcoral", "");
+                            noCluster.SafeSetAttribute("fillcolor", GraphColours.GetFillColourForAction("NoCluster"), "");
+                            noCluster.SafeSetAttribute("color", GraphColours.GetColourForAction("NoCluster"), "");
                             addNodesToGraph(rootGraph, subaction, parentCluster, noCluster, showSubactions, false);
                         }
                     }
@@ -318,23 +325,26 @@ namespace PowerDocu.FlowDocumenter
 
                 //start connecting the nodes
                 edgeName = "Edge " + previousNeighbourNode.GetName() + "-" + currentNode.GetName();
-                //get the preceding neighbour, which is on the same hierarchy level
-                ActionNode precedingNeighbour = flow.actions.getPrecedingNeighbour(node);
+                //get the preceding neighbours 
+                List<ActionNode> precedingNeighbours = flow.actions.getPrecedingNeighbours(node);
                 //Only connect if there is no preceding node (meaning it's the first node in the current level) or if the 'parent' is the previous node), and if there's no existing edge (to avoid duplicates)
-                if ((precedingNeighbour == null || previousNeighbourNode.GetName().Equals(precedingNeighbour.Name)) && !edges.Contains(edgeName))
+                if ((precedingNeighbours.Count == 0 || (precedingNeighbours.Count == 1 && precedingNeighbours.Find(o => o.Name.Equals(previousNeighbourNode.GetName())) != null)) && !edges.Contains(edgeName))
                 {
+                    ActionNode precedingNeighbour = precedingNeighbours.Count > 0 ? precedingNeighbours.Find(o => o.Name.Equals(previousNeighbourNode.GetName())) : null;
                     CreateEdge(currentNode, previousNeighbourNode, node, precedingNeighbour, edgeName, rootGraph);
                 }
-                else if (precedingNeighbour != null && !edges.Contains(edgeName))
+                else if (precedingNeighbours.Count > 0 && !edges.Contains(edgeName))
                 {
-                    edgeName = "Edge " + precedingNeighbour.Name + "-" + currentNode.GetName();
-                    Node precNode = rootGraph.GetNode(CharsetHelper.GetSafeName(precedingNeighbour.Name));
-                    if (precNode != null)
+                    foreach (ActionNode precedingNeighbour in precedingNeighbours)
                     {
-                        CreateEdge(currentNode, precNode, node, precedingNeighbour, edgeName, rootGraph);
+                        edgeName = "Edge " + precedingNeighbour.Name + "-" + currentNode.GetName();
+                        Node precNode = rootGraph.GetNode(CharsetHelper.GetSafeName(precedingNeighbour.Name));
+                        if (precNode != null)
+                        {
+                            CreateEdge(currentNode, precNode, node, precedingNeighbour, edgeName, rootGraph);
+                        }
                     }
                 }
-
                 foreach (ActionNode neighbour in node.Neighbours)
                 {
                     addEdgesToGraph(rootGraph, neighbour, currentNode, isTopLevel ? null : cluster, currentCluster, showSubactions, isTopLevel);
@@ -496,6 +506,84 @@ namespace PowerDocu.FlowDocumenter
                 }
             }
             edges.Add(edgeName);
+        }
+    }
+
+    public static class GraphColours
+    {
+        public static string ControlDarkColour = "#484f58";
+        public static string ControlDarkFillColour = "#dedfe0";
+        public static string ControlLightColour = "#486991";
+        public static string ControlLightFillColour = "#e4e9ef";
+        public static string ScopeColour = "#8c3900";
+        public static string ScopeFillColour = "#eee1d9";
+        public static string TerminateColour = "#f41700";
+        public static string TerminateFillColour = "#fddcd9";
+        public static string DataOperationColour = "#8c6cff";
+        public static string DataOperationFillColour = "#eee9ff";
+        public static string TriggerColour = "#0077ff";
+        public static string TriggerFillColour = "#d9ebff";
+        public static string DataverseColour = "#088142";
+        public static string DataverseFillColour = "#daece3";
+        public static string VariableColour = "#770bd6";
+        public static string VariableFillColour = "#ebdbf9";
+        public static string YesClusterFillColour = "#88da8d";//actual in studio: "#edf9ee";
+        public static string YesClusterColour = "#88da8d";
+        public static string NoClusterFillColour = "#fb8981";//actual in studio: "#feedec";
+        public static string NoClusterColour = "#fb8981";
+
+        //TODO other types to add
+        /*
+        Response 
+        Query         
+        Workflow 
+        OpenApiConnectionWebhook 
+        Wait
+        */
+        public static string GetColourForAction(string actionType)
+        {
+            return actionType switch
+            {
+                "Trigger" or "Expression" => TriggerColour,
+                "Compose" or "ParseJson" or "Select" or "Switch" or "Table" => DataOperationColour,
+                "If" or "Switch" => ControlDarkColour,
+                "Foreach" or "Until" => ControlDarkColour,
+                "Scope" => ScopeColour,
+                "Terminate" => TerminateColour,
+                "OpenApiConnection" => DataverseColour,
+                "SetVariable" or "AppendToArrayVariable" or "InitializeVariable" or "IncrementVariable" or "AppendToStringVariable" => VariableColour,
+                "Cluster" => "grey90",
+                "YesCluster" => YesClusterColour, //previously "lightgreen"
+                "NoCluster" => NoClusterColour, //previously "lightcoral"
+                "ApiConnection" => "blue", //todo this would require some additional checks which colour to use. For example, office365, msnweather, sharepoint, .... (property Connection of the ActionNode)
+                _ => "blue",
+            };
+        }
+
+        public static string GetFillColourForAction(string actionType)
+        {
+            string colour = actionType switch
+            {
+                "Trigger" or "Expression" => TriggerFillColour,
+                "Compose" or "ParseJson" or "Select" or "Switch" or "Table" => DataOperationFillColour,
+                "If" or "Switch" => ControlDarkFillColour,
+                "Foreach" or "Until" => ControlDarkFillColour,
+                "Scope" => ScopeFillColour,
+                "Terminate" => TerminateFillColour,
+                "OpenApiConnection" => DataverseFillColour,
+                "SetVariable" or "AppendToArrayVariable" or "InitializeVariable" or "IncrementVariable" or "AppendToStringVariable" => VariableFillColour,
+                "Cluster" => "#ffffff", //previously "grey90"
+                "YesCluster" => YesClusterFillColour, //previously "lightgreen"
+                "NoCluster" => NoClusterFillColour, //previously "lightcoral"
+                "ApiConnection" => "#ffffff", //todo this would require some additional checks which colour to use. For example, office365, msnweather, sharepoint, .... (property Connection of the ActionNode)
+                _ => "white",
+            };
+            //todo left in for debugging purposes
+            if (colour == "white")
+            {
+                Console.WriteLine(actionType);
+            }
+            return colour;
         }
     }
 }
