@@ -15,7 +15,7 @@
     </Content>
   </ItemGroup>
   <PropertyGroup>
-    <Version>1.2.3</Version>
+    <Version>1.2.4</Version>
     <Copyright>Rene Modery</Copyright>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
