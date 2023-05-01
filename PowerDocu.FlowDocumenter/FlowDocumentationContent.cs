@@ -270,7 +270,7 @@ namespace PowerDocu.FlowDocumenter
                                     }
                                     else
                                     {
-                                        Console.WriteLine("Duplicate key: " + ((Expression)eop).expressionOperator);
+                                        //Console.WriteLine("Duplicate key: " + ((Expression)eop).expressionOperator);
                                     }
                                 }
                                 else if (eop.GetType() == typeof(List<object>))
