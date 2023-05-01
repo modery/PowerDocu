@@ -208,6 +208,7 @@ namespace PowerDocu.FlowDocumenter
                     }
                     cluster.SafeSetAttribute("style", "filled", "");
                     cluster.SafeSetAttribute("fillcolor", GraphColours.GetFillColourForAction("Cluster"), "");
+                    cluster.SafeSetAttribute("color", GraphColours.GetColourForAction("Cluster"), "");
                     cluster.AddExisting(currentNode);
                     if (!nodeClusterRelationship.ContainsKey(currentNode))
                         nodeClusterRelationship.Add(currentNode, cluster);
@@ -531,6 +532,7 @@ namespace PowerDocu.FlowDocumenter
         public static string YesClusterColour = "#88da8d";
         public static string NoClusterFillColour = "#fb8981";//actual in studio: "#feedec";
         public static string NoClusterColour = "#fb8981";
+        public static string ClusterColour = "#000090";
 
         //TODO other types to add
         /*
@@ -552,7 +554,7 @@ namespace PowerDocu.FlowDocumenter
                 "Terminate" => TerminateColour,
                 "OpenApiConnection" => DataverseColour,
                 "SetVariable" or "AppendToArrayVariable" or "InitializeVariable" or "IncrementVariable" or "AppendToStringVariable" => VariableColour,
-                "Cluster" => "grey90",
+                "Cluster" => ClusterColour,
                 "YesCluster" => YesClusterColour, //previously "lightgreen"
                 "NoCluster" => NoClusterColour, //previously "lightcoral"
                 "ApiConnection" => "blue", //todo this would require some additional checks which colour to use. For example, office365, msnweather, sharepoint, .... (property Connection of the ActionNode)
@@ -579,10 +581,10 @@ namespace PowerDocu.FlowDocumenter
                 _ => "white",
             };
             //todo left in for debugging purposes
-            if (colour == "white")
+            /*if (colour == "white")
             {
                 Console.WriteLine(actionType);
-            }
+            }*/
             return colour;
         }
     }
