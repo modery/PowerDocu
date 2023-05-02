@@ -49,6 +49,7 @@ namespace PowerDocu.FlowDocumenter
             Node.IntroduceAttribute(rootGraph, "style", "");
             Node.IntroduceAttribute(rootGraph, "fillcolor", "");
             Node.IntroduceAttribute(rootGraph, "label", "");
+            Edge.IntroduceAttribute(rootGraph, "label", "");
             List<ActionNode> rootActions = flow.actions.getRootNodes();
 
             Node trigger = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(flow.trigger.Name));
@@ -332,7 +333,12 @@ namespace PowerDocu.FlowDocumenter
                 if ((precedingNeighbours.Count == 0 || (precedingNeighbours.Count == 1 && precedingNeighbours.Find(o => o.Name.Equals(previousNeighbourNode.GetName())) != null)) && !edges.Contains(edgeName))
                 {
                     ActionNode precedingNeighbour = precedingNeighbours.Count > 0 ? precedingNeighbours.Find(o => o.Name.Equals(previousNeighbourNode.GetName())) : null;
-                    CreateEdge(currentNode, previousNeighbourNode, node, precedingNeighbour, edgeName, rootGraph);
+                    string edgeLabel = null;
+                    if(node.parent?.Type.Equals("Switch") == true && node.parent.Name.Equals(previousNeighbourNode.GetName()))
+                    {
+                        node.parent.switchRelationship.TryGetValue(node, out edgeLabel);
+                    }
+                    CreateEdge(currentNode, previousNeighbourNode, node, precedingNeighbour, edgeName, rootGraph, edgeLabel);
                 }
                 else if (precedingNeighbours.Count > 0 && !edges.Contains(edgeName))
                 {
@@ -353,7 +359,7 @@ namespace PowerDocu.FlowDocumenter
             }
         }
 
-        private void CreateEdge(Node currentNode, Node previousNeighbourNode, ActionNode currentActionNode, ActionNode precedingNeighbour, string edgeName, RootGraph rootGraph)
+        private void CreateEdge(Node currentNode, Node previousNeighbourNode, ActionNode currentActionNode, ActionNode precedingNeighbour, string edgeName, RootGraph rootGraph, string edgeLabel = null)
         {
             Edge edgeAB = null;
             SubGraph prevCluster = (nodeClusterRelationship.ContainsKey(previousNeighbourNode)) ? nodeClusterRelationship[previousNeighbourNode] : null;
@@ -505,6 +511,9 @@ namespace PowerDocu.FlowDocumenter
                     edgeAB.SafeSetAttribute("style", "dotted", "");
                     edgeAB.SafeSetAttribute("color", "red", "");
                 }
+            }
+            if(edgeLabel!=null) {
+                edgeAB.SetAttribute("label", edgeLabel);
             }
             edges.Add(edgeName);
         }
