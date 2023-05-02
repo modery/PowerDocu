@@ -156,6 +156,12 @@ namespace PowerDocu.FlowDocumenter
                     html += "<tr><td><font point-size=\"10\">" + System.Web.HttpUtility.HtmlEncode(node.Description) + "</font></td></tr></table>";
                     currentNode.SetAttributeHtml("label", html);
                 }
+                else if (node.Type == "Switch")
+                {
+                    string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
+                    html += "<tr><td><FONT POINT-SIZE=\"10\">(" + System.Web.HttpUtility.HtmlEncode(node.Expression) + ")</FONT></td></tr></table>";
+                    currentNode.SetAttributeHtml("label", html);
+                }
                 else
                 {
                     currentNode.SetAttribute("label", CharsetHelper.GetSafeName(node.Name));
@@ -334,7 +340,7 @@ namespace PowerDocu.FlowDocumenter
                 {
                     ActionNode precedingNeighbour = precedingNeighbours.Count > 0 ? precedingNeighbours.Find(o => o.Name.Equals(previousNeighbourNode.GetName())) : null;
                     string edgeLabel = null;
-                    if(node.parent?.Type.Equals("Switch") == true && node.parent.Name.Equals(previousNeighbourNode.GetName()))
+                    if (node.parent?.Type.Equals("Switch") == true && node.parent.Name.Equals(previousNeighbourNode.GetName()))
                     {
                         node.parent.switchRelationship.TryGetValue(node, out edgeLabel);
                     }
@@ -512,8 +518,10 @@ namespace PowerDocu.FlowDocumenter
                     edgeAB.SafeSetAttribute("color", "red", "");
                 }
             }
-            if(edgeLabel!=null) {
+            if (edgeLabel != null)
+            {
                 edgeAB.SetAttribute("label", edgeLabel);
+                Console.WriteLine(flow.Name + " " + edgeLabel);
             }
             edges.Add(edgeName);
         }
