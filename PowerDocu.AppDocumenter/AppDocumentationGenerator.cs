@@ -29,11 +29,13 @@ namespace PowerDocu.AppDocumenter
                     //build the graph showing the navigations between the different screens
                     RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(app.Name), GraphType.Directed);
                     Graph.IntroduceAttribute(rootGraph, "compound", "true");
+                    Graph.IntroduceAttribute(rootGraph, "fontname", "helvetica");
                     Node.IntroduceAttribute(rootGraph, "shape", "rectangle");
                     Node.IntroduceAttribute(rootGraph, "color", "");
                     Node.IntroduceAttribute(rootGraph, "style", "");
                     Node.IntroduceAttribute(rootGraph, "fillcolor", "");
                     Node.IntroduceAttribute(rootGraph, "label", "");
+                    Node.IntroduceAttribute(rootGraph, "fontname", "helvetica");
                     //add all the screens
                     foreach (ControlEntity ce in app.ScreenNavigations.Keys)
                     {

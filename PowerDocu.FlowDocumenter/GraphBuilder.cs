@@ -44,11 +44,13 @@ namespace PowerDocu.FlowDocumenter
             clusterRelationship = new Dictionary<SubGraph, SubGraph>();
             RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(flow.Name), GraphType.Directed);
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
+            Graph.IntroduceAttribute(rootGraph, "fontname", "helvetica");
             Node.IntroduceAttribute(rootGraph, "shape", "");
             Node.IntroduceAttribute(rootGraph, "color", "");
             Node.IntroduceAttribute(rootGraph, "style", "");
             Node.IntroduceAttribute(rootGraph, "fillcolor", "");
             Node.IntroduceAttribute(rootGraph, "label", "");
+            Node.IntroduceAttribute(rootGraph, "fontname", "helvetica");
             Edge.IntroduceAttribute(rootGraph, "label", "");
             List<ActionNode> rootActions = flow.actions.getRootNodes();
 
@@ -521,7 +523,6 @@ namespace PowerDocu.FlowDocumenter
             if (edgeLabel != null)
             {
                 edgeAB.SetAttribute("label", edgeLabel);
-                Console.WriteLine(flow.Name + " " + edgeLabel);
             }
             edges.Add(edgeName);
         }
