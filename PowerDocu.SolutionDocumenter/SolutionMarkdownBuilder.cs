@@ -260,6 +260,7 @@ namespace PowerDocu.SolutionDocumenter
 
         private void renderEntities()
         {
+            DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(content);
             solutionDoc.Root.Add(new MdHeading("Tables", 3));
             foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {
@@ -285,6 +286,8 @@ namespace PowerDocu.SolutionDocumenter
                 }
                 solutionDoc.Root.Add(new MdTable(new MdTableRow("Display Name", "Name", "Data type", "Customizable", "Required", "Searchable"), tableRows));
             }
+            solutionDoc.Root.Add(new MdHeading("Table Relationships", 4));
+            solutionDoc.Root.Add(new MdParagraph(new MdImageSpan("Dataverse Table Relationships", "dataverse.svg")));
         }
 
         private MdImageSpan getAccessLevelIcon(AccessLevel accessLevel)

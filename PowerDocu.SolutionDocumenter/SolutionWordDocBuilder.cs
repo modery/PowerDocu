@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using PowerDocu.Common;
@@ -242,6 +242,7 @@ namespace PowerDocu.SolutionDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Tables"));
             ApplyStyleToParagraph("Heading2", para);
+            DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(content);
             foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {
                 para = body.AppendChild(new Paragraph());
@@ -276,6 +277,32 @@ namespace PowerDocu.SolutionDocumenter
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
             }
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Table Relationships"));
+            ApplyStyleToParagraph("Heading3", para);
+            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Png);
+            int imageWidth, imageHeight;
+            using (FileStream stream = new FileStream(content.folderPath + "dataverse.png", FileMode.Open))
+            {
+                using (var image = Image.FromStream(stream, false, false))
+                {
+                    imageWidth = image.Width;
+                    imageHeight = image.Height;
+                }
+                stream.Position = 0;
+                imagePart.FeedData(stream);
+            }
+            ImagePart svgPart = mainPart.AddNewPart<ImagePart>("image/svg+xml", "rId" + (new Random()).Next(100000, 999999));
+            using (FileStream stream = new FileStream(content.folderPath + "dataverse.svg", FileMode.Open))
+            {
+                svgPart.FeedData(stream);
+            }
+            body.AppendChild(new Paragraph(new Run(
+                InsertSvgImage(mainPart.GetIdOfPart(svgPart), mainPart.GetIdOfPart(imagePart), imageWidth, imageHeight)
+            )));
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
         }
 
         private void renderSecurityRoles()
