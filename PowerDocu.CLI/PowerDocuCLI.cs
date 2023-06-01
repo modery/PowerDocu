@@ -46,6 +46,12 @@ namespace PowerDocu.CLI
         {
             foreach (var itemToDocument in options.ItemsToDocument)
             {
+                if (!File.Exists(itemToDocument))
+                {
+                    NotificationHelper.SendNotification($"{itemToDocument} not found. Skipping.");
+                    break;
+                }
+
                 switch (Path.GetExtension(itemToDocument))
                 {
                     case ".zip":
