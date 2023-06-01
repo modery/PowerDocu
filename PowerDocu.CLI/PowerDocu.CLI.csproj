@@ -1,15 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <DebugType>embedded</DebugType>     
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\modules\PowerDocu.Common\PowerDocu.Common\PowerDocu.Common.csproj" />
+    <ProjectReference Include="..\PowerDocu.SolutionDocumenter\PowerDocu.SolutionDocumenter.csproj" />
   </ItemGroup>
 
 </Project>
