@@ -273,18 +273,21 @@ namespace PowerDocu.SolutionDocumenter
                 solutionDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
                 tableRows = new List<MdTableRow>();
 
-                foreach (ColumnEntity columnEntity in tableEntity.GetColumns())
+                if (tableEntity.GetColumns().Count > 0)
                 {
-                    string primaryNameColumn = columnEntity.getDisplayMask().Contains("PrimaryName") ? " (Primary name column)" : "";
-                    tableRows.Add(new MdTableRow(columnEntity.getDisplayName() + primaryNameColumn,
-                                                columnEntity.getName(),
-                                                columnEntity.getDataType(),
-                                                columnEntity.isCustomizable().ToString(),
-                                                columnEntity.isRequired().ToString(),
-                                                columnEntity.isSearchable().ToString()
-                                                ));
+                    foreach (ColumnEntity columnEntity in tableEntity.GetColumns())
+                    {
+                        string primaryNameColumn = columnEntity.getDisplayMask().Contains("PrimaryName") ? " (Primary name column)" : "";
+                        tableRows.Add(new MdTableRow(columnEntity.getDisplayName() + primaryNameColumn,
+                                                    columnEntity.getName(),
+                                                    columnEntity.getDataType(),
+                                                    columnEntity.isCustomizable().ToString(),
+                                                    columnEntity.isRequired().ToString(),
+                                                    columnEntity.isSearchable().ToString()
+                                                    ));
+                    }
+                    solutionDoc.Root.Add(new MdTable(new MdTableRow("Display Name", "Name", "Data type", "Customizable", "Required", "Searchable"), tableRows));
                 }
-                solutionDoc.Root.Add(new MdTable(new MdTableRow("Display Name", "Name", "Data type", "Customizable", "Required", "Searchable"), tableRows));
             }
             solutionDoc.Root.Add(new MdHeading("Table Relationships", 4));
             solutionDoc.Root.Add(new MdParagraph(new MdImageSpan("Dataverse Table Relationships", "dataverse.svg")));
