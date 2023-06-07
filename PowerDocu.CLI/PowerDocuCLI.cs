@@ -23,13 +23,15 @@ namespace PowerDocu.CLI
 
                 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(parsed => { options = parsed; });
 
+                await CheckForLatestVersion();
+
                 switch (options.UpdateIcons)
                 {
                     case true:
                         await ConnectorHelper.UpdateConnectorIcons();
                         break;
                     case false when !options.ItemsToDocument.Any():
-                        NotificationHelper.SendNotification($"No items to generate documentation on provided");
+                        NotificationHelper.SendNotification($"No items to generate documentation on");
                         break;
                     case false when !options.ItemsToDocument.All(itemToDocument =>
                         new List<string> { ".zip", ".msapp" }.Contains(Path.GetExtension(itemToDocument))):
@@ -62,17 +64,24 @@ namespace PowerDocu.CLI
                     NotificationHelper.SendNotification($"{itemToDocument} not found. Skipping.");
                     break;
                 }
-
                 switch (Path.GetExtension(itemToDocument))
                 {
                     case ".zip":
                         SolutionDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.SortFlowActions, options.WordTemplate);
                         break;
                     case ".msapp":
-                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat,
-                            options.ChangesOnly, options.DefaultValues, options.WordTemplate);
+                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.WordTemplate);
                         break;
                 }
+            }
+        }
+
+        private static async Task CheckForLatestVersion()
+        {
+            if(await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
+            {
+                NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
+                NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl);
             }
         }
     }
