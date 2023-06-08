@@ -16,7 +16,6 @@ namespace PowerDocu.CLI
         {
             try
             {
-
                 NotificationHelper.AddNotificationReceiver(new ConsoleNotificationReceiver());
 
                 var options = new CommandLineOptions();
@@ -67,10 +66,10 @@ namespace PowerDocu.CLI
                 switch (Path.GetExtension(itemToDocument))
                 {
                     case ".zip":
-                        SolutionDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.SortFlowActions, options.WordTemplate);
+                        SolutionDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.SortFlowActions, options.WordTemplate, options.OutputPath);
                         break;
                     case ".msapp":
-                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.WordTemplate);
+                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.WordTemplate, options.OutputPath);
                         break;
                 }
             }

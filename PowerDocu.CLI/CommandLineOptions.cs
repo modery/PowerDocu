@@ -8,6 +8,8 @@ namespace PowerDocu.CLI
     {
         [Option('p', "itemsToDocument", HelpText = "Semi colon delimited list of paths of items to document", Required = false, Separator = ';')]
         public IEnumerable<string>? ItemsToDocument { get; set; }
+        [Option('o', "outputPath", HelpText = "Destination to write dcoumentation to. Will default to path of item if blank", Required = false)]
+        public string? OutputPath { get; set; }
         [Option('m', "markDown", HelpText = "Format document as Markdown", Required = false)]
         public bool Markdown { get; set; }
         [Option('w', "word", HelpText = "Format document as Word", Required = false)]
@@ -33,9 +35,9 @@ namespace PowerDocu.CLI
 
         internal string SortFlowActions => this switch
         {
-            { SortFlowsByName: true} => FlowActionSortOrderHelper.ByName,
-            { SortFlowsByName: false } => FlowActionSortOrderHelper.ByOrderOfAppearance,
-            _ => FlowActionSortOrderHelper.ByOrderOfAppearance
+            { SortFlowsByName: true} => "By name",
+            { SortFlowsByName: false } => "By order of appearance",
+            _ => "By order of appearance"
         };
     }
 }

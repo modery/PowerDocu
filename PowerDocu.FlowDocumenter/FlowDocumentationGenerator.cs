@@ -7,21 +7,22 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null)
+        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
-                string path = Path.GetDirectoryName(filePath);
+                string path = outputPath == null ? Path.GetDirectoryName(filePath) : $"{outputPath}/{Path.GetFileNameWithoutExtension(filePath)}";
                 DateTime startDocGeneration = DateTime.Now;
                 FlowParser flowParserFromZip = new FlowParser(filePath);
+                filePath = Path.GetDirectoryName(filePath);
                 if (flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
                 {
-                    path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
+                    filePath += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
                 List<FlowEntity> flows = flowParserFromZip.getFlows();
                 foreach (FlowEntity flow in flows)
                 {
-                    GraphBuilder gbzip = new GraphBuilder(flow, path);
+                    GraphBuilder gbzip = new GraphBuilder(flow, filePath);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
                     FlowActionSortOrder sortOrder = flowActionSortOrder switch {
