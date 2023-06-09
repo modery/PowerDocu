@@ -24,7 +24,7 @@ namespace PowerDocu.AppDocumenter
         public AppDocumentationContent(AppEntity app, string path)
         {
             NotificationHelper.SendNotification("Preparing documentation content for " + app.Name);
-            folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc - " + app.Name + @"\");
+            folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc " + app.Name + @"\");
             Directory.CreateDirectory(folderPath);
             filename = CharsetHelper.GetSafeName(app.Name) + ((app.ID != null) ? ("(" + app.ID + ")") : "");
             ResourceStreams = app.ResourceStreams;

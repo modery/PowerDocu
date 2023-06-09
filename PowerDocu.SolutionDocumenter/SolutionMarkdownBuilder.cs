@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using PowerDocu.Common;
 using Grynwald.MarkdownGenerator;
 
@@ -23,6 +22,7 @@ namespace PowerDocu.SolutionDocumenter
             addSolutionOverview();
             addSolutionComponents();
             solutionDoc.Save(content.folderPath + "/" + solutionDocumentFileName);
+            createOrderFile();
             NotificationHelper.SendNotification("Created Markdown documentation for solution" + content.solution.UniqueName);
         }
 
@@ -321,6 +321,20 @@ namespace PowerDocu.SolutionDocumenter
                 _ => AccessLevel.None
             };
             return getAccessLevelIcon(level);
+        }
+
+        private void createOrderFile()
+        {
+            using var sw = new StreamWriter($"{content.folderPath}/.order");
+            foreach (var flow in content.flows)
+            {
+                sw.WriteLine(CharsetHelper.GetSafeName(@"FlowDoc " + flow.Name));
+            }
+
+            foreach (var app in content.apps)
+            {
+                sw.WriteLine(CharsetHelper.GetSafeName(@"AppDoc " + app.Name));
+            }
         }
     }
 }

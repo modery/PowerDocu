@@ -25,7 +25,7 @@ namespace PowerDocu.AppDocumenter
                 List<AppEntity> apps = appParserFromZip.getApps();
                 foreach (AppEntity app in apps)
                 {
-                    string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc - " + app.Name + @"\");
+                    string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc " + app.Name + @"\");
                     Directory.CreateDirectory(folderPath);
                     //build the graph showing the navigations between the different screens
                     RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(app.Name), GraphType.Directed);
