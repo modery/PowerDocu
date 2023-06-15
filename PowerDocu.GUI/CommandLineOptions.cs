@@ -2,7 +2,7 @@
 using CommandLine;
 using PowerDocu.Common;
 
-namespace PowerDocu.CLI
+namespace PowerDocu.GUI
 {
     public class CommandLineOptions
     {

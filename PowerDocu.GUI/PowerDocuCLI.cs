@@ -2,20 +2,31 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommandLine;
 using PowerDocu.AppDocumenter;
 using PowerDocu.Common;
 using PowerDocu.SolutionDocumenter;
 
-namespace PowerDocu.CLI
+namespace PowerDocu.GUI
 {
-    internal class PowerDocuCLI
+    internal static class PowerDocuCLI
     {
-        static async Task Main(string[] args)
+        public static async Task Run(string[] args)
         {
             try
             {
+                // Redirect output based on the operating system
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    RedirectOutputToConsoleWindow();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    RedirectOutputToConsoleStream();
+                }
+
                 NotificationHelper.AddNotificationReceiver(new ConsoleNotificationReceiver());
 
                 var options = new CommandLineOptions();
@@ -83,5 +94,21 @@ namespace PowerDocu.CLI
                 NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl);
             }
         }
+
+        private static void RedirectOutputToConsoleWindow()
+        {
+            // Redirect output to the console on Windows
+            AllocConsole();
+        }
+
+        private static void RedirectOutputToConsoleStream()
+        {
+            // Redirect output to the console stream on Linux and macOS
+            var stdout = Console.OpenStandardOutput();
+            Console.SetOut(new StreamWriter(stdout));
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern bool AllocConsole();
     }
 }
