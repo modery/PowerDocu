@@ -17,11 +17,12 @@ namespace PowerDocu.AppDocumenter
                 string path = outputPath == null ? Path.GetDirectoryName(filePath) : $"{outputPath}/{Path.GetFileNameWithoutExtension(filePath)}";
                 DateTime startDocGeneration = DateTime.Now;
                 AppParser appParserFromZip = new AppParser(filePath);
-                filePath = Path.GetDirectoryName(filePath);
-                if (appParserFromZip.packageType == AppParser.PackageType.SolutionPackage)
+
+                if (outputPath == null && appParserFromZip.packageType == AppParser.PackageType.SolutionPackage)
                 {
-                    filePath += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
+                    path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
+
                 List<AppEntity> apps = appParserFromZip.getApps();
                 foreach (AppEntity app in apps)
                 {

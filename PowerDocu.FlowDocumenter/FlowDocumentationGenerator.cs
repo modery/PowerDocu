@@ -14,15 +14,14 @@ namespace PowerDocu.FlowDocumenter
                 string path = outputPath == null ? Path.GetDirectoryName(filePath) : $"{outputPath}/{Path.GetFileNameWithoutExtension(filePath)}";
                 DateTime startDocGeneration = DateTime.Now;
                 FlowParser flowParserFromZip = new FlowParser(filePath);
-                filePath = Path.GetDirectoryName(filePath);
-                if (flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
+                if (outputPath == null && flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
                 {
-                    filePath += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
+                    path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
                 List<FlowEntity> flows = flowParserFromZip.getFlows();
                 foreach (FlowEntity flow in flows)
                 {
-                    GraphBuilder gbzip = new GraphBuilder(flow, filePath);
+                    GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
                     FlowActionSortOrder sortOrder = flowActionSortOrder switch {
