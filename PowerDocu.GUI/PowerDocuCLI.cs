@@ -67,7 +67,7 @@ namespace PowerDocu.GUI
 
         private static void GenerateDocumentation(CommandLineOptions options)
         {
-            foreach (var itemToDocument in options.ItemsToDocument)
+            foreach (var itemToDocument in options.ItemsToDocument!)
             {
                 if (!File.Exists(itemToDocument))
                 {
