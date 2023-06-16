@@ -40,7 +40,7 @@ namespace PowerDocu.GUI
                     case true:
                         await ConnectorHelper.UpdateConnectorIcons();
                         break;
-                    case false when !options.ItemsToDocument.Any():
+                    case false when options.ItemsToDocument == null || !options.ItemsToDocument.Any():
                         NotificationHelper.SendNotification($"No items to generate documentation on");
                         break;
                     case false when !options.ItemsToDocument.All(itemToDocument =>
