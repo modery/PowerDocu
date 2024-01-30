@@ -10,21 +10,23 @@ namespace PowerDocu.AppDocumenter
 {
     public static class AppDocumentationGenerator
     {
-        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string wordTemplate = null)
+        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
-                string path = Path.GetDirectoryName(filePath);
+                string path = outputPath == null ? Path.GetDirectoryName(filePath) : $"{outputPath}/{Path.GetFileNameWithoutExtension(filePath)}";
                 DateTime startDocGeneration = DateTime.Now;
                 AppParser appParserFromZip = new AppParser(filePath);
-                if (appParserFromZip.packageType == AppParser.PackageType.SolutionPackage)
+
+                if (outputPath == null && appParserFromZip.packageType == AppParser.PackageType.SolutionPackage)
                 {
                     path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }
+
                 List<AppEntity> apps = appParserFromZip.getApps();
                 foreach (AppEntity app in apps)
                 {
-                    string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc - " + app.Name + @"\");
+                    string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc " + app.Name + @"\");
                     Directory.CreateDirectory(folderPath);
                     //build the graph showing the navigations between the different screens
                     RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(app.Name), GraphType.Directed);
@@ -97,6 +99,7 @@ namespace PowerDocu.AppDocumenter
                     {
                         bitmap?.Save(folderPath + "ScreenNavigation.png");
                     }
+
                     AppDocumentationContent content = new AppDocumentationContent(app, path);
                     if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                     {

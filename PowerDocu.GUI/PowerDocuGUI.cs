@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PowerDocu.GUI
@@ -9,12 +11,20 @@ namespace PowerDocu.GUI
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static async Task Main(string[] args)
         {
-            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PowerDocuForm());
+            if (args is not { Length: > 0 })
+            {
+                Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new PowerDocuForm());
+            }
+            //Args infers that this was executed from a shell
+            else
+            {
+                await PowerDocuCLI.Run(args);
+            }
         }
     }
 }

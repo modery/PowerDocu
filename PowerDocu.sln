@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.FlowDocumenter", "PowerDocu.FlowDocumenter\PowerDocu.FlowDocumenter.csproj", "{602B2214-EE6C-48B6-A47A-823CCE685253}"
 EndProject
@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.GUI", "PowerDocu.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.Common", "modules\PowerDocu.Common\PowerDocu.Common\PowerDocu.Common.csproj", "{006E057F-1D12-4FBA-94B9-94A1E4A75A17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerDocu.AppDocumenter", "PowerDocu.AppDocumenter\PowerDocu.AppDocumenter.csproj", "{15EC009C-DEB1-437C-B81F-34A2D4F624A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.AppDocumenter", "PowerDocu.AppDocumenter\PowerDocu.AppDocumenter.csproj", "{15EC009C-DEB1-437C-B81F-34A2D4F624A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerDocu.SolutionDocumenter", "PowerDocu.SolutionDocumenter\PowerDocu.SolutionDocumenter.csproj", "{E728F5E8-32AC-42F6-84DB-BE287175016C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerDocu.SolutionDocumenter", "PowerDocu.SolutionDocumenter\PowerDocu.SolutionDocumenter.csproj", "{E728F5E8-32AC-42F6-84DB-BE287175016C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,14 +7,14 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null)
+        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
-                string path = Path.GetDirectoryName(filePath);
+                string path = outputPath == null ? Path.GetDirectoryName(filePath) : $"{outputPath}/{Path.GetFileNameWithoutExtension(filePath)}";
                 DateTime startDocGeneration = DateTime.Now;
                 FlowParser flowParserFromZip = new FlowParser(filePath);
-                if (flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
+                if (outputPath == null && flowParserFromZip.packageType == FlowParser.PackageType.SolutionPackage)
                 {
                     path += @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
                 }

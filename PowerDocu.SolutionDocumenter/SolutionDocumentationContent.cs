@@ -3,7 +3,7 @@ using PowerDocu.Common;
 
 namespace PowerDocu.SolutionDocumenter
 {
-    class SolutionDocumentationContent
+    public class SolutionDocumentationContent
     {
         public List<FlowEntity> flows = new List<FlowEntity>();
         public List<AppEntity> apps = new List<AppEntity>();
