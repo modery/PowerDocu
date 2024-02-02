@@ -260,7 +260,11 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private Table CreateControlTable(ControlEntity control, BorderValues borderType = BorderValues.Single)
+        private Table CreateControlTable(ControlEntity control) {
+            return CreateControlTable(control, BorderValues.Single);
+        }
+
+        private Table CreateControlTable(ControlEntity control, BorderValues borderType)
         {
             Table table = CreateTable();
             table.GetFirstChild<TableProperties>().TableBorders = new TableBorders(
