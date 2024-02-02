@@ -89,7 +89,7 @@ namespace PowerDocu.GUI
                     catch (Exception ex)
                     {
                         MessageBox.Show(
-                            $"Security error.\n\nError message: {ex.Message}\n\n"
+                            $"An error has occurred.\n\nError message: {ex.Message}\n\n"
                                 + $"Details:\n\n{ex.StackTrace}"
                         );
                     }
@@ -116,7 +116,7 @@ namespace PowerDocu.GUI
                 }
                 catch (Exception ex)
                 {
-                    NotificationHelper.SendNotification("Security error:");
+                    NotificationHelper.SendNotification("An error has occurred:");
                     NotificationHelper.SendNotification("Error message: " + ex.Message);
                     NotificationHelper.SendNotification(Environment.NewLine);
                     NotificationHelper.SendNotification("Details:");
