@@ -20,7 +20,7 @@ namespace PowerDocu.GUI
                 // Redirect output based on the operating system
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    RedirectOutputToConsoleWindow();
+                    RedirectOutputToConsoleWindow(args.Length > 0);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
@@ -88,17 +88,22 @@ namespace PowerDocu.GUI
 
         private static async Task CheckForLatestVersion()
         {
-            if(await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
+            if (await PowerDocuReleaseHelper.HasNewerPowerDocuRelease())
             {
                 NotificationHelper.SendNotification("A new PowerDocu release has been found: " + PowerDocuReleaseHelper.latestVersionTag);
                 NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl);
             }
         }
 
-        private static void RedirectOutputToConsoleWindow()
+        private static void RedirectOutputToConsoleWindow(bool hasArgs)
         {
             // Redirect output to the console on Windows
-            AllocConsole();
+            if (hasArgs)
+                //attach to existing console
+                AttachConsole(-1);
+            else
+                //create new console
+                AllocConsole();
         }
 
         private static void RedirectOutputToConsoleStream()
@@ -110,5 +115,7 @@ namespace PowerDocu.GUI
 
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
+        [DllImport("kernel32.dll")]
+        private static extern bool AttachConsole(int pid);
     }
 }
