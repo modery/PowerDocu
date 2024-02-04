@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using PowerDocu.Common;
 using Rubjerg.Graphviz;
-using Svg;
 using System.Xml;
 
 namespace PowerDocu.FlowDocumenter
@@ -42,7 +41,7 @@ namespace PowerDocu.FlowDocumenter
             nodesInGraph = new List<string>();
             nodeClusterRelationship = new Dictionary<Node, SubGraph>();
             clusterRelationship = new Dictionary<SubGraph, SubGraph>();
-            RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(flow.Name), GraphType.Directed);
+            RootGraph rootGraph = RootGraph.CreateNew(GraphType.Directed, CharsetHelper.GetSafeName(flow.Name));
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
             Graph.IntroduceAttribute(rootGraph, "fontname", "helvetica");
             Node.IntroduceAttribute(rootGraph, "shape", "");
@@ -92,8 +91,7 @@ namespace PowerDocu.FlowDocumenter
                 nodesInGraph = new List<string>();
                 addEdgesToGraph(rootGraph, rootAction, trigger, null, null, showSubactions, true);
             }
-            rootGraph.ComputeLayout();
-
+            rootGraph.CreateLayout();
             NotificationHelper.SendNotification("  - Created Graph " + folderPath + generateImageFiles(rootGraph, showSubactions) + ".png");
         }
 
@@ -101,9 +99,8 @@ namespace PowerDocu.FlowDocumenter
         {
             //Generate image files
             string filename = "flow" + (showSubactions ? "-detailed" : "");
-            // can't save directly as PNG (limitation of the .Net Wrapper), saving as SVG is the only option 
-            rootGraph.ToSvgFile(folderPath + filename + ".svg");
-            //rootGraph.ToDotFile(folderPath + filename+".dot");
+            rootGraph.ToPngFile("\"" + folderPath + filename + ".png\"");
+            rootGraph.ToSvgFile("\"" + folderPath + filename + ".svg\"");
 
             //updating the SVG, embedding any images as base64 content so that they are shown in the Word output
             XmlDocument xmlDoc = new XmlDocument
@@ -117,6 +114,8 @@ namespace PowerDocu.FlowDocumenter
                 xn.Attributes["xlink:href"].Value = "data:image/png;base64," + ImageHelper.GetBase64(xn.Attributes["xlink:href"].Value);
             }
             xmlDoc.Save(folderPath + filename + ".svg");
+            //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
+            /*
             // converting SVG to PNG
             var svgDocument = SvgDocument.Open(folderPath + filename + ".svg");
             //generating the PNG from the SVG
@@ -124,6 +123,7 @@ namespace PowerDocu.FlowDocumenter
             {
                 bitmap?.Save(folderPath + filename + ".png");
             }
+            */
             return filename;
         }
 
@@ -147,7 +147,8 @@ namespace PowerDocu.FlowDocumenter
                 SubGraph noCluster = null;
                 //adding the current item as a new node
                 Node currentNode = rootGraph.GetOrAddNode(CharsetHelper.GetSafeName(node.Name));
-                currentNode.SetAttribute("shape", "record");
+                currentNode.SetAttribute("shape", "box");
+                currentNode.SetAttribute("margin", "0");
                 currentNode.SetAttribute("color", GraphColours.GetColourForAction(node.Type));
                 currentNode.SetAttribute("style", "filled");
                 currentNode.SetAttribute("fillcolor", GraphColours.GetFillColourForAction(node.Type));

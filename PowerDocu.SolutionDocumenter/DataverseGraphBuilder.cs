@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using PowerDocu.Common;
 using Rubjerg.Graphviz;
-using Svg;
 
 namespace PowerDocu.SolutionDocumenter
 {
@@ -21,7 +20,7 @@ namespace PowerDocu.SolutionDocumenter
 
         private void buildGraph()
         {
-            RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(content.solution.UniqueName), GraphType.Undirected);
+            RootGraph rootGraph = RootGraph.CreateNew(GraphType.Undirected, CharsetHelper.GetSafeName(content.solution.UniqueName));
             Graph.IntroduceAttribute(rootGraph, "compound", "true");
             Graph.IntroduceAttribute(rootGraph, "color", "#000090");
             Graph.IntroduceAttribute(rootGraph, "style", "filled");
@@ -77,23 +76,25 @@ namespace PowerDocu.SolutionDocumenter
         private string generateImageFiles(RootGraph rootGraph)
         {
             //Generate image files
-            // can't save directly as PNG (limitation of the .Net Wrapper), saving as SVG is the only option 
-            rootGraph.ToSvgFile(content.folderPath + "dataverse.svg");
-            // converting SVG to PNG
+            rootGraph.ToSvgFile("\"" + content.folderPath + "dataverse.svg\"");
+            rootGraph.ToPngFile("\"" + content.folderPath + "dataverse.png\"");
+            //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
+            /*
             var svgDocument = SvgDocument.Open(content.folderPath + "dataverse.svg");
             //generating the PNG from the SVG
             using (var bitmap = svgDocument.Draw())
             {
                 bitmap?.Save(content.folderPath + "dataverse.png");
-            }
+            }*/
             return "dataverse";
         }
 
         private string getHexColor(string lookupColumnName)
         {
             entityColors.TryGetValue(lookupColumnName, out string colour);
-            if(String.IsNullOrEmpty(colour)) {
-                string[] colors = new string[] { "#d35400", "#008000", "#3455DB", "#9400d3", "#939393", "#b8806b", "#D35400", "#008b8b", "#B50000", "#1460aa", "#8b008b", "#696969", "#634806", "#870c25"};
+            if (String.IsNullOrEmpty(colour))
+            {
+                string[] colors = new string[] { "#d35400", "#008000", "#3455DB", "#9400d3", "#939393", "#b8806b", "#D35400", "#008b8b", "#B50000", "#1460aa", "#8b008b", "#696969", "#634806", "#870c25" };
                 colour = colors[entityColors.Count % colors.Length];
                 entityColors.Add(lookupColumnName, colour);
             }

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using PowerDocu.Common;
 using Rubjerg.Graphviz;
-using Svg;
 
 namespace PowerDocu.AppDocumenter
 {
@@ -29,7 +28,7 @@ namespace PowerDocu.AppDocumenter
                     string folderPath = path + CharsetHelper.GetSafeName(@"\AppDoc " + app.Name + @"\");
                     Directory.CreateDirectory(folderPath);
                     //build the graph showing the navigations between the different screens
-                    RootGraph rootGraph = RootGraph.CreateNew(CharsetHelper.GetSafeName(app.Name), GraphType.Directed);
+                    RootGraph rootGraph = RootGraph.CreateNew(GraphType.Directed, CharsetHelper.GetSafeName(app.Name));
                     Graph.IntroduceAttribute(rootGraph, "compound", "true");
                     Graph.IntroduceAttribute(rootGraph, "fontname", "helvetica");
                     Node.IntroduceAttribute(rootGraph, "shape", "rectangle");
@@ -91,15 +90,17 @@ namespace PowerDocu.AppDocumenter
                             }
                         }
                     }
-                    rootGraph.ComputeLayout();
-                    rootGraph.ToSvgFile(folderPath + "ScreenNavigation.svg");
+                    rootGraph.CreateLayout();
+                    rootGraph.ToPngFile("\""+folderPath + "ScreenNavigation.png\"");
+                    rootGraph.ToSvgFile("\""+folderPath + "ScreenNavigation.svg\"");
+                     //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
+                    /*
                     var svgDocument = SvgDocument.Open(folderPath + "ScreenNavigation.svg");
                     //generating the PNG from the SVG
                     using (var bitmap = svgDocument.Draw())
                     {
                         bitmap?.Save(folderPath + "ScreenNavigation.png");
-                    }
-
+                    }*/
                     AppDocumentationContent content = new AppDocumentationContent(app, path);
                     if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                     {
