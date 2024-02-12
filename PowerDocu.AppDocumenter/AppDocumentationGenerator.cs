@@ -91,8 +91,8 @@ namespace PowerDocu.AppDocumenter
                         }
                     }
                     rootGraph.CreateLayout();
-                    rootGraph.ToPngFile("\""+folderPath + "ScreenNavigation.png\"");
-                    rootGraph.ToSvgFile("\""+folderPath + "ScreenNavigation.svg\"");
+                    rootGraph.ToPngFile(folderPath + "ScreenNavigation.png");
+                    rootGraph.ToSvgFile(folderPath + "ScreenNavigation.svg");
                      //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
                     /*
                     var svgDocument = SvgDocument.Open(folderPath + "ScreenNavigation.svg");
