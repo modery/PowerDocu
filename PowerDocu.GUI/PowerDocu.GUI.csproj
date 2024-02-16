@@ -26,6 +26,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
     <DebugType>embedded</DebugType>
+    <AssemblyName>PowerDocu</AssemblyName>
   </PropertyGroup>
 
 </Project>
