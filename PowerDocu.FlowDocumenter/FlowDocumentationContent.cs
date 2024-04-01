@@ -57,6 +57,10 @@ namespace PowerDocu.FlowDocumenter
             {
                 metadataTable.Add("Flow ID", flow.ID);
             }
+            if (!String.IsNullOrEmpty(flow.Description))
+            {
+                metadataTable.Add("Description", flow.Description);
+            }
             metadataTable.Add("Documentation generated at", DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToShortTimeString());
             metadataTable.Add("Number of Variables", "" + flow.actions.ActionNodes.Count(o => o.Type == "InitializeVariable"));
             metadataTable.Add("Number of Actions", "" + flow.actions.ActionNodes.Count);
