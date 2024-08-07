@@ -60,7 +60,7 @@ namespace PowerDocu.FlowDocumenter
             if (!String.IsNullOrEmpty(flow.trigger.Description))
             {
                 string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
-                html += "<tr><td><FONT POINT-SIZE=\"10\">(" + System.Web.HttpUtility.HtmlEncode(flow.trigger.Description) + ")</FONT></td></tr></table>";
+                html += "<tr><td><FONT POINT-SIZE=\"10\">(" + generateMultiLineText(System.Web.HttpUtility.HtmlEncode(flow.trigger.Description)) + ")</FONT></td></tr></table>";
                 trigger.SetAttributeHtml("label", html);
             }
             else
@@ -79,7 +79,7 @@ namespace PowerDocu.FlowDocumenter
                     string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(flow.trigger.Name) + "</td></tr>";
                     if (!String.IsNullOrEmpty(flow.trigger.Description))
                     {
-                        html += "<tr><td></td><td><FONT POINT-SIZE=\"10\">" + System.Web.HttpUtility.HtmlEncode(flow.trigger.Description) + "</FONT></td></tr>";
+                        html += "<tr><td></td><td><FONT POINT-SIZE=\"10\">" + generateMultiLineText(System.Web.HttpUtility.HtmlEncode(flow.trigger.Description)) + "</FONT></td></tr>";
                     }
                     html += "</table>";
                     trigger.SetAttributeHtml("label", html);
@@ -156,13 +156,13 @@ namespace PowerDocu.FlowDocumenter
                 if (!String.IsNullOrEmpty(node.Description))
                 {
                     string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
-                    html += "<tr><td><font point-size=\"10\">" + System.Web.HttpUtility.HtmlEncode(node.Description) + "</font></td></tr></table>";
+                    html += "<tr><td><font point-size=\"10\">" + generateMultiLineText(System.Web.HttpUtility.HtmlEncode(node.Description)) + "</font></td></tr></table>";
                     currentNode.SetAttributeHtml("label", html);
                 }
                 else if (node.Type == "Switch")
                 {
                     string html = "<table border=\"0\"><tr><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
-                    html += "<tr><td><FONT POINT-SIZE=\"10\">(" + System.Web.HttpUtility.HtmlEncode(node.Expression) + ")</FONT></td></tr></table>";
+                    html += "<tr><td><FONT POINT-SIZE=\"10\">(" + generateMultiLineText(System.Web.HttpUtility.HtmlEncode(node.Expression)) + ")</FONT></td></tr></table>";
                     currentNode.SetAttributeHtml("label", html);
                 }
                 else
@@ -181,7 +181,7 @@ namespace PowerDocu.FlowDocumenter
                         string html = "<table border=\"0\"><tr><td><img src=\"" + connectorIcon32Path + "\" /></td><td>" + CharsetHelper.GetSafeName(node.Name) + "</td></tr>";
                         if (!String.IsNullOrEmpty(node.Description))
                         {
-                            html += "<tr><td></td><td><font point-size=\"10\">" + System.Web.HttpUtility.HtmlEncode(node.Description) + "</font></td></tr>";
+                            html += "<tr><td></td><td><font point-size=\"10\">" + generateMultiLineText(System.Web.HttpUtility.HtmlEncode(node.Description)) + "</font></td></tr>";
                         }
                         html += "</table>";
                         currentNode.SetAttributeHtml("label", html);
@@ -527,6 +527,26 @@ namespace PowerDocu.FlowDocumenter
             }
             edges.Add(edgeName);
         }
+
+        //splits a text into multiple lines (<br/> for line breaks), with each line having a maximum of 65 characters
+        private string generateMultiLineText(string text)
+        {
+            string[] words = text.Split(' ');
+            string multiLineText = "";
+            int lineLength = 0;
+            for (var counter = 0; counter < words.Length; counter++)
+            {
+                lineLength += words[counter].Length + 1;
+                if (lineLength >= 65)
+                {
+                    multiLineText += "<br/>";
+                    lineLength = 0;
+                }
+                multiLineText = multiLineText + words[counter] + " ";
+            }
+            return multiLineText;
+        }
+
     }
 
     public static class GraphColours
