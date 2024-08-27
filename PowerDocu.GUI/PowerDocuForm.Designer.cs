@@ -115,7 +115,7 @@ namespace PowerDocu.GUI
             settingsPanel = new Panel()
             {
                 Location = new Point(0, 0),
-                Size = new Size(convertToDPISpecific(350), convertToDPISpecific(600))
+                Size = new Size(convertToDPISpecific(450), convertToDPISpecific(600))
 
             };
 
