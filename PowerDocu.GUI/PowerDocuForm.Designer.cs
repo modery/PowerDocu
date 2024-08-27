@@ -42,84 +42,105 @@ namespace PowerDocu.GUI
             this.SizeChanged += new EventHandler(SizeChangedHandler);
             this.DpiChanged += new DpiChangedEventHandler(DpiChangedHandler);
             this.Text = "PowerDocu GUI (" + PowerDocuReleaseHelper.currentVersion.ToString() + ")";
-            this.Paint += new PaintEventHandler(PowerDocuForm_Paint);
-
             InitializePanels();
-        }
-
-        private void PowerDocuForm_Paint(object sender, PaintEventArgs e)
-        {
-            UpdateNavigation();
         }
 
         private void InitializePanels()
         {
-            leftPanel = new Panel()
+            statusIconPictureBox = new PictureBox()
+            {
+                Location = new Point(convertToDPISpecific(5), convertToDPISpecific(15)),
+                Size = new Size(convertToDPISpecific(16), convertToDPISpecific(16)),
+                Image = FontAwesome.Sharp.IconChar.InfoCircle.ToBitmap(Color.Green, convertToDPISpecific(16)),
+            };
+            Controls.Add(statusIconPictureBox);
+            statusLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(25), convertToDPISpecific(15)),
+                Text = "Welcome to PowerDocu",
+                Width = convertToDPISpecific(ClientSize.Width - convertToDPISpecific(40)),
+                Height = convertToDPISpecific(convertToDPISpecific(20))
+            };
+            Controls.Add(statusLabel);
+            ImageList imageList1 = new ImageList();
+            imageList1.Images.Add(FontAwesome.Sharp.IconChar.FileWord.ToBitmap(Color.Purple));
+            imageList1.Images.Add(FontAwesome.Sharp.IconChar.Gear.ToBitmap(Color.Gray));
+            imageList1.Images.Add(FontAwesome.Sharp.IconChar.Scroll.ToBitmap(Color.DarkOrange));
+            dynamicTabControl = new TabControl()
+            {
+                Name = "DynamicTabControl",
+                Dock = DockStyle.Bottom,
+                ImageList = imageList1,
+                Width = this.ClientSize.Width,
+                Height = this.ClientSize.Height - convertToDPISpecific(50)
+            };
+            Controls.Add(dynamicTabControl);
+
+
+            dynamicTabControl.TabPages.Add(createGenerateDocumentationTabPage());
+            dynamicTabControl.TabPages.Add(createSettingsTabPage());
+            // Add TabPage2  
+
+            TabPage tabPage3 = new TabPage()
+            {
+                Name = "tabPage3",
+                Text = "Log",
+                ImageIndex = 2,
+                AutoScroll = true
+            };
+            dynamicTabControl.TabPages.Add(tabPage3);
+
+
+            //status box
+            appStatusTextBox = new TextBox
+            {
+                Size = new Size(ClientSize.Width - convertToDPISpecific(40), ClientSize.Height - convertToDPISpecific(100)),
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(15)),
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true
+            };
+            tabPage3.Controls.Add(appStatusTextBox);
+        }
+
+        private TabPage createSettingsTabPage()
+        {
+            TabPage tabPage = new TabPage()
+            {
+                Name = "tabPage2",
+                Text = "Settings",
+                ImageIndex = 1,
+                AutoScroll = true
+            };
+            settingsPanel = new Panel()
             {
                 Location = new Point(0, 0),
-                Size = new Size(convertToDPISpecific(150), convertToDPISpecific(300))
-            };
-            step1Panel = new Panel()
-            {
-                Location = new Point(leftPanel.Width, 0),
-                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(410))
-            };
-            step2Panel = new Panel()
-            {
-                Location = new Point(leftPanel.Width, 0),
-                Size = new Size(ClientSize.Width - leftPanel.Width, convertToDPISpecific(410)),
-                Visible = false
-            };
-            Controls.Add(leftPanel);
-            Controls.Add(step1Panel);
-            Controls.Add(step2Panel);
-            backLeftPanelButton = new Button()
-            {
-                Text = "Back",
-                Size = new Size(convertToDPISpecific(50), convertToDPISpecific(30)),
-                BackColor = Color.LightGray,
-                ForeColor = Color.White,
-                Location = new Point(convertToDPISpecific(20), convertToDPISpecific(110)),
-                Enabled = false
-            };
-            backLeftPanelButton.Click += new EventHandler(BackNextButton_Click);
-            leftPanel.Controls.Add(backLeftPanelButton);
-            nextLeftPanelButton = new Button()
-            {
-                Text = "Next",
-                Size = new Size(convertToDPISpecific(50), convertToDPISpecific(30)),
-                BackColor = Color.DodgerBlue,
-                ForeColor = Color.White,
-                Location = new Point(convertToDPISpecific(80), convertToDPISpecific(110)),
-            };
-            nextLeftPanelButton.Click += new EventHandler(BackNextButton_Click);
-            leftPanel.Controls.Add(nextLeftPanelButton);
-            settingsLabel = new Label()
-            {
-                Location = new Point(convertToDPISpecific(40), convertToDPISpecific(19)),
-                Text = "Settings",
-                Height = convertToDPISpecific(25)
-            };
-            leftPanel.Controls.Add(settingsLabel);
-            documentLabel = new Label()
-            {
-                Location = new Point(convertToDPISpecific(40), convertToDPISpecific(79)),
-                Text = "Generate Documentation",
-                Height = convertToDPISpecific(20)
-            };
-            leftPanel.Controls.Add(documentLabel);
-            UpdateNavigation();
+                Size = new Size(convertToDPISpecific(350), convertToDPISpecific(600))
 
-            //Step 1 - select output format
+            };
+
+
+            tabPage.Controls.Add(settingsPanel);
+
+            //Tab 2 - Settings 
+
             outputFormatGroup = new GroupBox()
             {
                 Text = "Output Selection",
                 Padding = new Padding(10),
                 Location = new Point(convertToDPISpecific(15), convertToDPISpecific(15)),
                 Size = new System.Drawing.Size(convertToDPISpecific(400), convertToDPISpecific(115)),
-                AutoSize = false
+                AutoSize = true
             };
-            step1Panel.Controls.Add(outputFormatGroup);
+            settingsPanel.Controls.Add(outputFormatGroup);
+            outputFormatInfoLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25)),
+                Text = "Output format:",
+                Width = convertToDPISpecific(90),
+                Height = convertToDPISpecific(30)
+            };
+            outputFormatGroup.Controls.Add(outputFormatInfoLabel);
             openWordTemplateDialog = new OpenFileDialog()
             {
                 FileName = "",
@@ -128,25 +149,18 @@ namespace PowerDocu.GUI
             };
             outputFormatComboBox = new ComboBox()
             {
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25)),// + selectWordTemplateButton.Height),
+                Location = new Point(convertToDPISpecific(15) + outputFormatInfoLabel.Width + outputFormatInfoLabel.Location.Y, convertToDPISpecific(25)),// + selectWordTemplateButton.Height),
                 Size = new System.Drawing.Size(convertToDPISpecific(85), convertToDPISpecific(21)),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            outputFormatComboBox.Items.AddRange(new object[] {OutputFormatHelper.Word,
-                        OutputFormatHelper.Markdown,
-                        OutputFormatHelper.All
+            outputFormatComboBox.Items.AddRange(new object[] {OutputFormatHelper.All,
+                                                                OutputFormatHelper.Word,
+                                                                OutputFormatHelper.Markdown
                         });
             outputFormatComboBox.SelectedIndexChanged += new EventHandler(OutputFormatComboBox_Changed);
             outputFormatComboBox.SelectedIndex = 0;
             outputFormatGroup.Controls.Add(outputFormatComboBox);
-            outputFormatInfoLabel = new Label()
-            {
-                Location = new Point(convertToDPISpecific(30) + outputFormatComboBox.Width, outputFormatComboBox.Location.Y + convertToDPISpecific(5)),
-                Text = "Select output format",
-                Width = convertToDPISpecific(150),
-                Height = convertToDPISpecific(30)
-            };
-            outputFormatGroup.Controls.Add(outputFormatInfoLabel);
+
             selectWordTemplateButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
@@ -161,7 +175,7 @@ namespace PowerDocu.GUI
             outputFormatGroup.Controls.Add(selectWordTemplateButton);
             wordTemplateInfoLabel = new Label()
             {
-                Location = new Point(30 + selectWordTemplateButton.Width, convertToDPISpecific(45) + outputFormatComboBox.Height),
+                Location = new Point(convertToDPISpecific(10) + selectWordTemplateButton.Width + selectWordTemplateButton.Location.X, convertToDPISpecific(35) + outputFormatComboBox.Height),
                 Text = "Optional: Select a Word template",
                 Width = convertToDPISpecific(200),
                 Height = convertToDPISpecific(30),
@@ -169,46 +183,76 @@ namespace PowerDocu.GUI
                 AutoSize = true
             };
             outputFormatGroup.Controls.Add(wordTemplateInfoLabel);
+            clearWordTemplateButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(24), convertToDPISpecific(24)),
+                Location = new Point(35 + selectWordTemplateButton.Width, wordTemplateInfoLabel.Height + wordTemplateInfoLabel.Location.Y),
+                IconChar = IconChar.Eraser,
+                IconColor = Color.Red,
+                IconSize = convertToDPISpecific(24),
+                IconFont = IconFont.Auto,
+                ImageAlign = ContentAlignment.MiddleCenter,
+                Visible = false
+            };
+            clearWordTemplateButton.Click += new EventHandler(ClearWordTemplateButton_Click);
+            outputFormatGroup.Controls.Add(clearWordTemplateButton);
             documentationOptionsGroup = new GroupBox()
             {
                 Text = "Documentation Options",
                 Padding = new Padding(10),
-                Location = new Point(convertToDPISpecific(15), outputFormatGroup.Height + convertToDPISpecific(25)),
+                Location = new Point(convertToDPISpecific(15), outputFormatGroup.Height + outputFormatGroup.Location.Y + convertToDPISpecific(10)),
                 Size = new System.Drawing.Size(convertToDPISpecific(400), convertToDPISpecific(145)),
-                AutoSize = false
+                AutoSize = true
             };
-            step1Panel.Controls.Add(documentationOptionsGroup);
+            settingsPanel.Controls.Add(documentationOptionsGroup);
+            documentChangesOrEverythingLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25)),
+                Text = "Canvas Apps: Document Changed Properties or All Properties",
+                Width = convertToDPISpecific(350),
+                Height = convertToDPISpecific(20)
+            };
+            documentationOptionsGroup.Controls.Add(documentChangesOrEverythingLabel);
             documentChangesOnlyRadioButton = new RadioButton()
             {
                 TextAlign = ContentAlignment.MiddleLeft,
-                Text = "Canvas Apps: Document changes only",
+                Text = "Changes only",
                 Checked = true,
                 Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(15))
+                Location = new Point(convertToDPISpecific(30), documentChangesOrEverythingLabel.Height + documentChangesOrEverythingLabel.Location.Y)
             };
             documentationOptionsGroup.Controls.Add(documentChangesOnlyRadioButton);
             documentEverythingRadioButton = new RadioButton()
             {
                 TextAlign = ContentAlignment.MiddleLeft,
-                Text = "Canvas Apps: Document all properties",
+                Text = "All Properties",
                 Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
-                Location = new Point(convertToDPISpecific(15), 10 + documentChangesOnlyRadioButton.Height)
+                Location = new Point(convertToDPISpecific(30), documentChangesOnlyRadioButton.Height + documentChangesOnlyRadioButton.Location.Y)
             };
             documentationOptionsGroup.Controls.Add(documentEverythingRadioButton);
             documentDefaultsCheckBox = new CheckBox()
             {
                 TextAlign = ContentAlignment.MiddleLeft,
-                Text = "Canvas Apps: Document default values",
+                Text = "Canvas Apps: Document default values of properties",
                 Checked = true,
                 Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
                 Location = new Point(convertToDPISpecific(15), documentEverythingRadioButton.Location.Y + documentEverythingRadioButton.Height)
             };
             documentationOptionsGroup.Controls.Add(documentDefaultsCheckBox);
+            documentSampleDataCheckBox = new CheckBox()
+            {
+                TextAlign = ContentAlignment.MiddleLeft,
+                Text = "Canvas Apps: Document sample datasources",
+                Checked = false,
+                Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
+                Location = new Point(convertToDPISpecific(15), documentDefaultsCheckBox.Location.Y + documentDefaultsCheckBox.Height)
+            };
+            documentationOptionsGroup.Controls.Add(documentSampleDataCheckBox);
             flowActionSortOrderInfoLabel = new Label()
             {
-                Location = new Point(convertToDPISpecific(15), documentDefaultsCheckBox.Location.Y + documentDefaultsCheckBox.Height + convertToDPISpecific(5)),
-                Text = "Sort Flow Actions",
-                Width = convertToDPISpecific(100),
+                Location = new Point(convertToDPISpecific(15), documentSampleDataCheckBox.Location.Y + documentSampleDataCheckBox.Height + convertToDPISpecific(5)),
+                Text = "Flows: Sort Flow Actions",
+                Width = convertToDPISpecific(150),
                 Height = convertToDPISpecific(30)
             };
             documentationOptionsGroup.Controls.Add(flowActionSortOrderInfoLabel);
@@ -226,15 +270,35 @@ namespace PowerDocu.GUI
             {
                 Text = "Other Options",
                 Padding = new Padding(10),
-                Location = new Point(convertToDPISpecific(15), outputFormatGroup.Height + documentationOptionsGroup.Height + convertToDPISpecific(35)),
+                Location = new Point(convertToDPISpecific(15), documentationOptionsGroup.Height + documentationOptionsGroup.Location.Y + convertToDPISpecific(10)),
                 Size = new System.Drawing.Size(convertToDPISpecific(400), convertToDPISpecific(120)),
-                AutoSize = false
+                AutoSize = true
             };
-            step1Panel.Controls.Add(otherOptionsGroup);
-            updateConnectorIconsButton = new IconButton()
+            settingsPanel.Controls.Add(otherOptionsGroup);
+            saveConfigButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
                 Location = new Point(convertToDPISpecific(15), convertToDPISpecific(20)),
+                IconChar = IconChar.Save,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                ImageAlign = ContentAlignment.MiddleCenter
+            };
+            saveConfigButton.Click += new EventHandler(SaveConfigButton_Click);
+            otherOptionsGroup.Controls.Add(saveConfigButton);
+            saveConfigLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(10) + saveConfigButton.Width + saveConfigButton.Location.X, convertToDPISpecific(25)),
+                Text = "Save current configuration as default",
+                Width = convertToDPISpecific(250),
+                Height = convertToDPISpecific(30)
+            };
+            otherOptionsGroup.Controls.Add(saveConfigLabel);
+            updateConnectorIconsButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(convertToDPISpecific(15), saveConfigButton.Height + saveConfigButton.Location.Y + convertToDPISpecific(10)),
                 IconChar = IconChar.CloudDownloadAlt,
                 IconColor = Color.Green,
                 IconSize = convertToDPISpecific(32),
@@ -245,9 +309,9 @@ namespace PowerDocu.GUI
             otherOptionsGroup.Controls.Add(updateConnectorIconsButton);
             updateConnectorIconsLabel = new Label()
             {
-                Location = new Point(updateConnectorIconsButton.Location.X + updateConnectorIconsButton.Width + convertToDPISpecific(10), updateConnectorIconsButton.Location.Y + convertToDPISpecific(10)),
+                Location = new Point(updateConnectorIconsButton.Location.X + updateConnectorIconsButton.Width + convertToDPISpecific(10), updateConnectorIconsButton.Location.Y),
                 Text = "Update your existing set of connector icons\n(" + ConnectorHelper.numberOfConnectors() + " connectors, " + ConnectorHelper.numberOfConnectorIcons() + " icons)",
-                Width = convertToDPISpecific(200),
+                Width = convertToDPISpecific(250),
                 Height = convertToDPISpecific(30),
                 MaximumSize = new Size(Width, Height + convertToDPISpecific(100)),
                 AutoSize = true
@@ -256,7 +320,7 @@ namespace PowerDocu.GUI
             newReleaseButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(30) + updateConnectorIconsButton.Height),
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(10) + updateConnectorIconsButton.Height + updateConnectorIconsButton.Location.Y),
                 IconChar = IconChar.PlusCircle,
                 IconColor = Color.Green,
                 IconSize = convertToDPISpecific(32),
@@ -267,7 +331,7 @@ namespace PowerDocu.GUI
             otherOptionsGroup.Controls.Add(newReleaseButton);
             newReleaseLabel = new Label()
             {
-                Location = new Point(newReleaseButton.Location.X + newReleaseButton.Width + 10, newReleaseButton.Location.Y + 10),
+                Location = new Point(newReleaseButton.Location.X + newReleaseButton.Width + convertToDPISpecific(10), newReleaseButton.Location.Y),
                 Text = "Download new release: ",
                 Width = convertToDPISpecific(200),
                 Height = convertToDPISpecific(30),
@@ -276,8 +340,35 @@ namespace PowerDocu.GUI
                 Visible = false
             };
             otherOptionsGroup.Controls.Add(newReleaseLabel);
+            return tabPage;
+        }
 
-            //Step 2 - Process file
+        private TabPage createGenerateDocumentationTabPage()
+        {
+            TabPage tabPage = new TabPage()
+            {
+                Name = "tabPage1",
+                Text = "Create Documentation",
+                ImageIndex = 0
+            };
+
+            generateDocuPanel = new Panel()
+            {
+                Location = new Point(0, 0),
+                Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(25))
+            };
+
+            powerDocuInfoLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25)),
+                Text = "Welcome to PowerDocu!",
+                Width = convertToDPISpecific(450),
+                Height = convertToDPISpecific(60),
+                AutoSize = true,
+                Font= new Font(this.Font.FontFamily,1.5f*this.Font.Size)
+            };
+            generateDocuPanel.Controls.Add(powerDocuInfoLabel);
+
             openFileToParseDialog = new OpenFileDialog()
             {
                 FileName = "*.zip;*.msapp",
@@ -288,62 +379,48 @@ namespace PowerDocu.GUI
             selectFileToParseButton = new IconButton()
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25)),
+                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(25) + powerDocuInfoLabel.Location.Y + powerDocuInfoLabel.Height),
                 IconChar = IconChar.FileArchive,
-                IconColor = Color.Orange,
+                IconColor = Color.Purple,
                 IconSize = convertToDPISpecific(32),
                 IconFont = IconFont.Auto,
 
             };
             selectFileToParseButton.Click += new EventHandler(SelectZIPFileButton_Click);
-            step2Panel.Controls.Add(selectFileToParseButton);
+            generateDocuPanel.Controls.Add(selectFileToParseButton);
             fileToParseInfoLabel = new Label()
             {
-                Location = new Point(convertToDPISpecific(30) + selectFileToParseButton.Width, convertToDPISpecific(25)),
-                Text = "Select App, Flow, or Solution to document. Multiple items can be selected as well via Ctrl + Left Click. Upon selecting 'Open' in the dialog, documentation will be generated for all selected items.",
-                Width = convertToDPISpecific(350),
-                Height = convertToDPISpecific(60)
+                Location = new Point(convertToDPISpecific(30) + selectFileToParseButton.Width, convertToDPISpecific(25) + powerDocuInfoLabel.Location.Y + powerDocuInfoLabel.Height),
+                Text = "Select Apps, Flows, or Solutions to document. Multiple items can be selected via Ctrl + Left Click.",
+                Width = convertToDPISpecific(450),
+                Height = convertToDPISpecific(60),
+                AutoSize = true
             };
-            step2Panel.Controls.Add(fileToParseInfoLabel);
-            settingsTitleLabel = new Label()
+            generateDocuPanel.Controls.Add(fileToParseInfoLabel);
+            startDocumentationButton = new IconButton()
             {
-                Location = new Point(convertToDPISpecific(15), selectFileToParseButton.Location.Y + selectFileToParseButton.Height + convertToDPISpecific(35)),
-                Text = "Settings:",
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(convertToDPISpecific(15), selectFileToParseButton.Location.Y + selectFileToParseButton.Height + convertToDPISpecific(25)),
+                IconChar = IconChar.HourglassStart,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                Visible = false
+            };
+            startDocumentationButton.Click += new EventHandler(StartDocumentationButton_Click);
+            generateDocuPanel.Controls.Add(startDocumentationButton);
+            selectedFilesToDocumentLabel = new Label()
+            {
+                Location = new Point(convertToDPISpecific(30) + startDocumentationButton.Width, selectFileToParseButton.Location.Y + selectFileToParseButton.Height + convertToDPISpecific(25)),
+                Text = "",
                 //Font = new Font(Label.DefaultFont, FontStyle.Bold),
                 Width = convertToDPISpecific(400),
-                Height = convertToDPISpecific(15)
+                Height = convertToDPISpecific(15),
+                AutoSize = true
             };
-            step2Panel.Controls.Add(settingsTitleLabel);
-            settingsDetailsLabel = new Label()
-            {
-                Location = new Point(convertToDPISpecific(15), settingsTitleLabel.Location.Y + settingsTitleLabel.Height + convertToDPISpecific(10)),
-                Text = "",
-                Width = convertToDPISpecific(400),
-                Height = convertToDPISpecific(200)
-            };
-            step2Panel.Controls.Add(settingsDetailsLabel);
-
-            //status box
-            appStatusTextBox = new TextBox
-            {
-                Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(435)),
-                Location = new Point(convertToDPISpecific(15), convertToDPISpecific(425)),
-                Multiline = true,
-                ScrollBars = ScrollBars.Vertical,
-                ReadOnly = true
-            };
-            Controls.Add(appStatusTextBox);
-        }
-
-        private void UpdateNavigation()
-        {
-            Graphics g = leftPanel.CreateGraphics();
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
-            SolidBrush grayBrush = new SolidBrush(Color.LightGray);
-            g.FillEllipse(nextLeftPanelButton.Enabled ? blueBrush : grayBrush, convertToDPISpecific(20), convertToDPISpecific(20), convertToDPISpecific(15), convertToDPISpecific(15));
-            g.FillRectangle(grayBrush, convertToDPISpecific(24), convertToDPISpecific(37), convertToDPISpecific(3), convertToDPISpecific(40));
-            g.FillEllipse(backLeftPanelButton.Enabled ? blueBrush : grayBrush, convertToDPISpecific(20), convertToDPISpecific(80), convertToDPISpecific(15), convertToDPISpecific(15));
+            generateDocuPanel.Controls.Add(selectedFilesToDocumentLabel);
+            tabPage.Controls.Add(generateDocuPanel);
+            return tabPage;
         }
 
         private int convertToDPISpecific(int number)
@@ -352,16 +429,20 @@ namespace PowerDocu.GUI
             return (int)number * this.DeviceDpi / 96;
         }
 
-        private IconButton selectFileToParseButton, selectWordTemplateButton, newReleaseButton, updateConnectorIconsButton;
+        private IconButton selectFileToParseButton, selectWordTemplateButton, newReleaseButton, updateConnectorIconsButton, saveConfigButton, startDocumentationButton, clearWordTemplateButton;
         private OpenFileDialog openFileToParseDialog, openWordTemplateDialog;
         private TextBox appStatusTextBox;
         private ComboBox outputFormatComboBox, flowActionSortOrderComboBox;
         private GroupBox outputFormatGroup, documentationOptionsGroup, otherOptionsGroup;
-        private CheckBox documentDefaultsCheckBox;
+        private CheckBox documentDefaultsCheckBox, documentSampleDataCheckBox;
         private RadioButton documentChangesOnlyRadioButton, documentEverythingRadioButton;
-        private Panel leftPanel, step1Panel, step2Panel;
-        private Button nextLeftPanelButton, backLeftPanelButton;
-        private Label wordTemplateInfoLabel, fileToParseInfoLabel, outputFormatInfoLabel, flowActionSortOrderInfoLabel, settingsLabel, documentLabel, newReleaseLabel, updateConnectorIconsLabel, settingsTitleLabel, settingsDetailsLabel;
+        private Label wordTemplateInfoLabel, fileToParseInfoLabel, outputFormatInfoLabel,
+                        flowActionSortOrderInfoLabel, newReleaseLabel, updateConnectorIconsLabel,
+                        selectedFilesToDocumentLabel, statusLabel, saveConfigLabel,
+                        documentChangesOrEverythingLabel, powerDocuInfoLabel;
+        private TabControl dynamicTabControl;
+        private PictureBox statusIconPictureBox;
+        private Panel settingsPanel, generateDocuPanel;
 
         #endregion
     }
