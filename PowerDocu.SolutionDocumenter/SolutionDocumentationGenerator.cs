@@ -9,7 +9,7 @@ namespace PowerDocu.SolutionDocumenter
 {
     public static class SolutionDocumentationGenerator
     {
-        public static void GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
+        public static void GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, bool documentSampleData, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
@@ -26,6 +26,7 @@ namespace PowerDocu.SolutionDocumenter
                     fileFormat,
                     documentDefaultChangesOnly,
                     documentDefaults,
+                    documentSampleData,
                     wordTemplate,
                     outputPath
                 );

@@ -9,7 +9,7 @@ namespace PowerDocu.AppDocumenter
 {
     public static class AppDocumentationGenerator
     {
-        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, string wordTemplate = null, string outputPath = null)
+        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, bool documentSampleData = false, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
@@ -108,11 +108,11 @@ namespace PowerDocu.AppDocumenter
                         NotificationHelper.SendNotification("Creating Word documentation");
                         if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null, documentDefaultChangesOnly, documentDefaults);
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null, documentDefaultChangesOnly, documentDefaults, documentSampleData);
                         }
                         else
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate, documentDefaultChangesOnly, documentDefaults);
+                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate, documentDefaultChangesOnly, documentDefaults, documentSampleData);
                         }
                     }
                     if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))

@@ -22,12 +22,14 @@ namespace PowerDocu.AppDocumenter
         private readonly int appLogoWidth = 250;
         private bool documentChangedDefaultsOnly;
         private bool showDefaults;
+        private bool documentSampleData;
 
-        public AppMarkdownBuilder(AppDocumentationContent contentdocumentation, bool documentChangedDefaultsOnly = false, bool showDefaults = true)
+        public AppMarkdownBuilder(AppDocumentationContent contentdocumentation, bool documentChangedDefaultsOnly = false, bool showDefaults = true, bool documentSampleData = false)
         {
             content = contentdocumentation;
             this.documentChangedDefaultsOnly = documentChangedDefaultsOnly;
             this.showDefaults = showDefaults;
+            this.documentSampleData = documentSampleData;
             Directory.CreateDirectory(content.folderPath);
             mainDocumentFileName = ("index " + content.filename + ".md").Replace(" ", "-");
             appDetailsFileName = ("appdetails " + content.filename + ".md").Replace(" ", "-");
@@ -428,37 +430,40 @@ namespace PowerDocu.AppDocumenter
 
             foreach (DataSource datasource in content.appDataSources.dataSources)
             {
-                dataSourcesDocument.Root.Add(new MdHeading(new MdLinkSpan(datasource.Name, ("datasource " + datasource.Name + " " + content.filename + ".md").Replace(" ", "-")), 3));
-                datasourcesDocuments.TryGetValue(datasource.Name, out MdDocument dataSourceDocument);
-                dataSourceDocument.Root.Add(new MdHeading(datasource.Name, 3));
-                List<MdTableRow> tableRows = new List<MdTableRow>
+                if (!datasource.isSampleDataSource() || documentSampleData)
+                {
+                    dataSourcesDocument.Root.Add(new MdHeading(new MdLinkSpan(datasource.Name, ("datasource " + datasource.Name + " " + content.filename + ".md").Replace(" ", "-")), 3));
+                    datasourcesDocuments.TryGetValue(datasource.Name, out MdDocument dataSourceDocument);
+                    dataSourceDocument.Root.Add(new MdHeading(datasource.Name, 3));
+                    List<MdTableRow> tableRows = new List<MdTableRow>
                 {
                     new MdTableRow("Name", datasource.Name),
                     new MdTableRow("Type", datasource.Type)
                 };
-                dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
-                tableRows = new List<MdTableRow>();
-                dataSourceDocument.Root.Add(new MdHeading("DataSource Properties", 4));
-                foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
-                {
-                    if (expression.expressionOperator != "TableDefinition")
+                    dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                    tableRows = new List<MdTableRow>();
+                    dataSourceDocument.Root.Add(new MdHeading("DataSource Properties", 4));
+                    foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
                     {
-                        if (expression.expressionOperands.Count > 1)
+                        if (expression.expressionOperator != "TableDefinition")
                         {
-                            tableRows.Add(new MdTableRow(expression.expressionOperator, new MdRawMarkdownSpan(AddExpressionDetails(new List<Expression> { expression }))));
+                            if (expression.expressionOperands.Count > 1)
+                            {
+                                tableRows.Add(new MdTableRow(expression.expressionOperator, new MdRawMarkdownSpan(AddExpressionDetails(new List<Expression> { expression }))));
+                            }
+                            else
+                            {
+                                tableRows.Add(new MdTableRow(expression.expressionOperator, (expression.expressionOperands.Count > 0) ? expression.expressionOperands[0].ToString() : ""));
+                            }
                         }
                         else
                         {
-                            tableRows.Add(new MdTableRow(expression.expressionOperator, (expression.expressionOperands.Count > 0) ? expression.expressionOperands[0].ToString() : ""));
+                            //todo document the table definition ? probably make it configurable
+                            // removed it for the moment as it resulted in very large files with likely little value
                         }
                     }
-                    else
-                    {
-                        //todo document the table definition ? probably make it configurable
-                        // removed it for the moment as it resulted in very large files with likely little value
-                    }
+                    dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
                 }
-                dataSourceDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
             }
         }
 
@@ -469,38 +474,41 @@ namespace PowerDocu.AppDocumenter
             resourcesDocument.Root.Add(new MdParagraph(new MdTextSpan(content.appResources.infoText)));
             foreach (Resource resource in content.appResources.resources)
             {
-                resourcesDocument.Root.Add(new MdHeading(resource.Name, 3));
-                List<MdTableRow> tableRows = new List<MdTableRow>
+                if (!resource.isSampleResource())
+                {
+                    resourcesDocument.Root.Add(new MdHeading(resource.Name, 3));
+                    List<MdTableRow> tableRows = new List<MdTableRow>
                 {
                     new MdTableRow("Name", resource.Name),
                     new MdTableRow("Content", resource.Content),
                     new MdTableRow("Resource Kind", resource.ResourceKind)
                 };
-                if (resource.ResourceKind == "LocalFile")
-                {
-                    if (content.ResourceStreams.TryGetValue(resource.Name, out MemoryStream resourceStream))
+                    if (resource.ResourceKind == "LocalFile")
                     {
-                        Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
-                        using Stream streamToWriteTo = File.Open(content.folderPath + @"resources\" + fileName.expressionOperands[0].ToString(), FileMode.Create);
-
-                        resourceStream.Position = 0;
-                        resourceStream.CopyTo(streamToWriteTo);
-                        int imageWidth = 400;
-                        if (!fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
+                        if (content.ResourceStreams.TryGetValue(resource.Name, out MemoryStream resourceStream))
                         {
-                            using var image = Image.FromStream(resourceStream, false, false);
-                            imageWidth = (image.Width > 400) ? 400 : image.Width;
-                        }
-                        //todo consider showing a resized copy of the image if it is wider than 400px
-                        tableRows.Add(new MdTableRow("Resource Preview", new MdImageSpan(resource.Name, "resources/" + fileName.expressionOperands[0].ToString())));
-                    }
-                }
-                foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
-                {
-                    tableRows.Add(new MdTableRow(expression.expressionOperator, expression.expressionOperands?[0].ToString()));
-                }
+                            Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
+                            using Stream streamToWriteTo = File.Open(content.folderPath + @"resources\" + fileName.expressionOperands[0].ToString(), FileMode.Create);
 
-                resourcesDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                            resourceStream.Position = 0;
+                            resourceStream.CopyTo(streamToWriteTo);
+                            int imageWidth = 400;
+                            if (!fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
+                            {
+                                using var image = Image.FromStream(resourceStream, false, false);
+                                imageWidth = (image.Width > 400) ? 400 : image.Width;
+                            }
+                            //todo consider showing a resized copy of the image if it is wider than 400px
+                            tableRows.Add(new MdTableRow("Resource Preview", new MdImageSpan(resource.Name, "resources/" + fileName.expressionOperands[0].ToString())));
+                        }
+                    }
+                    foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
+                    {
+                        tableRows.Add(new MdTableRow(expression.expressionOperator, expression.expressionOperands?[0].ToString()));
+                    }
+
+                    resourcesDocument.Root.Add(new MdTable(new MdTableRow("Property", "Value"), tableRows));
+                }
             }
         }
     }

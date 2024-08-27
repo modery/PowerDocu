@@ -8,7 +8,7 @@ namespace PowerDocu.GUI
     {
         [Option('p', "itemsToDocument", HelpText = "Semi colon delimited list of paths of items to document", Required = false, Separator = ';')]
         public IEnumerable<string>? ItemsToDocument { get; set; }
-        [Option('o', "outputPath", HelpText = "Destination to write dcoumentation to. Will default to path of item if blank", Required = false)]
+        [Option('o', "outputPath", HelpText = "Destination to write documentation to. Will default to path of item if blank", Required = false)]
         public string? OutputPath { get; set; }
         [Option('m', "markDown", HelpText = "Format document as Markdown", Required = false)]
         public bool Markdown { get; set; }
@@ -18,6 +18,8 @@ namespace PowerDocu.GUI
         public bool ChangesOnly { get; set; }
         [Option('d', "defaultValues", HelpText = "Document Canvas App Default values", Required = false)]
         public bool DefaultValues { get; set; }
+        [Option('e', "sampledatasources", HelpText = "Document Sample Datasources", Required = false)]
+        public bool SampleDataSources { get; set; }
         [Option('s', "sortFlowsByName", HelpText = "Sort flows by name", Required = false)]
         public bool SortFlowsByName { get; set; }
         [Option('i', "updateIcons", HelpText = "Update existing set of connector icons", Required = false)]
@@ -35,7 +37,7 @@ namespace PowerDocu.GUI
 
         internal string SortFlowActions => this switch
         {
-            { SortFlowsByName: true} => "By name",
+            { SortFlowsByName: true } => "By name",
             { SortFlowsByName: false } => "By order of appearance",
             _ => "By order of appearance"
         };

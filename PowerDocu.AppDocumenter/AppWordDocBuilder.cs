@@ -17,12 +17,14 @@ namespace PowerDocu.AppDocumenter
         private bool DetailedDocumentation = false;
         private bool documentChangedDefaultsOnly;
         private bool showDefaults;
+        private bool documentSampleData;
 
-        public AppWordDocBuilder(AppDocumentationContent contentDocumentation, string template, bool documentChangedDefaultsOnly = false, bool showDefaults = true)
+        public AppWordDocBuilder(AppDocumentationContent contentDocumentation, string template, bool documentChangedDefaultsOnly = false, bool showDefaults = true, bool documentSampleData = false)
         {
             content = contentDocumentation;
             this.documentChangedDefaultsOnly = documentChangedDefaultsOnly;
             this.showDefaults = showDefaults;
+            this.documentSampleData = documentSampleData;
             Directory.CreateDirectory(content.folderPath);
             do
             {
@@ -260,7 +262,8 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
 
-        private Table CreateControlTable(ControlEntity control) {
+        private Table CreateControlTable(ControlEntity control)
+        {
             return CreateControlTable(control, BorderValues.Single);
         }
 
@@ -430,7 +433,7 @@ namespace PowerDocu.AppDocumenter
             if (showDefaults && defaultValue != rule.InvariantScript && !content.appControls.controlPropertiesToSkip.Contains(rule.Property))
             {
                 value = CreateTable(BorderValues.None);
-                value.Append(CreateChangedDefaultColourRow(new Text(rule.InvariantScript), new Text(defaultValue)));
+                value.Append(CreateChangedDefaultColourRow(CreateRunWithLinebreaks(rule.InvariantScript), new Text(defaultValue)));
             }
             return CreateRow(new Text(rule.Property), value);
         }
@@ -496,24 +499,27 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Text(content.appDataSources.infoText))));
             foreach (DataSource datasource in content.appDataSources.dataSources)
             {
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Text(datasource.Name));
-                ApplyStyleToParagraph("Heading2", para);
-                body.AppendChild(new Paragraph(new Run()));
-                Table table = CreateTable();
-                table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
-                table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
-                if (DetailedDocumentation)
+                if (!datasource.isSampleDataSource() || documentSampleData)
                 {
-                    table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                    foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
+                    para = body.AppendChild(new Paragraph());
+                    run = para.AppendChild(new Run());
+                    run.AppendChild(new Text(datasource.Name));
+                    ApplyStyleToParagraph("Heading2", para);
+                    body.AppendChild(new Paragraph(new Run()));
+                    Table table = CreateTable();
+                    table.Append(CreateRow(new Text("Name"), new Text(datasource.Name)));
+                    table.Append(CreateRow(new Text("Type"), new Text(datasource.Type)));
+                    if (DetailedDocumentation)
                     {
-                        AddExpressionTable(expression, table);
+                        table.Append(CreateMergedRow(new Text("DataSource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                        foreach (Expression expression in datasource.Properties.OrderBy(o => o.expressionOperator))
+                        {
+                            AddExpressionTable(expression, table);
+                        }
                     }
+                    body.Append(table);
+                    body.AppendChild(new Paragraph(new Run(new Break())));
                 }
-                body.Append(table);
-                body.AppendChild(new Paragraph(new Run(new Break())));
             }
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
@@ -527,57 +533,60 @@ namespace PowerDocu.AppDocumenter
             body.AppendChild(new Paragraph(new Run(new Text(content.appResources.infoText))));
             foreach (Resource resource in content.appResources.resources)
             {
-                para = body.AppendChild(new Paragraph());
-                run = para.AppendChild(new Run());
-                run.AppendChild(new Text(resource.Name));
-                ApplyStyleToParagraph("Heading2", para);
-                body.AppendChild(new Paragraph(new Run()));
-                Table table = CreateTable();
-                table.Append(CreateRow(new Text("Name"), new Text(resource.Name)));
-                table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
-                table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
-                if (resource.ResourceKind == "LocalFile" && content.ResourceStreams.TryGetValue(resource.Name, out MemoryStream resourceStream))
+                if (!resource.isSampleResource())
                 {
-                    try
+                    para = body.AppendChild(new Paragraph());
+                    run = para.AppendChild(new Run());
+                    run.AppendChild(new Text(resource.Name));
+                    ApplyStyleToParagraph("Heading2", para);
+                    body.AppendChild(new Paragraph(new Run()));
+                    Table table = CreateTable();
+                    table.Append(CreateRow(new Text("Name"), new Text(resource.Name)));
+                    table.Append(CreateRow(new Text("Content"), new Text(resource.Content)));
+                    table.Append(CreateRow(new Text("Resource Kind"), new Text(resource.ResourceKind)));
+                    if (resource.ResourceKind == "LocalFile" && content.ResourceStreams.TryGetValue(resource.Name, out MemoryStream resourceStream))
                     {
-                        Drawing icon = null;
-                        Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
-                        if (fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
+                        try
                         {
-                            string svg = Encoding.Default.GetString(resourceStream.ToArray());
-                            icon = InsertSvgImage(mainPart, svg, 400, 400);
-                        }
-                        else
-                        {
-                            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
-                            int imageWidth, imageHeight;
-                            using (var image = Image.FromStream(resourceStream, false, false))
+                            Drawing icon = null;
+                            Expression fileName = resource.Properties.First(o => o.expressionOperator == "FileName");
+                            if (fileName.expressionOperands[0].ToString().EndsWith("svg", StringComparison.OrdinalIgnoreCase))
                             {
-                                imageWidth = image.Width;
-                                imageHeight = image.Height;
+                                string svg = Encoding.Default.GetString(resourceStream.ToArray());
+                                icon = InsertSvgImage(mainPart, svg, 400, 400);
                             }
-                            resourceStream.Position = 0;
-                            imagePart.FeedData(resourceStream);
-                            int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
-                            icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                            else
+                            {
+                                ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+                                int imageWidth, imageHeight;
+                                using (var image = Image.FromStream(resourceStream, false, false))
+                                {
+                                    imageWidth = image.Width;
+                                    imageHeight = image.Height;
+                                }
+                                resourceStream.Position = 0;
+                                imagePart.FeedData(resourceStream);
+                                int usedWidth = (imageWidth > 400) ? 400 : imageWidth;
+                                icon = InsertImage(mainPart.GetIdOfPart(imagePart), usedWidth, (int)(usedWidth * imageHeight / imageWidth));
+                            }
+                            table.Append(CreateRow(new Text("Resource Preview"), icon));
                         }
-                        table.Append(CreateRow(new Text("Resource Preview"), icon));
+                        catch (Exception e)
+                        {
+                            table.Append(CreateRow(new Text("Resource Preview"), new Text("Resource Preview is not available, media file is invalid.")));
+                        }
                     }
-                    catch (Exception e)
+                    if (DetailedDocumentation)
                     {
-                        table.Append(CreateRow(new Text("Resource Preview"), new Text("Resource Preview is not available, media file is invalid.")));
+                        table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
+                        foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
+                        {
+                            AddExpressionTable(expression, table);
+                        }
                     }
+                    body.Append(table);
+                    body.AppendChild(new Paragraph(new Run(new Break())));
                 }
-                if (DetailedDocumentation)
-                {
-                    table.Append(CreateMergedRow(new Text("Resource Properties"), 2, WordDocBuilder.cellHeaderBackground));
-                    foreach (Expression expression in resource.Properties.OrderBy(o => o.expressionOperator))
-                    {
-                        AddExpressionTable(expression, table);
-                    }
-                }
-                body.Append(table);
-                body.AppendChild(new Paragraph(new Run(new Break())));
             }
             body.AppendChild(new Paragraph(new Run(new Break())));
         }
