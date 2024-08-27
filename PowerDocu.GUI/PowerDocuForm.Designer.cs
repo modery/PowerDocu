@@ -235,7 +235,7 @@ namespace PowerDocu.GUI
                 TextAlign = ContentAlignment.MiddleLeft,
                 Text = "Canvas Apps: Document default values of properties",
                 Checked = true,
-                Size = new Size(convertToDPISpecific(300), convertToDPISpecific(30)),
+                Size = new Size(convertToDPISpecific(350), convertToDPISpecific(30)),
                 Location = new Point(convertToDPISpecific(15), documentEverythingRadioButton.Location.Y + documentEverythingRadioButton.Height)
             };
             documentationOptionsGroup.Controls.Add(documentDefaultsCheckBox);
