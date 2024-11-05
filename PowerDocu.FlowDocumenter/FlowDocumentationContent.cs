@@ -20,7 +20,7 @@ namespace PowerDocu.FlowDocumenter
         {
             NotificationHelper.SendNotification("Preparing documentation content for " + flow.Name);
             folderPath = path + CharsetHelper.GetSafeName(@"\FlowDoc " + flow.Name + @"\");
-            filename = CharsetHelper.GetSafeName(flow.Name) + ((flow.ID != null) ? ("(" + flow.ID + ")") : "");
+            filename = CharsetHelper.GetSafeName(flow.Name);
             metadata = new FlowMetadata(flow);
             overview = new FlowOverview();
             connectionReferences = new FlowConnectionReferences(flow);
