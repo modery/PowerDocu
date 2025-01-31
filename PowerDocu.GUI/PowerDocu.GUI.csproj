@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Fontawesome.sharp" Version="6.3.0" />
+    <PackageReference Include="Fontawesome.sharp" Version="6.6.0" />
   </ItemGroup>
 
   <ItemGroup>
