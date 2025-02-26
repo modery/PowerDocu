@@ -23,7 +23,6 @@ namespace PowerDocu.SolutionDocumenter
             body = mainPart.Document.Body;
             PrepareDocument(!String.IsNullOrEmpty(template));
             addSolutionMetadata();
-            addEnvironmentVariables();
             addSolutionComponents();
         }
 
@@ -153,15 +152,14 @@ namespace PowerDocu.SolutionDocumenter
             Paragraph para = body.AppendChild(new Paragraph());
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Environment Variables"));
-            ApplyStyleToParagraph("Heading1", para);
+            ApplyStyleToParagraph("Heading2", para);
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
-            run.AppendChild(new Text("This solution contains the following environment variables"));
             foreach(EnvironmentVariableEntity environmentVariable in content.solution.EnvironmentVariables) {
                 para = body.AppendChild(new Paragraph());
                 run = para.AppendChild(new Run());
                 run.AppendChild(new Text(environmentVariable.DisplayName));
-                ApplyStyleToParagraph("Heading2", para);
+                ApplyStyleToParagraph("Heading3", para);
                 Table table = CreateTable();
                 table.Append(CreateHeaderRow(new Text("Property"), new Text("Value")));
                 table.Append(CreateRow(new Text("Internal Name"), new Text(environmentVariable.Name)));
@@ -186,6 +184,7 @@ namespace PowerDocu.SolutionDocumenter
             para = body.AppendChild(new Paragraph());
             run = para.AppendChild(new Run());
             run.AppendChild(new Text("This solution contains the following components"));
+            addEnvironmentVariables();
             foreach (string componentType in content.solution.GetComponentTypes())
             {
                 switch (componentType)

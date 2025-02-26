@@ -20,7 +20,6 @@ namespace PowerDocu.SolutionDocumenter
             solutionDoc = new MdDocument();
 
             addSolutionOverview();
-            addEnvironmentVariables();
             addSolutionComponents();
             solutionDoc.Save(content.folderPath + "/" + solutionDocumentFileName);
             createOrderFile();
@@ -148,11 +147,10 @@ namespace PowerDocu.SolutionDocumenter
 
         private void addEnvironmentVariables()
         {
-            solutionDoc.Root.Add(new MdHeading("Environment Variables", 2));
-            solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("This solution contains the following environment variables")));
+            solutionDoc.Root.Add(new MdHeading("Environment Variables", 3));
             foreach (EnvironmentVariableEntity environmentVariable in content.solution.EnvironmentVariables)
             {
-                solutionDoc.Root.Add(new MdHeading(environmentVariable.DisplayName, 3));
+                solutionDoc.Root.Add(new MdHeading(environmentVariable.DisplayName, 4));
                 List<MdTableRow> environmentVariableTableRows = new List<MdTableRow>();
                 environmentVariableTableRows.Add(new MdTableRow("Internal Name", environmentVariable.Name));
                 environmentVariableTableRows.Add(new MdTableRow("Type", environmentVariable.getTypeDisplayName()));
@@ -170,6 +168,7 @@ namespace PowerDocu.SolutionDocumenter
         {
             solutionDoc.Root.Add(new MdHeading("Solution Components", 2));
             solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("This solution contains the following components")));
+            addEnvironmentVariables();
             foreach (string componentType in content.solution.GetComponentTypes())
             {
                 switch (componentType)
