@@ -7,7 +7,7 @@ namespace PowerDocu.FlowDocumenter
 {
     public static class FlowDocumentationGenerator
     {
-        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
+        public static List<FlowEntity> GenerateDocumentation(string filePath, string fileFormat, bool fullDocumentation, string flowActionSortOrder, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
@@ -24,28 +24,32 @@ namespace PowerDocu.FlowDocumenter
                     GraphBuilder gbzip = new GraphBuilder(flow, path);
                     gbzip.buildTopLevelGraph();
                     gbzip.buildDetailedGraph();
-                    FlowActionSortOrder sortOrder = flowActionSortOrder switch {
-                        "By order of appearance" => FlowActionSortOrder.SortByOrder,
-                        "By name" => FlowActionSortOrder.SortByName,
-                        _ => FlowActionSortOrder.SortByName
-                    };
-                    FlowDocumentationContent content = new FlowDocumentationContent(flow, path, sortOrder);
-                    if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
+                    if (fullDocumentation)
                     {
-                        NotificationHelper.SendNotification("Creating Word documentation");
-                        if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                        FlowActionSortOrder sortOrder = flowActionSortOrder switch
                         {
-                            FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, null);
-                        }
-                        else
+                            "By order of appearance" => FlowActionSortOrder.SortByOrder,
+                            "By name" => FlowActionSortOrder.SortByName,
+                            _ => FlowActionSortOrder.SortByName
+                        };
+                        FlowDocumentationContent content = new FlowDocumentationContent(flow, path, sortOrder);
+                        if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                         {
-                            FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, wordTemplate);
+                            NotificationHelper.SendNotification("Creating Word documentation");
+                            if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                            {
+                                FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, null);
+                            }
+                            else
+                            {
+                                FlowWordDocBuilder wordzip = new FlowWordDocBuilder(content, wordTemplate);
+                            }
                         }
-                    }
-                    if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
-                    {
-                        NotificationHelper.SendNotification("Creating Markdown documentation");
-                        FlowMarkdownBuilder markdownFile = new FlowMarkdownBuilder(content);
+                        if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
+                        {
+                            NotificationHelper.SendNotification("Creating Markdown documentation");
+                            FlowMarkdownBuilder markdownFile = new FlowMarkdownBuilder(content);
+                        }
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;

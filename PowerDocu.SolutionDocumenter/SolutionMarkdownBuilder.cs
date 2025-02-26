@@ -20,6 +20,7 @@ namespace PowerDocu.SolutionDocumenter
             solutionDoc = new MdDocument();
 
             addSolutionOverview();
+            addEnvironmentVariables();
             addSolutionComponents();
             solutionDoc.Save(content.folderPath + "/" + solutionDocumentFileName);
             createOrderFile();
@@ -144,6 +145,27 @@ namespace PowerDocu.SolutionDocumenter
             }
         }
 
+
+        private void addEnvironmentVariables()
+        {
+            solutionDoc.Root.Add(new MdHeading("Environment Variables", 2));
+            solutionDoc.Root.Add(new MdParagraph(new MdTextSpan("This solution contains the following environment variables")));
+            foreach (EnvironmentVariableEntity environmentVariable in content.solution.EnvironmentVariables)
+            {
+                solutionDoc.Root.Add(new MdHeading(environmentVariable.DisplayName, 3));
+                List<MdTableRow> environmentVariableTableRows = new List<MdTableRow>();
+                environmentVariableTableRows.Add(new MdTableRow("Internal Name", environmentVariable.Name));
+                environmentVariableTableRows.Add(new MdTableRow("Type", environmentVariable.getTypeDisplayName()));
+                environmentVariableTableRows.Add(new MdTableRow("Default Value", environmentVariable.DefaultValue ?? ""));
+                environmentVariableTableRows.Add(new MdTableRow("Description", environmentVariable.DescriptionDefault ?? ""));
+                environmentVariableTableRows.Add(new MdTableRow("IntroducedVersion", environmentVariable.IntroducedVersion));
+                //table.Append(CreateRow(new Text("IsRequired"), new Text(environmentVariable.IsRequired.ToString())));
+                //table.Append(CreateRow(new Text("IsCustomizable"), new Text(environmentVariable.IsCustomizable.ToString())));
+                //todo descriptions, localizednames
+                solutionDoc.Root.Add(new MdTable(new MdTableRow("Property", "Value"), environmentVariableTableRows));
+            }
+        }
+
         private void addSolutionComponents()
         {
             solutionDoc.Root.Add(new MdHeading("Solution Components", 2));
@@ -165,7 +187,7 @@ namespace PowerDocu.SolutionDocumenter
                         foreach (SolutionComponent component in components)
                         {
                             //todo add link to documentation
-                            componentTableRows.Add(new MdTableRow(new MdTextSpan(content.solution.GetDisplayNameForComponent(component))));
+                            componentTableRows.Add(new MdTableRow(new MdTextSpan(content.GetDisplayNameForComponent(component))));
                         }
                         if (componentTableRows.Count > 0)
                         {
@@ -260,7 +282,6 @@ namespace PowerDocu.SolutionDocumenter
 
         private void renderEntities()
         {
-            DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(content);
             solutionDoc.Root.Add(new MdHeading("Tables", 3));
             foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {

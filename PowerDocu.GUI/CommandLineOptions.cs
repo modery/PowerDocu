@@ -15,6 +15,8 @@ namespace PowerDocu.GUI
         [Option('w', "word", HelpText = "Format document as Word", Required = false)]
         public bool Word { get; set; }
         [Option('c', "changesOnly", HelpText = "Document changes only or all properties", Required = false)]
+        public bool FullDocumentation { get; set; }
+        [Option('f', "defaultValues", HelpText = "Create full set of documentation (true) or images only (false)", Required = false)]
         public bool ChangesOnly { get; set; }
         [Option('d', "defaultValues", HelpText = "Document Canvas App Default values", Required = false)]
         public bool DefaultValues { get; set; }

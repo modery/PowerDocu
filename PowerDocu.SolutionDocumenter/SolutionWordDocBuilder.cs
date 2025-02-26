@@ -23,6 +23,7 @@ namespace PowerDocu.SolutionDocumenter
             body = mainPart.Document.Body;
             PrepareDocument(!String.IsNullOrEmpty(template));
             addSolutionMetadata();
+            addEnvironmentVariables();
             addSolutionComponents();
         }
 
@@ -146,6 +147,36 @@ namespace PowerDocu.SolutionDocumenter
             return table;
         }
 
+
+        private void addEnvironmentVariables()
+        {
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Environment Variables"));
+            ApplyStyleToParagraph("Heading1", para);
+            para = body.AppendChild(new Paragraph());
+            run = para.AppendChild(new Run());
+            run.AppendChild(new Text("This solution contains the following environment variables"));
+            foreach(EnvironmentVariableEntity environmentVariable in content.solution.EnvironmentVariables) {
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+                run.AppendChild(new Text(environmentVariable.DisplayName));
+                ApplyStyleToParagraph("Heading2", para);
+                Table table = CreateTable();
+                table.Append(CreateHeaderRow(new Text("Property"), new Text("Value")));
+                table.Append(CreateRow(new Text("Internal Name"), new Text(environmentVariable.Name)));
+                table.Append(CreateRow(new Text("Type"), new Text(environmentVariable.getTypeDisplayName())));
+                table.Append(CreateRow(new Text("Default Value"), new Text(environmentVariable.DefaultValue)));
+                table.Append(CreateRow(new Text("Description"), new Text(environmentVariable.DescriptionDefault)));
+                table.Append(CreateRow(new Text("IntroducedVersion"), new Text(environmentVariable.IntroducedVersion)));
+                //table.Append(CreateRow(new Text("IsRequired"), new Text(environmentVariable.IsRequired.ToString())));
+                //table.Append(CreateRow(new Text("IsCustomizable"), new Text(environmentVariable.IsCustomizable.ToString())));
+                //todo descriptions, localizednames
+                body.Append(table);
+                para = body.AppendChild(new Paragraph());
+                run = para.AppendChild(new Run());
+            }
+        }
         private void addSolutionComponents()
         {
             Paragraph para = body.AppendChild(new Paragraph());
@@ -175,7 +206,7 @@ namespace PowerDocu.SolutionDocumenter
                         table.Append(CreateHeaderRow(new Text(componentType)));
                         foreach (SolutionComponent component in components)
                         {
-                            table.Append(CreateRow(new Text(content.solution.GetDisplayNameForComponent(component))));
+                            table.Append(CreateRow(new Text(content.GetDisplayNameForComponent(component))));
                         }
                         body.Append(table);
                         para = body.AppendChild(new Paragraph());
@@ -242,7 +273,6 @@ namespace PowerDocu.SolutionDocumenter
             Run run = para.AppendChild(new Run());
             run.AppendChild(new Text("Tables"));
             ApplyStyleToParagraph("Heading2", para);
-            DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(content);
             foreach (TableEntity tableEntity in content.solution.Customizations.getEntities())
             {
                 para = body.AppendChild(new Paragraph());

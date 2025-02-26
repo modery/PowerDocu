@@ -9,7 +9,7 @@ namespace PowerDocu.AppDocumenter
 {
     public static class AppDocumentationGenerator
     {
-        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool documentDefaultChangesOnly, bool documentDefaults, bool documentSampleData = false, string wordTemplate = null, string outputPath = null)
+        public static List<AppEntity> GenerateDocumentation(string filePath, string fileFormat, bool fullDocumentation, bool documentDefaultChangesOnly, bool documentDefaults, bool documentSampleData = false, string wordTemplate = null, string outputPath = null)
         {
             if (File.Exists(filePath))
             {
@@ -93,7 +93,7 @@ namespace PowerDocu.AppDocumenter
                     rootGraph.CreateLayout();
                     rootGraph.ToPngFile(folderPath + "ScreenNavigation.png");
                     rootGraph.ToSvgFile(folderPath + "ScreenNavigation.svg");
-                     //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
+                    //the following code is no longer required, as saving directly to PNG is now possible through GraphViz. Keeping it in case it is required in the future
                     /*
                     var svgDocument = SvgDocument.Open(folderPath + "ScreenNavigation.svg");
                     //generating the PNG from the SVG
@@ -101,24 +101,27 @@ namespace PowerDocu.AppDocumenter
                     {
                         bitmap?.Save(folderPath + "ScreenNavigation.png");
                     }*/
-                    AppDocumentationContent content = new AppDocumentationContent(app, path);
-                    if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
+                    if (fullDocumentation)
                     {
-                        //create the Word document
-                        NotificationHelper.SendNotification("Creating Word documentation");
-                        if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                        AppDocumentationContent content = new AppDocumentationContent(app, path);
+                        if (fileFormat.Equals(OutputFormatHelper.Word) || fileFormat.Equals(OutputFormatHelper.All))
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null, documentDefaultChangesOnly, documentDefaults, documentSampleData);
+                            //create the Word document
+                            NotificationHelper.SendNotification("Creating Word documentation");
+                            if (String.IsNullOrEmpty(wordTemplate) || !File.Exists(wordTemplate))
+                            {
+                                AppWordDocBuilder wordzip = new AppWordDocBuilder(content, null, documentDefaultChangesOnly, documentDefaults, documentSampleData);
+                            }
+                            else
+                            {
+                                AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate, documentDefaultChangesOnly, documentDefaults, documentSampleData);
+                            }
                         }
-                        else
+                        if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
                         {
-                            AppWordDocBuilder wordzip = new AppWordDocBuilder(content, wordTemplate, documentDefaultChangesOnly, documentDefaults, documentSampleData);
+                            NotificationHelper.SendNotification("Creating Markdown documentation");
+                            AppMarkdownBuilder markdownFile = new AppMarkdownBuilder(content);
                         }
-                    }
-                    if (fileFormat.Equals(OutputFormatHelper.Markdown) || fileFormat.Equals(OutputFormatHelper.All))
-                    {
-                        NotificationHelper.SendNotification("Creating Markdown documentation");
-                        AppMarkdownBuilder markdownFile = new AppMarkdownBuilder(content);
                     }
                 }
                 DateTime endDocGeneration = DateTime.Now;

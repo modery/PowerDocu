@@ -77,10 +77,10 @@ namespace PowerDocu.GUI
                 switch (Path.GetExtension(itemToDocument))
                 {
                     case ".zip":
-                        SolutionDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.SampleDataSources, options.SortFlowActions, options.WordTemplate, options.OutputPath);
+                        SolutionDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.FullDocumentation, options.ChangesOnly, options.DefaultValues, options.SampleDataSources, options.SortFlowActions, options.WordTemplate, options.OutputPath);
                         break;
                     case ".msapp":
-                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.ChangesOnly, options.DefaultValues, options.SampleDataSources, options.WordTemplate, options.OutputPath);
+                        AppDocumentationGenerator.GenerateDocumentation(itemToDocument, options.FileFormat, options.FullDocumentation, options.ChangesOnly, options.DefaultValues, options.SampleDataSources, options.WordTemplate, options.OutputPath);
                         break;
                 }
             }

@@ -37,7 +37,8 @@ namespace PowerDocu.GUI
             if (configHelper.wordTemplate != null)
             {
                 openWordTemplateDialog.FileName = configHelper.wordTemplate;
-                wordTemplateInfoLabel.Text = "Template: " + Path.GetFileName(configHelper.wordTemplate);
+                wordTemplateInfoLabel.Text =
+                    "Template: " + Path.GetFileName(configHelper.wordTemplate);
             }
         }
 
@@ -49,9 +50,14 @@ namespace PowerDocu.GUI
                 newReleaseButton.Visible = true;
                 newReleaseLabel.Text += PowerDocuReleaseHelper.latestVersionTag;
                 newReleaseLabel.Visible = true;
-                string newReleaseMessage = $"A new PowerDocu release has been found: {PowerDocuReleaseHelper.latestVersionTag}";
+                string newReleaseMessage =
+                    $"A new PowerDocu release has been found: {PowerDocuReleaseHelper.latestVersionTag}";
                 NotificationHelper.SendNotification(newReleaseMessage);
-                NotificationHelper.SendNotification("Please visit " + PowerDocuReleaseHelper.latestVersionUrl + " or press the Update button to download it");
+                NotificationHelper.SendNotification(
+                    "Please visit "
+                        + PowerDocuReleaseHelper.latestVersionUrl
+                        + " or press the Update button to download it"
+                );
                 NotificationHelper.SendNotification(Environment.NewLine);
                 statusLabel.Text = newReleaseMessage;
             }
@@ -59,7 +65,9 @@ namespace PowerDocu.GUI
             int connectorIcons = ConnectorHelper.numberOfConnectorIcons();
             if (connectorIcons < 100)
             {
-                NotificationHelper.SendNotification($"Only {connectorIcons} connector icons were found. Please update the Connectors list (press the Green Cloud Download icon)");
+                NotificationHelper.SendNotification(
+                    $"Only {connectorIcons} connector icons were found. Please update the Connectors list (press the Green Cloud Download icon)"
+                );
             }
         }
 
@@ -67,12 +75,15 @@ namespace PowerDocu.GUI
         {
             if (openFileToParseDialog.ShowDialog() == DialogResult.OK)
             {
-                selectedFilesToDocumentLabel.Text = "Start documentation process for selected files:" + Environment.NewLine;
+                selectedFilesToDocumentLabel.Text =
+                    "Select either the full documentation or just the image generation to start the documentation process for the following selected files:" + Environment.NewLine;
                 foreach (string fileName in openFileToParseDialog.FileNames)
                 {
-                    selectedFilesToDocumentLabel.Text += "   " + Path.GetFileName(fileName) + Environment.NewLine;
+                    selectedFilesToDocumentLabel.Text +=
+                        "   " + Path.GetFileName(fileName) + Environment.NewLine;
                 }
                 startDocumentationButton.Visible = true;
+                startImageGenerationButton.Visible = true;
             }
         }
 
@@ -103,7 +114,9 @@ namespace PowerDocu.GUI
 
         private void NewReleaseButton_Click(object sender, EventArgs e)
         {
-            var sInfo = new System.Diagnostics.ProcessStartInfo(PowerDocuReleaseHelper.latestVersionUrl)
+            var sInfo = new System.Diagnostics.ProcessStartInfo(
+                PowerDocuReleaseHelper.latestVersionUrl
+            )
             {
                 UseShellExecute = true,
             };
@@ -119,8 +132,10 @@ namespace PowerDocu.GUI
             await ConnectorHelper.UpdateConnectorIcons();
             updateConnectorIconsButton.Enabled = true;
             updateConnectorIconsButton.IconColor = Color.Green;
-            updateConnectorIconsLabel.Text = $"Update your existing set of connector icons\n({ConnectorHelper.numberOfConnectors()} connectors, {ConnectorHelper.numberOfConnectorIcons()} icons)";
-            statusLabel.Text = $"Connector icons have been updated ({ConnectorHelper.numberOfConnectors()} connectors, {ConnectorHelper.numberOfConnectorIcons()} icons)";
+            updateConnectorIconsLabel.Text =
+                $"Update your existing set of connector icons\n({ConnectorHelper.numberOfConnectors()} connectors, {ConnectorHelper.numberOfConnectorIcons()} icons)";
+            statusLabel.Text =
+                $"Connector icons have been updated ({ConnectorHelper.numberOfConnectors()} connectors, {ConnectorHelper.numberOfConnectorIcons()} icons)";
         }
 
         private async void SaveConfigButton_Click(object sender, EventArgs e)
@@ -139,20 +154,33 @@ namespace PowerDocu.GUI
             configHelper.SaveConfigurationToFile();
             statusLabel.Text = "New default configuration has been saved.";
         }
+
         private async void StartDocumentationButton_Click(object sender, EventArgs e)
         {
-            statusLabel.Text = $"Starting documentation process for {openFileToParseDialog.FileNames.Length} files...";
+            startDocumentation(true);
+        }
+
+        private async void StartImageGenerationButton_Click(object sender, EventArgs e)
+        {
+            startDocumentation(false);
+        }
+
+        //fullDocumentation = true to start full documentation generation , false to start image generation
+        private void startDocumentation(bool fullDocumentation = true)
+        {
+            statusLabel.Text =
+                $"Starting documentation process for {openFileToParseDialog.FileNames.Length} files...";
             statusLabel.Refresh();
             startDocumentationButton.Enabled = false;
+            startImageGenerationButton.Enabled = false;
             startDocumentationButton.IconColor = Color.DarkGray;
+            startImageGenerationButton.IconColor = Color.DarkGray;
             foreach (string fileName in openFileToParseDialog.FileNames)
             {
                 try
                 {
                     NotificationHelper.SendNotification(
-                        "Preparing to parse file " +
-                            fileName
-                            + ", please wait."
+                        "Preparing to parse file " + fileName + ", please wait."
                     );
                     Cursor = Cursors.WaitCursor; // change cursor to hourglass type
                     if (fileName.EndsWith(".zip"))
@@ -163,6 +191,7 @@ namespace PowerDocu.GUI
                         SolutionDocumentationGenerator.GenerateDocumentation(
                             fileName,
                             outputFormatComboBox.SelectedItem.ToString(),
+                            fullDocumentation,
                             documentChangesOnlyRadioButton.Checked,
                             documentDefaultsCheckBox.Checked,
                             documentSampleDataCheckBox.Checked,
@@ -177,6 +206,7 @@ namespace PowerDocu.GUI
                         AppDocumentationGenerator.GenerateDocumentation(
                             fileName,
                             outputFormatComboBox.SelectedItem.ToString(),
+                            fullDocumentation,
                             documentChangesOnlyRadioButton.Checked,
                             documentDefaultsCheckBox.Checked,
                             documentSampleDataCheckBox.Checked,
@@ -201,27 +231,34 @@ namespace PowerDocu.GUI
                     NotificationHelper.SendNotification(Environment.NewLine);
                     Cursor = Cursors.Arrow; // change cursor to normal type
                     startDocumentationButton.Enabled = true;
+                    startImageGenerationButton.Enabled = true;
                     startDocumentationButton.IconColor = Color.Green;
+                    startImageGenerationButton.IconColor = Color.Green;
                 }
             }
         }
+
         private async void ClearWordTemplateButton_Click(object sender, EventArgs e)
         {
-
             openWordTemplateDialog.FileName = "";
             clearWordTemplateButton.Visible = false;
             wordTemplateInfoLabel.Text = "No Word template selected";
         }
 
-
         private void SizeChangedHandler(object sender, EventArgs e)
         {
-            appStatusTextBox.Size = new Size(ClientSize.Width - convertToDPISpecific(40), ClientSize.Height - convertToDPISpecific(100));
+            appStatusTextBox.Size = new Size(
+                ClientSize.Width - convertToDPISpecific(40),
+                ClientSize.Height - convertToDPISpecific(100)
+            );
             dynamicTabControl.Height = ClientSize.Height - convertToDPISpecific(50);
             dynamicTabControl.Width = ClientSize.Width;
             statusLabel.Width = convertToDPISpecific(ClientSize.Width - convertToDPISpecific(20));
 
-            generateDocuPanel.Size = new Size(ClientSize.Width - convertToDPISpecific(30), ClientSize.Height - convertToDPISpecific(25));
+            generateDocuPanel.Size = new Size(
+                ClientSize.Width - convertToDPISpecific(30),
+                ClientSize.Height - convertToDPISpecific(25)
+            );
         }
 
         private void DpiChangedHandler(object sender, EventArgs e)
@@ -233,7 +270,10 @@ namespace PowerDocu.GUI
         {
             if (outputFormatComboBox != null && selectWordTemplateButton != null)
             {
-                if (outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.Word) || outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.All))
+                if (
+                    outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.Word)
+                    || outputFormatComboBox.SelectedItem.ToString().Equals(OutputFormatHelper.All)
+                )
                 {
                     selectWordTemplateButton.Enabled = true;
                     wordTemplateInfoLabel.ForeColor = Color.Black;

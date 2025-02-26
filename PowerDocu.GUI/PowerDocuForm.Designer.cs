@@ -401,7 +401,7 @@ namespace PowerDocu.GUI
             {
                 Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
                 Location = new Point(convertToDPISpecific(15), selectFileToParseButton.Location.Y + selectFileToParseButton.Height + convertToDPISpecific(25)),
-                IconChar = IconChar.HourglassStart,
+                IconChar = IconChar.FileExport,
                 IconColor = Color.Green,
                 IconSize = convertToDPISpecific(32),
                 IconFont = IconFont.Auto,
@@ -409,12 +409,24 @@ namespace PowerDocu.GUI
             };
             startDocumentationButton.Click += new EventHandler(StartDocumentationButton_Click);
             generateDocuPanel.Controls.Add(startDocumentationButton);
+            startImageGenerationButton = new IconButton()
+            {
+                Size = new Size(convertToDPISpecific(42), convertToDPISpecific(42)),
+                Location = new Point(convertToDPISpecific(15), startDocumentationButton.Location.Y + startDocumentationButton.Height + convertToDPISpecific(0)),
+                IconChar = IconChar.Images,
+                IconColor = Color.Green,
+                IconSize = convertToDPISpecific(32),
+                IconFont = IconFont.Auto,
+                Visible = false
+            };
+            startImageGenerationButton.Click += new EventHandler(StartImageGenerationButton_Click);
+            generateDocuPanel.Controls.Add(startImageGenerationButton);            
             selectedFilesToDocumentLabel = new Label()
             {
                 Location = new Point(convertToDPISpecific(30) + startDocumentationButton.Width, selectFileToParseButton.Location.Y + selectFileToParseButton.Height + convertToDPISpecific(25)),
                 Text = "",
                 //Font = new Font(Label.DefaultFont, FontStyle.Bold),
-                Width = convertToDPISpecific(400),
+                Width = convertToDPISpecific(300),
                 Height = convertToDPISpecific(15),
                 AutoSize = true
             };
@@ -429,7 +441,7 @@ namespace PowerDocu.GUI
             return (int)number * this.DeviceDpi / 96;
         }
 
-        private IconButton selectFileToParseButton, selectWordTemplateButton, newReleaseButton, updateConnectorIconsButton, saveConfigButton, startDocumentationButton, clearWordTemplateButton;
+        private IconButton selectFileToParseButton, selectWordTemplateButton, newReleaseButton, updateConnectorIconsButton, saveConfigButton, startDocumentationButton, startImageGenerationButton, clearWordTemplateButton;
         private OpenFileDialog openFileToParseDialog, openWordTemplateDialog;
         private TextBox appStatusTextBox;
         private ComboBox outputFormatComboBox, flowActionSortOrderComboBox;
