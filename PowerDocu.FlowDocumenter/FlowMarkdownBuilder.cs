@@ -283,7 +283,6 @@ namespace PowerDocu.FlowDocumenter
                                                     }
                                                 }
                                                 else {
-                                                    string s = "";
                                                 }
                                             }
                                             operandsCell.Append("</table>");

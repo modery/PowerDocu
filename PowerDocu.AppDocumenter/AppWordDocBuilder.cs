@@ -571,7 +571,7 @@ namespace PowerDocu.AppDocumenter
                             }
                             table.Append(CreateRow(new Text("Resource Preview"), icon));
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             table.Append(CreateRow(new Text("Resource Preview"), new Text("Resource Preview is not available, media file is invalid.")));
                         }

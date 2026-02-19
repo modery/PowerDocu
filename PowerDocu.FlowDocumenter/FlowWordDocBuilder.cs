@@ -350,7 +350,6 @@ namespace PowerDocu.FlowDocumenter
                                                     operandsCell.Append(innerOperandsTable, new Paragraph());
                                                 }
                                                 else {
-                                                    string s = "";
                                                 }
                                             }
                                             operandsCell.Append(operandsTable, new Paragraph());

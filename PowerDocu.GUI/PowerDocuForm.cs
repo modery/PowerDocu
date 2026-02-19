@@ -183,7 +183,7 @@ namespace PowerDocu.GUI
             configHelper.checkForUpdatesOnLaunch = checkForUpdatesOnLaunchCheckBox.Checked;
         }
 
-        private async void SaveConfigButton_Click(object sender, EventArgs e)
+        private void SaveConfigButton_Click(object sender, EventArgs e)
         {
             statusLabel.Text = "Saving configuration...";
             statusLabel.Refresh();
@@ -192,12 +192,12 @@ namespace PowerDocu.GUI
             statusLabel.Text = "New default configuration has been saved.";
         }
 
-        private async void StartDocumentationButton_Click(object sender, EventArgs e)
+        private void StartDocumentationButton_Click(object sender, EventArgs e)
         {
             startDocumentation(true);
         }
 
-        private async void StartImageGenerationButton_Click(object sender, EventArgs e)
+        private void StartImageGenerationButton_Click(object sender, EventArgs e)
         {
             startDocumentation(false);
         }
@@ -271,7 +271,7 @@ namespace PowerDocu.GUI
             }
         }
 
-        private async void ClearWordTemplateButton_Click(object sender, EventArgs e)
+        private void ClearWordTemplateButton_Click(object sender, EventArgs e)
         {
             openWordTemplateDialog.FileName = "";
             clearWordTemplateButton.Visible = false;
