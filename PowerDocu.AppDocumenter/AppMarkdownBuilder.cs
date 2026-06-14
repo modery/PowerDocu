@@ -47,7 +47,7 @@ namespace PowerDocu.AppDocumenter
             //a dedicated document for each datasource
             foreach (DataSource datasource in content.appDataSources.dataSources.OrderBy(o => o.Name).ToList())
             {
-                datasourcesDocuments.Add(datasource.Name, set.CreateMdDocument(("datasource " + datasource.Name + " " + content.filename + ".md").Replace(" ", "-")));
+                datasourcesDocuments.Add(datasource.Name, set.CreateMdDocument(("datasource-" + CharsetHelper.GetSafeName(datasource.Name) + "-" + content.filename + ".md").Replace(" ", "-")));
             }
             resourcesDocument = set.CreateMdDocument(resourcesFileName);
             controlsDocument = set.CreateMdDocument(controlsFileName);
