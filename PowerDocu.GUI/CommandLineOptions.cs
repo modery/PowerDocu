@@ -58,6 +58,8 @@ namespace PowerDocu.GUI
         public bool DocumentBusinessProcessFlows { get; set; }
         [Option('y', "documentClassicWorkflows", HelpText = "Document Classic Workflows", Required = false, Default = true)]
         public bool DocumentClassicWorkflows { get; set; }
+        [Option("documentDataflows", HelpText = "Document Dataflows", Required = false, Default = true)]
+        public bool DocumentDataflows { get; set; }
 
         internal string FileFormat => this switch
         {

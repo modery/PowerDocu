@@ -18,6 +18,7 @@ namespace PowerDocu.SolutionDocumenter
                 { "Model-Driven App",  ("#117A65", "#ffffff", "rectangle") },
                 { "Business Process Flow", ("#AF601A", "#ffffff", "octagon") },
                 { "Desktop Flow",      ("#2E86C1", "#ffffff", "rectangle") },
+                { "Dataflow",          ("#1A5276", "#ffffff", "rectangle") },
                 { "Table",             ("#B9770E", "#ffffff", "cylinder") },
                 { "Connector",         ("#7D3C98", "#ffffff", "diamond") },
                 { "Data Source",       ("#7D3C98", "#ffffff", "diamond") },
@@ -44,6 +45,7 @@ namespace PowerDocu.SolutionDocumenter
                 { "stage entity",    "#AF601A" },
                 { "uses env variable","#5B6770" },
                 { "calls flow",      "#2874A6" },
+                { "loads into",      "#1A5276" },
             };
 
         // Component types to include in the graph. Add new types here as needed.
@@ -57,6 +59,7 @@ namespace PowerDocu.SolutionDocumenter
                 "Model-Driven App",
                 "Business Process Flow",
                 "Desktop Flow",
+                "Dataflow",
                 "Table"
                 /* [potential future additions]
                 "Connector",

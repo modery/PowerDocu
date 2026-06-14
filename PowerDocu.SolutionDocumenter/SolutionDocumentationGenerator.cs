@@ -10,6 +10,7 @@ using PowerDocu.AppModuleDocumenter;
 using PowerDocu.BPFDocumenter;
 using PowerDocu.ClassicWorkflowDocumenter;
 using PowerDocu.DesktopFlowDocumenter;
+using PowerDocu.DataflowDocumenter;
 using PowerDocu.FlowDocumenter;
 
 namespace PowerDocu.SolutionDocumenter
@@ -146,155 +147,168 @@ namespace PowerDocu.SolutionDocumenter
                             EnrichCustomActivityMetadata(workflow.Steps, context.Customizations);
                         }
                         _enrichContext = null;
+                        // Extract Dataverse Dataflows from customizations
+                        if (config.documentDataflows)
+                        {
+                            context.Dataflows = context.Customizations.getDataflows() ?? new List<DataflowEntity>();
+                        }
                     }
                 }
-            }
 
 
-            NotificationHelper.SendNotification(
-                $"Phase 1 complete: {context.Flows.Count} flow(s), {context.Apps.Count} app(s), " +
-                $"{context.Agents.Count} agent(s), {context.AppModules.Count} app module(s), " +
-                $"{context.BusinessProcessFlows.Count} BPF(s), {context.DesktopFlows.Count} desktop flow(s), " +
-                $"{context.ClassicWorkflows.Count} classic workflow(s), " +
-                $"{context.Tables.Count} table(s), {context.Roles.Count} role(s)."
-            );
+                NotificationHelper.SendNotification(
+                    $"Phase 1 complete: {context.Flows.Count} flow(s), {context.Apps.Count} app(s), " +
+                    $"{context.Agents.Count} agent(s), {context.AppModules.Count} app module(s), " +
+                    $"{context.BusinessProcessFlows.Count} BPF(s), {context.DesktopFlows.Count} desktop flow(s), " +
+                    $"{context.ClassicWorkflows.Count} classic workflow(s), " +
+                    $"{context.Dataflows.Count} dataflow(s), " +
+                    $"{context.Tables.Count} table(s), {context.Roles.Count} role(s)."
+                );
 
-            // Build progress tracker from discovered counts
-            var progress = new ProgressTracker();
-            if (config.documentFlows && context.Flows.Count > 0)
-                progress.Register("Flows", context.Flows.Count);
-            if (config.documentApps && context.Apps.Count > 0)
-                progress.Register("Apps", context.Apps.Count);
-            if (config.documentAgents && context.Agents.Count > 0)
-                progress.Register("Agents", context.Agents.Count);
-            if (config.documentBusinessProcessFlows && context.BusinessProcessFlows.Count > 0)
-                progress.Register("BPFs", context.BusinessProcessFlows.Count);
-            if (config.documentDesktopFlows && context.DesktopFlows.Count > 0)
-                progress.Register("DesktopFlows", context.DesktopFlows.Count);
-            if (config.documentClassicWorkflows && context.ClassicWorkflows.Count > 0)
-                progress.Register("Classic Workflows", context.ClassicWorkflows.Count);
-            if (config.documentModelDrivenApps && context.AppModules.Count > 0)
-                progress.Register("Model-Driven Apps", context.AppModules.Count);
-            int aiModelCount = context.Customizations?.getAIModels()?.Count ?? 0;
-            if (config.documentSolution && context.Solution != null && aiModelCount > 0)
-                progress.Register("AI Models", aiModelCount);
-            context.Progress = progress;
-            if (progress.BuildString().Length > 0)
-                NotificationHelper.SendStatusUpdate(progress.BuildString());
+                // Build progress tracker from discovered counts
+                var progress = new ProgressTracker();
+                if (config.documentFlows && context.Flows.Count > 0)
+                    progress.Register("Flows", context.Flows.Count);
+                if (config.documentApps && context.Apps.Count > 0)
+                    progress.Register("Apps", context.Apps.Count);
+                if (config.documentAgents && context.Agents.Count > 0)
+                    progress.Register("Agents", context.Agents.Count);
+                if (config.documentBusinessProcessFlows && context.BusinessProcessFlows.Count > 0)
+                    progress.Register("BPFs", context.BusinessProcessFlows.Count);
+                if (config.documentDesktopFlows && context.DesktopFlows.Count > 0)
+                    progress.Register("DesktopFlows", context.DesktopFlows.Count);
+                if (config.documentClassicWorkflows && context.ClassicWorkflows.Count > 0)
+                    progress.Register("Classic Workflows", context.ClassicWorkflows.Count);
+                if (config.documentDataflows && context.Dataflows.Count > 0)
+                    progress.Register("Dataflows", context.Dataflows.Count);
+                if (config.documentModelDrivenApps && context.AppModules.Count > 0)
+                    progress.Register("Model-Driven Apps", context.AppModules.Count);
+                int aiModelCount = context.Customizations?.getAIModels()?.Count ?? 0;
+                if (config.documentSolution && context.Solution != null && aiModelCount > 0)
+                    progress.Register("AI Models", aiModelCount);
+                context.Progress = progress;
+                if (progress.BuildString().Length > 0)
+                    NotificationHelper.SendStatusUpdate(progress.BuildString());
 
-            // ── Phase 2: Generate all documentation ────────────────────────
-            NotificationHelper.SendNotification("Phase 2: Generating documentation...");
-            NotificationHelper.SendPhaseUpdate("Documenting");
+                // ── Phase 2: Generate all documentation ────────────────────────
+                NotificationHelper.SendNotification("Phase 2: Generating documentation...");
+                NotificationHelper.SendPhaseUpdate("Documenting");
 
-            // Compute centralised solution base path so that all sub-documenters
-            // write into the same Solution folder, regardless of how individual
-            // parsers classify the package.
-            string solutionBasePath = outputPath == null
-                ? Path.GetDirectoryName(filePath) + @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath))
-                : outputPath + @"\" + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
+                // Compute centralised solution base path so that all sub-documenters
+                // write into the same Solution folder, regardless of how individual
+                // parsers classify the package.
+                string solutionBasePath = outputPath == null
+                    ? Path.GetDirectoryName(filePath) + @"\Solution " + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath))
+                    : outputPath + @"\" + CharsetHelper.GetSafeName(Path.GetFileNameWithoutExtension(filePath));
 
-            // Generate flow documentation
-            if (flows != null)
-            {
-                FlowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate app documentation
-            if (apps != null)
-            {
-                AppDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate agent documentation
-            if (agents != null)
-            {
-                AgentDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate AI Model documentation
-            if (config.documentSolution && context.Solution != null)
-            {
-                AIModelDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate Business Process Flow documentation
-            if (config.documentBusinessProcessFlows)
-            {
-                BPFDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate Desktop Flow documentation
-            if (config.documentDesktopFlows)
-            {
-                DesktopFlowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate Classic Workflow documentation
-            if (config.documentClassicWorkflows)
-            {
-                ClassicWorkflowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
-            }
-
-            // Generate solution-level documentation (solution overview, model-driven apps, Dataverse graph)
-            if (config.documentSolution && context.Solution != null)
-            {
-                string solutionPath = solutionBasePath + @"\";
-
-                // Generate Model-Driven App documentation
-                if (config.documentModelDrivenApps)
+                // Generate flow documentation
+                if (flows != null)
                 {
-                    AppModuleDocumentationGenerator.GenerateOutput(context, solutionPath);
+                    FlowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
                 }
 
-                // Generate solution overview documentation
-                SolutionDocumentationContent solutionContent = new SolutionDocumentationContent(context, solutionPath);
-
-                try
+                // Generate app documentation
+                if (apps != null)
                 {
-                    DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(solutionContent);
-                }
-                catch (Exception ex)
-                {
-                    NotificationHelper.SendNotification("Warning: Could not generate Dataverse relationship graph: " + ex.Message);
+                    AppDocumentationGenerator.GenerateOutput(context, solutionBasePath);
                 }
 
-                // Generate solution component relationship graph
-                try
+                // Generate agent documentation
+                if (agents != null)
                 {
-                    SolutionComponentGraphBuilder componentGraphBuilder = new SolutionComponentGraphBuilder(
-                        solutionContent, solutionPath, config.showAllComponentsInGraph);
-                    componentGraphBuilder.Build();
-                }
-                catch (Exception ex)
-                {
-                    NotificationHelper.SendNotification("Warning: Could not generate solution component graph: " + ex.Message);
+                    AgentDocumentationGenerator.GenerateOutput(context, solutionBasePath);
                 }
 
-                if (fullDocumentation)
+                // Generate AI Model documentation
+                if (config.documentSolution && context.Solution != null)
                 {
-                    if (config.outputFormat.Equals(OutputFormatHelper.Word) || config.outputFormat.Equals(OutputFormatHelper.All))
+                    AIModelDocumentationGenerator.GenerateOutput(context, solutionBasePath);
+                }
+
+                // Generate Business Process Flow documentation
+                if (config.documentBusinessProcessFlows)
+                {
+                    BPFDocumentationGenerator.GenerateOutput(context, solutionBasePath);
+                }
+
+                // Generate Desktop Flow documentation
+                if (config.documentDesktopFlows)
+                {
+                    DesktopFlowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
+                }
+
+                // Generate Classic Workflow documentation
+                if (config.documentClassicWorkflows)
+                {
+                    ClassicWorkflowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
+                }
+                // Generate Dataflow documentation
+                if (config.documentDataflows)
+                {
+                    DataflowDocumentationGenerator.GenerateOutput(context, solutionBasePath);
+                }
+
+                // Generate solution-level documentation (solution overview, model-driven apps, Dataverse graph)
+                if (config.documentSolution && context.Solution != null)
+                {
+                    string solutionPath = solutionBasePath + @"\";
+
+                    // Generate Model-Driven App documentation
+                    if (config.documentModelDrivenApps)
                     {
-                        NotificationHelper.SendNotification("Creating Solution documentation");
-                        SolutionWordDocBuilder wordzip = new SolutionWordDocBuilder(solutionContent, config.wordTemplate, config.documentDefaultColumns, config.addTableOfContents);
-                        WebResourceWordDocBuilder wrWordDoc = new WebResourceWordDocBuilder(solutionContent, config.wordTemplate);
+                        AppModuleDocumentationGenerator.GenerateOutput(context, solutionPath);
                     }
-                    if (config.outputFormat.Equals(OutputFormatHelper.Markdown) || config.outputFormat.Equals(OutputFormatHelper.All))
-                    {
-                        SolutionMarkdownBuilder mdDoc = new SolutionMarkdownBuilder(solutionContent, config.documentDefaultColumns);
-                        WebResourceMarkdownBuilder wrMdDoc = new WebResourceMarkdownBuilder(solutionContent);
-                    }
-                    if (config.outputFormat.Equals(OutputFormatHelper.Html) || config.outputFormat.Equals(OutputFormatHelper.All))
-                    {
-                        NotificationHelper.SendNotification("Creating HTML Solution documentation");
-                        SolutionHtmlBuilder htmlDoc = new SolutionHtmlBuilder(solutionContent, config.documentDefaultColumns);
-                        WebResourceHtmlBuilder wrDoc = new WebResourceHtmlBuilder(solutionContent);
-                    }
-                    FormSvgBuilder.ClearCache();
-                }
-            }
 
-            DateTime endDocGeneration = DateTime.Now;
-            NotificationHelper.SendNotification($"Documentation completed for {filePath}. Total time: {(endDocGeneration - startDocGeneration).TotalSeconds} seconds.");
+                    // Generate solution overview documentation
+                    SolutionDocumentationContent solutionContent = new SolutionDocumentationContent(context, solutionPath);
+
+                    try
+                    {
+                        DataverseGraphBuilder dataverseGraphBuilder = new DataverseGraphBuilder(solutionContent);
+                    }
+                    catch (Exception ex)
+                    {
+                        NotificationHelper.SendNotification("Warning: Could not generate Dataverse relationship graph: " + ex.Message);
+                    }
+
+                    // Generate solution component relationship graph
+                    try
+                    {
+                        SolutionComponentGraphBuilder componentGraphBuilder = new SolutionComponentGraphBuilder(
+                            solutionContent, solutionPath, config.showAllComponentsInGraph);
+                        componentGraphBuilder.Build();
+                    }
+                    catch (Exception ex)
+                    {
+                        NotificationHelper.SendNotification("Warning: Could not generate solution component graph: " + ex.Message);
+                    }
+
+                    if (fullDocumentation)
+                    {
+                        if (config.outputFormat.Equals(OutputFormatHelper.Word) || config.outputFormat.Equals(OutputFormatHelper.All))
+                        {
+                            NotificationHelper.SendNotification("Creating Solution documentation");
+                            SolutionWordDocBuilder wordzip = new SolutionWordDocBuilder(solutionContent, config.wordTemplate, config.documentDefaultColumns, config.addTableOfContents);
+                            WebResourceWordDocBuilder wrWordDoc = new WebResourceWordDocBuilder(solutionContent, config.wordTemplate);
+                        }
+                        if (config.outputFormat.Equals(OutputFormatHelper.Markdown) || config.outputFormat.Equals(OutputFormatHelper.All))
+                        {
+                            SolutionMarkdownBuilder mdDoc = new SolutionMarkdownBuilder(solutionContent, config.documentDefaultColumns);
+                            WebResourceMarkdownBuilder wrMdDoc = new WebResourceMarkdownBuilder(solutionContent);
+                        }
+                        if (config.outputFormat.Equals(OutputFormatHelper.Html) || config.outputFormat.Equals(OutputFormatHelper.All))
+                        {
+                            NotificationHelper.SendNotification("Creating HTML Solution documentation");
+                            SolutionHtmlBuilder htmlDoc = new SolutionHtmlBuilder(solutionContent, config.documentDefaultColumns);
+                            WebResourceHtmlBuilder wrDoc = new WebResourceHtmlBuilder(solutionContent);
+                        }
+                        FormSvgBuilder.ClearCache();
+                    }
+                }
+
+                DateTime endDocGeneration = DateTime.Now;
+                NotificationHelper.SendNotification($"Documentation completed for {filePath}. Total time: {(endDocGeneration - startDocGeneration).TotalSeconds} seconds.");
+            }
         }
 
         private static void EnrichCustomActivityMetadata(List<ClassicWorkflowStep> steps, CustomizationsEntity customizations)

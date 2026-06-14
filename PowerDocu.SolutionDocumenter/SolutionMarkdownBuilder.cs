@@ -55,6 +55,11 @@ namespace PowerDocu.SolutionDocumenter
                 var agentLink = new MdLinkSpan("Agents", "#agents");
                 statisticsEntries.Add(("Agents", content.agents.Count, agentLink));
             }
+            if (content.dataflows.Count > 0)
+            {
+                var dfLink = new MdLinkSpan("Dataflows", "#dataflows");
+                statisticsEntries.Add(("Dataflows", content.dataflows.Count, dfLink));
+            }
             if (content.solution.AppActions.Count > 0)
             {
                 var link = new MdLinkSpan("Command Bar Buttons", "#app-actions");
@@ -99,6 +104,7 @@ namespace PowerDocu.SolutionDocumenter
                 "AI Project" => "AI Models",
                 "Option Set" => "Option Sets",
                 "Agent" => "Agents",
+                "Dataflow" => "Dataflows",
                 "Web Resource" => "Web Resources",
                 "AppAction" => "Command Bar Buttons",
                 "SettingDefinition" => "Setting Definitions",
@@ -249,6 +255,10 @@ namespace PowerDocu.SolutionDocumenter
             {
                 sections.Add((GetComponentSectionHeading("Agent"), "Agent"));
             }
+            if (content.dataflows.Count > 0)
+            {
+                sections.Add((GetComponentSectionHeading("Dataflow"), "Dataflow"));
+            }
             if (content.solution.AppActions.Count > 0)
             {
                 sections.Add((GetComponentSectionHeading("AppAction"), "AppAction"));
@@ -290,6 +300,9 @@ namespace PowerDocu.SolutionDocumenter
                         break;
                     case "Agent":
                         renderAgents();
+                        break;
+                    case "Dataflow":
+                        renderDataflows();
                         break;
                     case "Web Resource":
                         renderWebResources();
@@ -452,6 +465,23 @@ namespace PowerDocu.SolutionDocumenter
                     rows.Add(new MdTableRow(cell));
                 }
                 solutionDoc.Root.Add(new MdTable(new MdTableRow("Agent"), rows));
+            }
+        }
+
+        private void renderDataflows()
+        {
+            solutionDoc.Root.Add(new MdHeading("Dataflows", 3));
+            if (content.dataflows.Count > 0)
+            {
+                List<MdTableRow> rows = new List<MdTableRow>();
+                foreach (DataflowEntity df in content.dataflows.OrderBy(d => d.GetDisplayName()))
+                {
+                    MdSpan cell = (content.context?.Config?.documentDataflows == true)
+                        ? (MdSpan)new MdLinkSpan(df.GetDisplayName(), CrossDocLinkHelper.GetDataflowDocMdPath(df.GetDisplayName()))
+                        : new MdTextSpan(df.GetDisplayName());
+                    rows.Add(new MdTableRow(cell, new MdTextSpan(df.Queries.Count.ToString()), new MdTextSpan(df.GetStateLabel())));
+                }
+                solutionDoc.Root.Add(new MdTable(new MdTableRow("Dataflow", "Queries", "State"), rows));
             }
         }
 
@@ -895,6 +925,11 @@ namespace PowerDocu.SolutionDocumenter
             foreach (var agent in content.agents)
             {
                 sw.WriteLine(CharsetHelper.GetSafeName(@"AgentDoc " + agent.Name));
+            }
+
+            foreach (var df in content.dataflows)
+            {
+                sw.WriteLine(CharsetHelper.GetSafeName(@"DataflowDoc " + df.GetDisplayName()));
             }
         }
     }

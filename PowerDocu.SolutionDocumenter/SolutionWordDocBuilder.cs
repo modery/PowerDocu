@@ -52,6 +52,10 @@ namespace PowerDocu.SolutionDocumenter
             {
                 statisticsEntries.Add((GetComponentSectionHeading("Agent"), content.agents.Count));
             }
+            if (content.dataflows.Count > 0)
+            {
+                statisticsEntries.Add((GetComponentSectionHeading("Dataflow"), content.dataflows.Count));
+            }
             if (content.solution.AppActions.Count > 0)
             {
                 statisticsEntries.Add((GetComponentSectionHeading("AppAction"), content.solution.AppActions.Count));
@@ -219,6 +223,7 @@ namespace PowerDocu.SolutionDocumenter
                 "AI Project" => "AI Models",
                 "Option Set" => "Option Sets",
                 "Agent" => "Agents",
+                "Dataflow" => "Dataflows",
                 "Web Resource" => "Web Resources",
                 "AppAction" => "Command Bar Buttons",
                 "SettingDefinition" => "Setting Definitions",
@@ -241,6 +246,10 @@ namespace PowerDocu.SolutionDocumenter
             if (content.agents.Count > 0)
             {
                 sections.Add((GetComponentSectionHeading("Agent"), "Agent"));
+            }
+            if (content.dataflows.Count > 0)
+            {
+                sections.Add((GetComponentSectionHeading("Dataflow"), "Dataflow"));
             }
             if (content.solution.AppActions.Count > 0)
             {
@@ -283,6 +292,9 @@ namespace PowerDocu.SolutionDocumenter
                         break;
                     case "Agent":
                         renderAgents();
+                        break;
+                    case "Dataflow":
+                        renderDataflows();
                         break;
                     case "Web Resource":
                         renderWebResources();
@@ -695,6 +707,19 @@ namespace PowerDocu.SolutionDocumenter
             foreach (AgentEntity agent in content.agents.OrderBy(a => a.Name))
             {
                 table.Append(CreateRow(new Text(agent.Name)));
+            }
+            body.Append(table);
+            body.AppendChild(new Paragraph(new Run()));
+        }
+
+        private void renderDataflows()
+        {
+            AddHeading("Dataflows", "Heading2");
+            Table table = CreateTable();
+            table.Append(CreateHeaderRow(new Text("Dataflow"), new Text("Queries"), new Text("State")));
+            foreach (DataflowEntity df in content.dataflows.OrderBy(d => d.GetDisplayName()))
+            {
+                table.Append(CreateRow(new Text(df.GetDisplayName()), new Text(df.Queries.Count.ToString()), new Text(df.GetStateLabel())));
             }
             body.Append(table);
             body.AppendChild(new Paragraph(new Run()));

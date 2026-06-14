@@ -82,6 +82,19 @@ namespace PowerDocu.SolutionDocumenter
                 componentSections.Add(section);
             }
 
+            if (content.dataflows.Count > 0)
+            {
+                var section = new List<(string label, string href, int level)>
+                {
+                    ("Dataflows", solutionFileName + "#dataflows", 1)
+                };
+                foreach (DataflowEntity df in content.dataflows.OrderBy(d => d.GetDisplayName()))
+                {
+                    section.Add((df.GetDisplayName(), solutionFileName + "#" + SanitizeAnchorId("dataflow-" + df.GetDisplayName()), 2));
+                }
+                componentSections.Add(section);
+            }
+
             if (content.solution.AppActions.Count > 0)
             {
                 componentSections.Add(new List<(string label, string href, int level)>
@@ -214,6 +227,11 @@ namespace PowerDocu.SolutionDocumenter
                 string agentLink = $"<a href=\"#agents\">Agents</a>";
                 statisticsEntries.Add((GetComponentSectionLabel("Agent"), agentLink, content.agents.Count));
             }
+            if (content.dataflows.Count > 0)
+            {
+                string dfLink = $"<a href=\"#dataflows\">Dataflows</a>";
+                statisticsEntries.Add((GetComponentSectionLabel("Dataflow"), dfLink, content.dataflows.Count));
+            }
             if (content.solution.AppActions.Count > 0)
             {
                 string link = $"<a href=\"#app-actions\">Command Bar Buttons</a>";
@@ -258,6 +276,7 @@ namespace PowerDocu.SolutionDocumenter
                 "AI Project" => "ai-models",
                 "Option Set" => "option-sets",
                 "Agent" => "agents",
+                "Dataflow" => "dataflows",
                 "Web Resource" => "web-resources",
                 "AppAction" => "app-actions",
                 "SettingDefinition" => "setting-definitions",
@@ -280,6 +299,7 @@ namespace PowerDocu.SolutionDocumenter
                 "AI Project" => "AI Models",
                 "Option Set" => "Option Sets",
                 "Agent" => "Agents",
+                "Dataflow" => "Dataflows",
                 "Web Resource" => "Web Resources",
                 "AppAction" => "Command Bar Buttons",
                 "SettingDefinition" => "Setting Definitions",
@@ -403,6 +423,10 @@ namespace PowerDocu.SolutionDocumenter
             {
                 sections.Add((GetComponentSectionLabel("Agent"), "Agent"));
             }
+            if (content.dataflows.Count > 0)
+            {
+                sections.Add((GetComponentSectionLabel("Dataflow"), "Dataflow"));
+            }
             if (content.solution.AppActions.Count > 0)
             {
                 sections.Add((GetComponentSectionLabel("AppAction"), "AppAction"));
@@ -444,6 +468,9 @@ namespace PowerDocu.SolutionDocumenter
                         break;
                     case "Agent":
                         renderAgents(body);
+                        break;
+                    case "Dataflow":
+                        renderDataflows(body);
                         break;
                     case "Web Resource":
                         renderWebResources(body);
@@ -642,6 +669,24 @@ namespace PowerDocu.SolutionDocumenter
                         ? Link(agent.Name, CrossDocLinkHelper.GetAgentDocHtmlPath(agent.Name))
                         : Encode(agent.Name);
                     body.Append($"<tr id=\"{Encode(anchorId)}\"><td>{linkHtml}</td></tr>");
+                }
+                body.AppendLine(TableEnd());
+            }
+        }
+
+        private void renderDataflows(StringBuilder body)
+        {
+            body.AppendLine(HeadingWithId(3, "Dataflows", "dataflows"));
+            if (content.dataflows.Count > 0)
+            {
+                body.Append(TableStart("Dataflow", "Queries", "State"));
+                foreach (DataflowEntity df in content.dataflows.OrderBy(d => d.GetDisplayName()))
+                {
+                    string anchorId = SanitizeAnchorId("dataflow-" + df.GetDisplayName());
+                    string linkHtml = (content.context?.Config?.documentDataflows == true)
+                        ? Link(df.GetDisplayName(), CrossDocLinkHelper.GetDataflowDocHtmlPath(df.GetDisplayName()))
+                        : Encode(df.GetDisplayName());
+                    body.Append($"<tr id=\"{Encode(anchorId)}\"><td>{linkHtml}</td><td>{df.Queries.Count}</td><td>{Encode(df.GetStateLabel())}</td></tr>");
                 }
                 body.AppendLine(TableEnd());
             }
